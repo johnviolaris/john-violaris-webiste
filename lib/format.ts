@@ -11,6 +11,14 @@ function toDate(value: Date | string) {
   return typeof value === "string" ? new Date(value) : value;
 }
 
+/** "14 September 2026" */
+export function formatUkDate(value: Date | string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    dateStyle: "long",
+    timeZone: "Europe/London",
+  }).format(toDate(value));
+}
+
 /** "14 September 2026 at 21:04" */
 export function formatUkDateTime(value: Date | string) {
   return new Intl.DateTimeFormat("en-GB", {

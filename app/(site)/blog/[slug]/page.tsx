@@ -23,6 +23,7 @@ import {
 } from "@/lib/cms/seo/json-ld";
 import { seoMetadataFor, structuredDataFor } from "@/lib/cms/seo/metadata";
 import { blogIntroDefaults } from "@/lib/content/pages";
+import { formatUkDate } from "@/lib/format";
 import { slugify } from "@/lib/slug";
 
 /**
@@ -131,9 +132,26 @@ export default async function ArticlePage({
               />
             </div>
           )}
+          {/*
+            Who wrote it and how current it is (REQ-063): legal guidance is
+            judged on both. The name links to the About page, which says who
+            John is; the date is the article's last save, the same value as
+            `dateModified` in the markup above. "Updated", not "Reviewed": a
+            save proves the article changed, not that the law was re-checked.
+          */}
           <div className="article-meta">
-            <span>{config.name}</span>
+            <Link href="/about" rel="author" className="article-byline">
+              {config.name}
+            </Link>
             <span>{config.role}</span>
+            {structured.lastModified ? (
+              <span>
+                Updated{" "}
+                <time dateTime={structured.lastModified}>
+                  {formatUkDate(structured.lastModified)}
+                </time>
+              </span>
+            ) : null}
             <span>{article.readTime}</span>
           </div>
         </Container>

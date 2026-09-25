@@ -2247,6 +2247,15 @@ body {
   text-transform: uppercase;
   color: rgb(250 250 248 / 60%);
 }
+.article-byline {
+  color: var(--color-cream);
+  text-decoration: underline;
+  text-decoration-color: rgb(201 168 76 / 60%);
+  text-underline-offset: 4px;
+}
+.article-byline:hover {
+  color: var(--color-gold-light);
+}
 
 /*
  * Optional featured image, set per article in the CMS.

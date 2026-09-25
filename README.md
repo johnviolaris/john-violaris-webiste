@@ -205,6 +205,12 @@ Articles prerender at build time, and `dynamicParams` is left at its default so
 an article published after a deploy renders on first request instead of 404ing
 until the next build.
 
+Each article shows who wrote it and how current it is (REQ-063): John's name,
+linking to the About page (`rel="author"`), his role, and "Updated" with the
+date of the last save. That date is the same value as `dateModified` in the
+structured data. It says "Updated" rather than "Reviewed" because a save shows
+that the article changed, not that the law in it was re-checked.
+
 ### Images
 
 `blog-images` is a public Supabase Storage bucket: public read, admin-only
