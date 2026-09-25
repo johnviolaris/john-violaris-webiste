@@ -59,6 +59,7 @@ export function MobileContactBar() {
   return (
     <div
       className="mobile-contact-bar"
+      data-track="mobile_bar"
       data-visible={visible ? "true" : "false"}
       // Hidden from assistive technology while off screen; every link here is
       // also reachable from the header drawer and the footer.

@@ -15,7 +15,11 @@ export function PoliceStationDetail({
   config: SiteConfig;
 }) {
   return (
-    <section className="police-detail section-space" aria-labelledby="police-detail-heading">
+    <section
+      className="police-detail section-space"
+      aria-labelledby="police-detail-heading"
+      data-track="police_station"
+    >
       <Container>
         <div className="police-detail-grid">
           <div className="police-detail-copy">

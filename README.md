@@ -62,6 +62,7 @@ below remain the defaults, used until a setting is given a value:
 | `NEXT_PUBLIC_PHONE_DISPLAY`   | Human-readable telephone number    |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | WhatsApp number, any usual format  |
 | `NEXT_PUBLIC_APP_VERSION`     | Build identifier for stale-tab detection (see below). Only needed where the deploy exposes neither a Vercel deployment id nor a git checkout. |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 measurement ID (`G-…`). Unset, there is no analytics and no cookie banner. Set it in Vercel's **Production** environment only (see "Analytics and consent"). |
 
 Server-side variables. These are never sent to the browser and must not be
 prefixed with `NEXT_PUBLIC_`:
@@ -586,6 +587,51 @@ between the build and the running server.
 Rebuilding from a dirty tree produces the same commit SHA as the previous build,
 so set `NEXT_PUBLIC_APP_VERSION` explicitly if you deploy uncommitted work.
 
+## Analytics and consent
+
+GA4, behind a cookie banner (SEO requirements REQ-053 to REQ-055). It is **off
+until `NEXT_PUBLIC_GA_MEASUREMENT_ID` is set**: with no ID there is no banner,
+no script and no event, and the cookie policy says the site sets no cookies.
+Set the ID in Vercel's Production environment only, so previews never report.
+Keep GA4's enhanced measurement on, including "page changes based on browser
+history events". That is what counts page views after client-side navigation.
+
+- **Nothing before consent.** Google's script is not requested until the
+  visitor presses Accept. Consent Mode v2 is still declared (every type
+  `denied` by default, then `analytics_storage` granted); advertising storage
+  is never granted. The choice is kept in local storage
+  (`jv-analytics-consent`), not a cookie.
+- **Reject is as easy as accept.** Two identical buttons. The banner floats
+  (no layout shift), keeps clear of the ReviewSolicitors tab, and sits above
+  the docked mobile contact bar while that is showing.
+- **Revocable.** "Cookie settings" in the footer and on `/cookies` reopens the
+  banner. Rejecting after accepting deletes the `_ga` cookies and reloads the
+  page without Google's script.
+- **Events** (`lib/analytics.ts`): `phone_click`, `whatsapp_click`,
+  `email_click` and `booking_click`, each with `location`, the nearest
+  `data-track` attribute (`header`, `mobile_menu`, `hero`, `mobile_bar`,
+  `footer`, `cta_banner`, `contact_card`, `contact_page`, `enquiry_form`,
+  `police_station`, `utility_bar`); plus `form_submit` and `form_error`
+  (`error_type`). One capture-phase listener classifies links by where they
+  go, so a contact link added later is counted without being instrumented.
+  Mark these events as key events in GA4.
+- **No personal data or case details.** The spec lists `matter_type` on
+  `form_submit`. It is left out on purpose: which offence someone is accused
+  of is criminal-offence data, and it has no business reaching Google.
+- **Local testing.** Put the ID in `.env.development.local`. On `localhost`
+  everything runs except the request to Google, so the banner, the consent
+  calls and the events can be checked in `window.dataLayer` without reporting
+  anything.
+- **Beside the ReviewSolicitors widget.** The banner lives inside a permanent
+  `.consent-slot` wrapper. The widget's script rewrites and moves its own
+  element, the banner's next sibling in the layout; inserting the banner
+  directly beside it crashed React.
+
+`/cookies` is the policy (`components/sections/cookie-policy.tsx`). Its opening
+is editable under Website Content. The list itself is written in code because
+it describes what the code stores, and it follows the analytics switch by
+itself.
+
 ## Scope still outstanding
 
 This is the public frontend, enquiry capture, a CMS-managed blog and editable
@@ -597,9 +643,8 @@ CMS half of REQ-019), per-page generated share cards (the optional half of REQ-0
 redirects (REQ-025–030), and the SEO health checks and draft preview in the
 editor (REQ-048, REQ-052).
 
-Analytics, Search Console, domain
-configuration and production launch remain separate work
-after that.
+Analytics needs a GA4 property and its ID; Search Console, domain
+configuration and production launch remain separate work after that.
 
 The existing Next.js/Vercel architecture is retained. No deployment or changes to
 external services are part of this local redesign.

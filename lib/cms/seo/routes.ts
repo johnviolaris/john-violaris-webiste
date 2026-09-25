@@ -57,6 +57,7 @@ const fixedPages: { path: string; label: string; key: string }[] = [
   { path: "/fees", label: "Fees", key: "fees" },
   { path: "/reviews", label: "Reviews", key: "reviews" },
   { path: "/contact", label: "Contact", key: "contact" },
+  { path: "/cookies", label: "Cookie policy", key: "cookies" },
 ];
 
 /** Newest of two optional timestamps. */

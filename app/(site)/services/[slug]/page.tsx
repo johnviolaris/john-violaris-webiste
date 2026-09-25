@@ -362,7 +362,7 @@ export default async function ServicePage({
             </div>
             <div className="page-rail">
               <OnThisPage items={sections} />
-              <aside className="service-contact-card">
+              <aside className="service-contact-card" data-track="contact_card">
                 <span className="eyebrow">Speak directly to John</span>
                 <h2>
                   It starts with

@@ -206,7 +206,7 @@ const iconCardItem = {
   max: 12,
 };
 
-/** The four fields of a page's opening block, shared by six pages. */
+/** The four fields of a page's opening block, shared by seven pages. */
 function introSection(page: keyof typeof pageIntroDefaults): SectionDefinition {
   return {
     key: "intro",
@@ -866,6 +866,14 @@ export const pageGroups: PageGroup[] = [
     label: "Reviews",
     description: "The reviews page opening. The reviews are supplied by ReviewSolicitors.",
     sections: [introSection("reviews")],
+  },
+
+  {
+    key: "cookies",
+    label: "Cookie policy",
+    description:
+      "The cookie policy's opening. The list of cookies below it follows what the site actually stores, so it is kept in the code rather than edited here.",
+    sections: [introSection("cookies")],
   },
 
   {

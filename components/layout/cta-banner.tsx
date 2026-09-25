@@ -32,7 +32,11 @@ export function CtaBanner({
   emphasis?: string;
 }) {
   return (
-    <section className="closing-section" aria-labelledby="cta-heading">
+    <section
+      className="closing-section"
+      aria-labelledby="cta-heading"
+      data-track="cta_banner"
+    >
       <Container>
         <div className="closing-top">
           <p className="eyebrow">

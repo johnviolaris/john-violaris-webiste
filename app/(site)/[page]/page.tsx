@@ -5,6 +5,7 @@ import { PageIntro } from "@/components/pages/page-intro";
 import { AboutBackground } from "@/components/sections/about-background";
 import { CareerBand } from "@/components/sections/career-band";
 import { ContactEnquiryForm } from "@/components/sections/contact-enquiry-form";
+import { CookiePolicy } from "@/components/sections/cookie-policy";
 import { FeesPreview } from "@/components/sections/fees-preview";
 import { MeetJohn } from "@/components/sections/meet-john";
 import { PoliceStation } from "@/components/sections/police-station";
@@ -47,7 +48,7 @@ import {
 import { whatsappHref } from "@/lib/site-config";
 
 /**
- * The six pages this route renders.
+ * The seven pages this route renders.
  *
  * The opening copy comes from `lib/content/pages.ts`, which is also what the
  * CMS falls back to, so the heading here and the heading in the editor cannot
@@ -241,7 +242,11 @@ export default async function InformationPage({
       {page === "contact" && (
         <>
           <ContactEnquiryForm />
-          <section className="section-space" id="consultation">
+          <section
+            className="section-space"
+            id="consultation"
+            data-track="contact_page"
+          >
             <Container>
               <div className="contact-grid">
                 <div>
@@ -310,6 +315,7 @@ export default async function InformationPage({
           </section>
         </>
       )}
+      {page === "cookies" && <CookiePolicy />}
       {page !== "contact" && (
         <CtaBanner content={shared("cta", ctaDefaults)} config={config} />
       )}

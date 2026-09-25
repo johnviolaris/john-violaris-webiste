@@ -100,7 +100,11 @@ export function Hero({
     : firstPortraitScale;
 
   return (
-    <section className="hero-editorial" aria-labelledby="hero-heading">
+    <section
+      className="hero-editorial"
+      aria-labelledby="hero-heading"
+      data-track="hero"
+    >
       <Container>
         <div className="hero-topline">
           <span>{content.toplineLeft}</span>

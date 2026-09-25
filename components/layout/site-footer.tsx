@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CookieSettingsButton } from "@/components/layout/analytics";
 import { Container } from "@/components/ui/container";
 import { Logo } from "@/components/layout/logo";
 import type { Service } from "@/lib/content/services";
@@ -13,7 +14,7 @@ export function SiteFooter({
   services: Service[];
 }) {
   return (
-    <footer className="editorial-footer">
+    <footer className="editorial-footer" data-track="footer">
       <Container>
         <div className="footer-grid">
           <div className="footer-identity">
@@ -99,6 +100,10 @@ export function SiteFooter({
               .filter(Boolean)
               .join(" · ")}
           </span>
+          <nav className="footer-bottom-links" aria-label="Legal">
+            <Link href="/cookies">Cookie policy</Link>
+            <CookieSettingsButton />
+          </nav>
           <a href="#main">Back to top ↑</a>
         </div>
         <p className="footer-legal">

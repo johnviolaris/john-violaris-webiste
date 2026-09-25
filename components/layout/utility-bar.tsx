@@ -19,7 +19,7 @@ export function UtilityBar({ config }: { config: SiteConfig }) {
   const whatsapp = whatsappHref(config);
 
   return (
-    <div className="utility-bar">
+    <div className="utility-bar" data-track="utility_bar">
       <div className="utility-bar-inner">
         <p className="utility-promise">
           <span className="utility-dot" aria-hidden="true" />

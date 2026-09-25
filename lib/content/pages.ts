@@ -739,4 +739,11 @@ export const pageIntroDefaults: Record<string, PageIntroContent> = {
     description:
       "A free initial conversation, directly with John. Share your situation, your concerns and any important dates.",
   },
+  cookies: {
+    eyebrow: "Cookie policy",
+    title: "What this site stores.",
+    emphasis: "And why.",
+    description:
+      "Everything this site keeps in your browser, what it is for and how long it stays.",
+  },
 };

@@ -88,7 +88,7 @@ export function SiteHeader() {
   const isActive = (href: string) => current === href;
 
   return (
-    <header className="site-header sticky top-0 z-50 bg-navy">
+    <header className="site-header sticky top-0 z-50 bg-navy" data-track="header">
       {/* Fine brass rule separates the sticky header from page content. */}
       <div
         aria-hidden="true"
@@ -173,6 +173,7 @@ export function SiteHeader() {
         role="dialog"
         aria-modal={open ? true : undefined}
         aria-label="Navigation"
+        data-track="mobile_menu"
         onClick={(event) => {
           if ((event.target as HTMLElement).closest("a")) setOpenedOn(null);
         }}

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { Analytics } from "@/components/layout/analytics";
 import { MobileContactBar } from "@/components/layout/mobile-contact-bar";
 import { ServiceCatalogueProvider } from "@/components/layout/service-catalogue-provider";
 import { SiteConfigProvider } from "@/components/layout/site-config-provider";
@@ -54,6 +55,10 @@ export default async function SiteLayout({
             services={groups.flatMap((group) => group.services)}
           />
           <MobileContactBar />
+          {/* Directly after the contact bar: the banner's CSS finds the bar
+              with a sibling selector and sits above it, so the urgent-contact
+              route is never hidden behind a cookie question (REQ-054). */}
+          <Analytics />
           {/*
           ReviewSolicitors pins this to the right edge of the viewport, vertically
           centred, so it clears the contact bar docked along the bottom. It lives

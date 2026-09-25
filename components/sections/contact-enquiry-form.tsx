@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useActionState, useEffect, useId, useRef } from "react";
 
+import { useEnquiryTracking } from "@/components/layout/analytics";
 import { Container } from "@/components/ui/container";
 import { Icon } from "@/components/ui/icons";
 import { submitEnquiry } from "@/lib/enquiries/actions";
@@ -34,6 +35,9 @@ export function ContactEnquiryForm() {
   const formId = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const alertRef = useRef<HTMLParagraphElement>(null);
+
+  // `form_submit` or `form_error`, once per submission, when consent allows.
+  useEnquiryTracking(state);
 
   /**
    * React resets the form once an action settles, but its value tracker is not
@@ -78,6 +82,7 @@ export function ContactEnquiryForm() {
   return (
     <section
       className="enquiry-section section-space"
+      data-track="enquiry_form"
       aria-labelledby="enquiry-heading"
     >
       <Container>
