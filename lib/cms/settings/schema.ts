@@ -120,7 +120,7 @@ export const settingGroups: SettingGroup[] = [
         label: "WhatsApp number",
         type: "tel",
         maxLength: 24,
-        placeholder: "+44 7855 260293",
+        placeholder: "+44 7427 260293",
         hint: "Any usual shape works. Leave blank and no WhatsApp link is shown anywhere.",
       },
       {
