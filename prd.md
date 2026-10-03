@@ -1,5 +1,15 @@
 Product Requirements Document (PRD)
 John Violaris — Criminal Defence Solicitor Website
+
+Current scope decisions
+
+This document incorporates the following approved delivery decisions:
+
+- The Vercel application deployment identified in Phase 1 is complete; this
+  does not by itself mark every Phase 1 launch or external-service task complete.
+- Consultation calls to action lead visitors to the contact journey; no TidyCal or other booking-calendar integration is in scope.
+- The public website does not display fee figures, and the admin area does not include fee-schedule management. The Fees page explains the consultation and fee-setting process without publishing prices.
+
 1. Product Overview
 
 Build a production-ready website for John Violaris, a criminal defence solicitor practising across England & Wales, with a strong focus on motoring offences and police station representation.
@@ -18,7 +28,7 @@ Generate qualified private-client enquiries.
 Build trust quickly through John's experience and credentials.
 Clearly explain the legal services John provides.
 Make contacting John extremely easy.
-Allow visitors to book a free consultation.
+Allow visitors to request a free initial consultation.
 Provide useful offence-specific information that can rank in Google.
 Allow John to manage website content through a secure CMS.
 Provide a strong technical SEO foundation for future SEO work.
@@ -62,7 +72,7 @@ Personal representation.
 Practises across England & Wales.
 Extensive police station and Magistrates' Court experience.
 Free initial consultation.
-Transparent fees where applicable.
+Clear information about how fees are discussed and agreed privately.
 
 A major recurring message should be:
 
@@ -84,8 +94,6 @@ Supabase Auth
 Supabase Storage where required
 Email
 Resend
-Booking
-TidyCal
 Hosting
 Vercel
 Source Control
@@ -111,7 +119,7 @@ Urgent help section.
 Experience section.
 How the process works.
 Testimonials / reviews.
-Fees preview.
+Fee-process preview.
 Final consultation CTA.
 
 Primary CTA:
@@ -173,35 +181,33 @@ Relevant legal process.
 Possible defence issues.
 How John can assist.
 What happens next.
-Fees CTA.
-Consultation CTA.
+Fees-information CTA.
+Consultation-request CTA.
 Related services.
 
 Desktop service pages may include a sticky contact sidebar with:
 
 Call John.
 WhatsApp.
-Book Consultation.
+Request Consultation.
 Free initial consultation message.
 
 The architecture should make it easy to create additional service pages through the CMS later.
 
 6.5 Fees
 
-Explain pricing clearly and transparently.
+Explain clearly how fees are assessed and agreed with a prospective client.
 
-Possible sections:
+The approved scope is deliberately limited:
 
 Free initial consultation.
-Fixed-fee services.
-Police station representation.
-Magistrates' Court representation.
-Motoring offence representation.
-Additional hearings or work.
+Factors that can affect the work required.
+An explanation that John discusses the scope and fee privately before instruction.
+A clear route to contact John for a case-specific discussion.
 
-All final pricing must be editable through the CMS.
+The website must not publish fee figures, price ranges, fee cards, or a fee schedule.
 
-Avoid hardcoding fees throughout the frontend.
+Fee-schedule management is not part of the CMS. General Fees-page copy remains editable with the other website content.
 
 6.6 Police Station
 
@@ -255,7 +261,6 @@ Contact form.
 Direct email.
 WhatsApp.
 Direct phone call.
-TidyCal consultation booking.
 
 Urgent cases should prominently display:
 
@@ -305,17 +310,17 @@ This is particularly important for:
 Mobile users.
 Urgent court matters.
 Police station representation.
-11. TidyCal Booking
+11. Consultation Requests
 
-Integrate John's TidyCal booking flow for free consultation scheduling.
+No booking-calendar integration is in scope.
 
-The site should provide booking CTAs throughout relevant pages.
+The site should provide consultation calls to action throughout relevant pages. These lead to the contact journey, where a visitor can submit the enquiry form, call, email, or use WhatsApp.
 
 Example:
 
 Book a Free Consultation
 
-The TidyCal URL should be centrally configurable rather than hardcoded across multiple components.
+CTA destinations should be centralized rather than hardcoded across multiple components.
 
 12. Admin Authentication
 
@@ -350,19 +355,10 @@ Full page content
 Publish status
 URL slug
 Images
-Fees
-Fee title
-Description
-Price
-Included services
-Display order
-Testimonials
-Client name / initials
-Review text
-Matter type
-Rating
-Source
-Publish status
+Reviews
+Read-only view of the verified ReviewSolicitors reviews shown publicly
+No testimonial editing or publishing workflow; corrections stay with the source platform
+Surrounding Reviews-page copy remains editable under Website Content
 Blog
 Title
 Slug
@@ -499,7 +495,12 @@ drivingjustice.co.uk
 
 The system should support both domains through Vercel.
 
-One domain should ultimately act as the primary/canonical domain unless a future strategy gives each domain distinct content.
+The apex `johnviolaris.com` is the primary/canonical domain.
+
+`www.johnviolaris.com`, `drivingjustice.co.uk` and
+`www.drivingjustice.co.uk` permanently redirect path-for-path, preserving query
+strings, to the canonical HTTPS apex. Those domains were attached and the
+DNS/SSL cutover completed on 2026-10-03.
 
 Avoid duplicate indexed versions of identical content.
 
@@ -585,7 +586,7 @@ Conversion
 
 Every important page should offer a clear path to:
 
-Book.
+Request a consultation.
 Call.
 WhatsApp.
 Submit an enquiry.
@@ -633,7 +634,6 @@ Possible data entities:
 Site Settings
 Services
 Service Pages
-Fees
 Testimonials
 Blog Posts
 Blog Categories
@@ -648,7 +648,6 @@ Store common information centrally, including:
 John's phone number
 WhatsApp number
 Email address
-TidyCal URL
 Primary domain
 Secondary domain
 Social/profile URLs
@@ -668,7 +667,7 @@ Service content can be managed.
 Contact form works.
 Admin enquiry emails work.
 Visitor confirmation emails work.
-TidyCal works.
+Consultation CTAs lead to the contact journey.
 WhatsApp click-to-chat works.
 Direct email works.
 Direct phone actions work.
@@ -679,7 +678,7 @@ Required Schema.org markup is implemented.
 Cross-browser testing is complete.
 Production domains are connected.
 SSL is active.
-Production deployment is complete.
+The Vercel application deployment is complete.
 CMS usage documentation is provided.
 Product Vision
 

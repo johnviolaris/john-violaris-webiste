@@ -188,11 +188,12 @@ export type SeedSiteSetting = {
  * Site settings, seeded with the facts that are actually known.
  *
  * What is absent matters more than what is here. There is no telephone number,
- * WhatsApp number, TidyCal URL or SRA number in this list, because none has
- * been confirmed and PRD §25 forbids inventing one. `siteSettingsDefaults` in
- * `lib/site-config.ts` keeps reading those from the environment until John sets
- * them under Site Settings, and every route that depends on one stays hidden
- * rather than rendering a control that leads nowhere.
+ * WhatsApp number or SRA number in this list, because none has been confirmed
+ * and PRD §25 forbids inventing one. TidyCal is intentionally out of scope.
+ * `siteSettingsDefaults` in `lib/site-config.ts` keeps reading the remaining
+ * values from the environment until John sets them under Site Settings, and
+ * every route that depends on one stays hidden rather than rendering a control
+ * that leads nowhere.
  *
  * The canonical domain, the secondary domain and the dialling code are not
  * here either, and that one is a decision rather than a gap: they are

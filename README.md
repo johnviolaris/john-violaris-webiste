@@ -6,6 +6,8 @@ Next.js 16 App Router, React 19, TypeScript and Tailwind CSS v4.
 npm run dev
 npm run build
 npm run lint
+npm run typecheck
+npm test
 ```
 
 ## Current implementation
@@ -15,7 +17,7 @@ serif typography and a typographic JV identity. The design intentionally works
 without stock portraits or invented client reviews.
 
 - Homepage with personal introduction, experience statistics, service explorer,
-  police station feature, process, expandable FAQs, fees preview and consultation CTA.
+  police station feature, process, expandable FAQs, fee-process preview and consultation CTA.
 - A persistent route to John on every page: a slim contact rail above the masthead
   from 640px up, and a docked action bar below 1280px that appears once the hero
   has been scrolled past. Both render only the routes that are configured.
@@ -26,8 +28,9 @@ without stock portraits or invented client reviews.
   640px upward; smaller screens reach the catalogue through the mobile navigation.
 - Mobile navigation with scroll lock, focus trapping, Escape/close controls and
   automatic dismissal on navigation or resizing to desktop.
-- About, Services, Police Station, Fees, Contact and Useful Information pages.
-- Fifteen service pages generated from a shared template and the service catalogue.
+- About, Services, Police Station, Fees, Reviews, Contact and Resources pages,
+  plus a cookie policy and a privacy notice.
+- Published service pages generated from a shared template and the service catalogue.
 - A fees page that explains how fees are worked out, deliberately without
   figures.
 - A working enquiry form on the contact page: server-side validation with
@@ -49,6 +52,10 @@ without stock portraits or invented client reviews.
   structured data on every public page.
 - Consultation links route to the contact page, which offers email, telephone
   and WhatsApp. There is no booking calendar.
+- Live at https://johnviolaris.com since 2026-10-03. `www.johnviolaris.com`,
+  `drivingjustice.co.uk` and `www.drivingjustice.co.uk` redirect to it in
+  Vercel's domain settings, with the same rule in `proxy.ts` behind them. The
+  old GoDaddy site's `/ols/` store pages redirect to the home page.
 
 ## Content and configuration
 
@@ -344,7 +351,8 @@ The split inside that file is the thing to understand:
   because a row that looks authoritative and is ignored is worse than no row.
 
 `resolveSiteConfig` lays stored values over the defaults and derives `telHref`,
-`mailtoHref`, `bookingHref` and the normalised WhatsApp digits. Only non-empty
+`mailtoHref`, `bookingHref` (the internal name for `/contact#consultation`, not
+an external booking service) and the normalised WhatsApp digits. Only non-empty
 values override: clearing a field in the admin deletes its row, which is what
 makes "leave it blank to fall back" true rather than a figure of speech.
 
@@ -464,14 +472,14 @@ carry `lastmod`. `app/robots.ts` allows everything public and disallows
 
 ### Only the canonical host is indexed
 
-`proxy.ts` sends `X-Robots-Tag: noindex, nofollow` on every response whose
-`Host` is not `johnviolaris.com` — the `vercel.app` address that serves as
-staging, preview deployments, `www`, and `localhost` — and on `/admin` and
-`/auth` on every host (REQ-035). Per request, because the pages are static and
-the same HTML is served on every host; from the `Host` header rather than
-`request.nextUrl`, which carries the server's own hostname locally. Until
-johnviolaris.com points at Vercel, nothing the new site serves is indexable,
-which is intended: the domain still serves the old site.
+`proxy.ts` permanently redirects the three known production aliases —
+`www.johnviolaris.com`, `drivingjustice.co.uk` and
+`www.drivingjustice.co.uk` — path-for-path and query-for-query to the canonical
+HTTPS apex. Other non-canonical hosts, including Vercel previews and localhost,
+continue to serve in place with `X-Robots-Tag: noindex, nofollow`. `/admin` and
+`/auth` receive the same header on every host (REQ-035). This is decided from
+the request's `Host` header because the pages themselves are static and shared
+across deployments.
 
 ### The default share card
 
@@ -561,6 +569,25 @@ Rows hold a named person's account of an allegation against them. Treat them as
 sensitive: the inbox is admin-only, no enquiry is ever rendered on the public
 site, and deletion from the detail page is how an erasure request is honoured.
 
+Migration `20260927215019_redirects_and_enquiry_attribution.sql` (applied to
+production 2026-10-03) adds an external referrer (origin and path only), five
+UTM fields and `gclid` to each enquiry. With analytics configured, first-touch
+values are kept for the current tab only after the visitor accepts analytics
+storage, submitted only with an enquiry, and shown in the admin detail view.
+They are read from the address, never removed from it: Google's tag loads only
+after consent and takes the campaign and `gclid` from the address at that
+moment.
+
+The rate limit stores a salted SHA-256 of the visitor's IP address, never the
+address. The salt is `ENQUIRY_IP_SALT`, or the server-only Supabase key when
+that is unset, so the digest cannot be reversed by hashing every IPv4 address.
+
+`/privacy` is the privacy notice (`components/sections/privacy-notice.tsx`),
+linked from the footer and from the enquiry form. Like the cookie policy it is
+written in code because it describes what the code does with an enquiry; its
+opening is editable under Website Content. It names no ICO registration,
+address or retention period, because none has been supplied.
+
 ## Deploys and stale tabs
 
 A tab left open across a deploy keeps running the previous build. Its chunks may
@@ -600,7 +627,9 @@ history events". That is what counts page views after client-side navigation.
   visitor presses Accept. Consent Mode v2 is still declared (every type
   `denied` by default, then `analytics_storage` granted); advertising storage
   is never granted. The choice is kept in local storage
-  (`jv-analytics-consent`), not a cookie.
+  (`jv-analytics-consent`), not a cookie. First-touch campaign/referrer data is
+  likewise withheld from session storage until acceptance and cleared after
+  rejection or withdrawal.
 - **Reject is as easy as accept.** Two identical buttons. The banner floats
   (no layout shift), keeps clear of the ReviewSolicitors tab, and sits above
   the docked mobile contact bar while that is showing.
@@ -608,16 +637,17 @@ history events". That is what counts page views after client-side navigation.
   banner. Rejecting after accepting deletes the `_ga` cookies and reloads the
   page without Google's script.
 - **Events** (`lib/analytics.ts`): `phone_click`, `whatsapp_click`,
-  `email_click` and `booking_click`, each with `location`, the nearest
+  `email_click` and `booking_click` (the consultation CTA leading to contact,
+  not a calendar booking), each with `location`, the nearest
   `data-track` attribute (`header`, `mobile_menu`, `hero`, `mobile_bar`,
   `footer`, `cta_banner`, `contact_card`, `contact_page`, `enquiry_form`,
   `police_station`, `utility_bar`); plus `form_submit` and `form_error`
   (`error_type`). One capture-phase listener classifies links by where they
   go, so a contact link added later is counted without being instrumented.
   Mark these events as key events in GA4.
-- **No personal data or case details.** The spec lists `matter_type` on
-  `form_submit`. It is left out on purpose: which offence someone is accused
-  of is criminal-offence data, and it has no business reaching Google.
+- **No personal data or case details.** `matter_type` is deliberately absent
+  from `form_submit`: which offence someone is accused of is criminal-offence
+  data, and it has no business reaching Google.
 - **Local testing.** Put the ID in `.env.development.local`. On `localhost`
   everything runs except the request to Google, so the banner, the consent
   calls and the events can be checked in `window.dataLayer` without reporting
@@ -634,20 +664,47 @@ itself.
 
 ## Scope still outstanding
 
-This is the public frontend, enquiry capture, a CMS-managed blog and editable
-page copy — not the complete production system in `prd.md`.
+The three delivery phases are built and live. What remains is configuration
+outside this repository, content only John can supply, and the optional SEO
+items at the end of this section.
 
-Every admin section is built. From `seo_requirements.md`, still open:
-the custom JSON-LD field and the editor's schema warnings (REQ-018, and the
-CMS half of REQ-019), per-page generated share cards (the optional half of REQ-024), the redirect table and host/case
-redirects (REQ-025–030), and the SEO health checks and draft preview in the
-editor (REQ-048, REQ-052).
+Use [`docs/production-launch-checklist.md`](docs/production-launch-checklist.md)
+for the database backup/migration gate, preview checks, production smoke tests
+and rollback sequence on later releases.
+[`docs/cms-guide.md`](docs/cms-guide.md) is the plain-English guide to the
+admin for John.
 
-Analytics needs a GA4 property and its ID; Search Console, domain
-configuration and production launch remain separate work after that.
+Outside the repository, as of 2026-10-03:
 
-The existing Next.js/Vercel architecture is retained. No deployment or changes to
-external services are part of this local redesign.
+- **Vercel (`john-violaris` team).** `NEXT_PUBLIC_GA_MEASUREMENT_ID` is not set
+  in Production, so analytics is off on the live site. The project was
+  recreated when it moved teams, so also check that `SUPABASE_SECRET_KEY`,
+  `RESEND_API_KEY`, `ENQUIRY_FROM_EMAIL`, `ENQUIRY_NOTIFICATION_EMAIL` and
+  `ENQUIRY_IP_SALT` came across, then send one test enquiry.
+- **Resend.** Send from John's domain (`alert.johnviolaris.com` already has
+  Resend's DNS records) rather than the developer's, and confirm where
+  notifications go.
+- **Supabase.** Turn off public sign-ups and turn on leaked-password protection
+  under Authentication. The sign-up form is gone, but the Auth API still
+  accepts a sign-up made with the public key.
+- **Google Search Console** (and Bing Webmaster Tools). Verify both domains and
+  submit `https://johnviolaris.com/sitemap.xml`.
+- **From John.** The SRA number and regulatory status, the complaints and Legal
+  Ombudsman wording, and what the privacy notice should add: an ICO number, a
+  retention period, or the firm's name if the firm is the data controller. The
+  Special Reasons page (Service Pages in the CMS) says "No ban if accepted" and
+  "Disqualification avoided entirely", but the court keeps a discretion even
+  when special reasons are found; that wording is his to correct.
+
+In the code, redirect management is partial (REQ-029): the table and automatic
+slug history exist, but there is no redirect admin UI or lookup for arbitrary
+paths. Also open are the custom JSON-LD field and publication warnings (REQ-018
+and the CMS half of REQ-019), the optional per-page generated share cards
+(REQ-024), and the SEO health checks and draft preview (REQ-048, REQ-052).
+
+TidyCal and public fee figures are not outstanding work: both were
+intentionally removed from scope, and the Fees page intentionally has no
+fee-schedule admin.
 
 ## Design and accessibility
 
@@ -664,24 +721,31 @@ sticky service contact panels return to normal flow.
 ### Performance
 
 Lighthouse, mobile, against a production build (`next build`, then the
-`site-prod` launch configuration on port 3001), 2026-09-25:
+`site-prod` launch configuration on port 3001), 2026-10-03:
 
-| Page            | Performance | Accessibility | Best practices | LCP   |
-| --------------- | ----------- | ------------- | -------------- | ----- |
-| Home            | 90          | 99            | 100            | 3.6 s |
-| Offence page    | 93          | 98            | 100            | 3.2 s |
-| Article         | 97          | 98            | 100            | 2.6 s |
-| Contact, About  | 97          | 98–99         | 100            | 2.6 s |
+| Page            | Performance | Accessibility | Best practices | LCP       |
+| --------------- | ----------- | ------------- | -------------- | --------- |
+| Home            | 85–88       | 99            | 96             | 3.8 s     |
+| Offence page    | 90–91       | 98            | 100            | 3.4–3.5 s |
+| Article         | 96          | 98            | 100            | 2.7 s     |
+| Contact         | 95          | 99            | 100            | 2.7 s     |
+| About, Privacy  | 94–95       | 98            | 100            | 2.7–2.8 s |
 
-SEO scores 69 locally only because `proxy.ts` marks every host but
-johnviolaris.com `noindex`. The one accessibility failure left is a heading
-inside the ReviewSolicitors widget, as are the image-size and cache warnings.
+Scores move by several points between runs on the same machine (one contact
+run scored 77 while the machine was busy), so run a page more than once before
+reading anything into a change. The live home page, measured minutes apart on
+the same machine, scored lower than the build above. SEO scores 69 locally only
+because localhost is deliberately `noindex`. Home's missing best-practices
+points are the ReviewSolicitors panel's avatar service (`ui-avatars.com`)
+failing to answer; the remaining accessibility failure is a heading inside that
+panel.
 
-The LCP figures are Lighthouse's simulation of a slow phone. In the trace
-itself the home portrait paints with the first content, at about 0.25 s. The
-simulation charges it for every script that loaded before then, and the
-biggest of those is the `motion` library behind the hero's scroll animation.
-That library is the next thing to look at if the numbers need to come down.
+The LCP figures are Lighthouse's simulation of a slow phone. In the trace the
+home portrait paints with the first content, but the simulation charges it for
+the scripts loaded before it. The hero loads Motion lazily (`LazyMotion` with
+`motion/react-m`). The reviews marquee keeps the full `motion/react` build: the
+mini build animates through the Web Animations API, which has no `y`, and the
+columns stood still.
 
 Tried and dropped: `experimental.inlineCss`. It inlines the stylesheet twice,
 once as `<style>` and again in the React payload, which took the home page to

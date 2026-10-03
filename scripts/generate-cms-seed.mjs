@@ -175,7 +175,7 @@ const statements = [
   },
   {
     comment:
-      "Site settings. Only the facts that are actually known are seeded. No\n-- telephone number, WhatsApp number, TidyCal URL or SRA number appears here,\n-- because none has been confirmed and PRD §25 forbids inventing one. The site\n-- omits each of those routes entirely until it is set.",
+      "Site settings. Only the facts that are actually known are seeded. No\n-- telephone number, WhatsApp number or SRA number appears here because none\n-- has been confirmed and PRD §25 forbids inventing one. TidyCal is intentionally\n-- out of scope. The site omits unconfirmed contact routes until a value is set.",
     sql: seedInto({
       table: "site_settings",
       columns: ["key", "value"],

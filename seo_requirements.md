@@ -27,35 +27,49 @@ These were settled before this document was written. They are assumptions baked 
 
 | Decision             | Choice                                                                                                                   | Affects |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------- |
-| **Canonical domain** | `johnviolaris.com` serves everything. `drivingjustice.co.uk` 301-redirects path-for-path. One brand, one index.            | §4      |
+| **Canonical domain** | `johnviolaris.com` serves everything. `drivingjustice.co.uk` permanently redirects path-for-path (308 in the app). One brand, one index. | §4 |
 | **Location pages**   | Architecture built from day one, **zero pages published at launch**. Avoids a re-architecture when SEO starts.             | §7      |
 | **Business address** | Unknown. Schema emits address/geo/hours **only when populated in the CMS**, omits them cleanly otherwise. Never invented.  | §2      |
 | **Analytics**        | GA4 direct + Search Console, with UK consent handling. GTM specified as an optional swap-in. No call-tracking vendor.      | §10     |
+| **Deployment**       | The Vercel application deployment identified in Phase 1 is complete. Public-domain cutover and search-service activation are separate launch tasks. | §4, §13 |
+| **Consultations**    | No TidyCal or other booking calendar. Consultation CTAs lead to the contact journey: form, phone, email, or WhatsApp.       | §6, §10 |
+| **Fees**             | No public fee figures and no fee-schedule admin. `/fees` explains how scope and fees are discussed privately.              | §8, §9, §12 |
 
-### Current implementation state (as of 2026-09-14)
+### Current implementation state (as of 2026-10-03)
 
 An honest snapshot, so nobody re-specifies work that exists or assumes work that doesn't.
 
 **Already in place**
 
-- `metadataBase`, title template, default description, default Open Graph and `robots` defaults — `app/layout.tsx`
-- Per-route `generateMetadata` with titles, descriptions and `alternates.canonical` — `app/(site)/[page]/page.tsx`, `app/(site)/services/[slug]/page.tsx`, `app/(site)/blog/[slug]/page.tsx`
-- A single `LegalService` JSON-LD block on the homepage — `app/(site)/page.tsx:23`
-- Central configuration for contact details, domains and navigation — `lib/site-config.ts`
-- Custom 404 — `app/not-found.tsx`
-- `next/font` with `display: "swap"` for all three faces — `app/layout.tsx`
-- Skip-to-content link and a `<main id="main">` landmark — `app/(site)/layout.tsx`
-- CMS tables including a path-keyed `seo_metadata` table — `supabase/migrations/20260914103000_create_cms_content_tables.sql`
-- Admin gate (`profiles.role = 'admin'`, `private.is_admin()`) — same migration
+- The site is live at `https://johnviolaris.com` (since 2026-10-03). `www.johnviolaris.com`, `drivingjustice.co.uk` and `www.drivingjustice.co.uk` permanently redirect to the apex path-for-path in Vercel's domain settings, with the same rule in `proxy.ts` behind them, and HTTP redirects to HTTPS.
+- Core title, description, canonical, Open Graph and robots overrides are implemented through the route-keyed SEO editor, and every route has search-oriented default titles and descriptions within the editor's 60/155-character guide. The complete §1 target field model and embedded per-entity panels remain partial.
+- `app/sitemap.ts` and `app/robots.ts` generate the public sitemap and crawl rules.
+- Shared JSON-LD covers `LegalService`, `Person`, `Service`, `FAQPage`, `BreadcrumbList` and `BlogPosting` without inventing prices or unavailable business details. Review/AggregateRating markup remains deliberately omitted while reviews come from the third-party widget.
+- Preview and staging hosts, plus admin routes, are marked `noindex` by response header; uppercase paths redirect to lowercase; custom 404 handling returns the correct status.
+- The redirect table (migration `20260927215019`, applied to production 2026-10-03) records published blog and service slug changes automatically, and the page, article and service routes consult it before a 404. The old site's only other URLs, under `/ols/`, redirect to `/` (REQ-026).
+- Core website copy, services, service pages, articles, site settings and SEO metadata are CMS-backed.
+- Supabase authentication, an admin-role check before every admin read, and RLS protect the CMS and enquiries. The site has no public sign-up form.
+- GA4 consent mode, the cookie banner, cookie policy, contact-conversion events and consent-gated referrer/UTM/`gclid` capture on enquiries (REQ-056) are implemented and activate when a production measurement ID is supplied.
+- A privacy notice at `/privacy`, linked from the footer and the enquiry form.
+- The enquiry journey stores submissions and supports Resend notification and confirmation emails.
+- Schema verification covers every public sitemap URL. CI runs lint, type checks, unit tests, the CMS/SEO/runtime/schema verifiers and the pgTAP database suites.
 
-**Not yet built**
+**Built, but not active in production (external configuration)**
 
-- `app/sitemap.ts`, `app/robots.ts` — neither file exists
-- Any redirect handling. `proxy.ts` currently only refreshes the Supabase session; `drivingjustice.co.uk` is unconnected
-- Schema beyond the single homepage block — no `Person`, no `Service`, no `BreadcrumbList`, no `BlogPosting`
-- Any CMS-driven metadata: all copy still lives in `lib/content/*` as hardcoded TypeScript
-- Analytics, consent banner, any `dataLayer`
-- Image housekeeping: `public/John Violaris 2.png` is a 9.2MB unreferenced file sitting in the public directory, and served filenames contain spaces (REQ-021)
+- `NEXT_PUBLIC_GA_MEASUREMENT_ID` is not set in the current Vercel project, so analytics, the consent banner and campaign capture are off on the live site.
+- Search Console and Bing Webmaster Tools verification and sitemap submission need those accounts.
+- Public sign-ups are still enabled in the hosted Supabase Auth settings, although the site offers no sign-up form.
+
+**Major work still outstanding**
+
+- REQ-029 remains partial: there is no redirect-management UI, generic arbitrary-path proxy lookup or cross-request 60-second cache.
+- The custom JSON-LD escape hatch, publication-time schema warnings, draft preview and SEO health dashboard (REQ-018, REQ-019, REQ-048, REQ-052).
+- Build-wide one-H1/slug safety checks, robots overrides, manual rebuild controls, scheduled publishing, version history/audit, a separate SEO-editor role and the location-page seam remain target requirements rather than completed features.
+- Regulatory content only John can supply: SRA number and authorisation statement, complaints and Legal Ombudsman information (REQ-062).
+- A Firefox pass, a manual screen-reader pass and one end-to-end production enquiry. An automated smoke test in Chrome, Edge and WebKit at 375, 768, 1024 and 1440px passed on 2026-10-03.
+- Image-upload filename normalization: the bundled portrait filename still contains a space (REQ-022).
+
+TidyCal and public fee figures are **not** outstanding work. They were intentionally removed from scope; the consultation journey and explanatory Fees page are the finished product behavior.
 
 > **Note on Next.js 16.** This project runs Next 16.3.4, where `middleware.ts` has been renamed to **`proxy.ts`** (the file already exists and exports `proxy()`). Sitemaps and robots use the `app/sitemap.ts` / `app/robots.ts` file conventions returning `MetadataRoute.Sitemap` / `MetadataRoute.Robots`. Verify API details in `node_modules/next/dist/docs/` before writing code — per `AGENTS.md`, this version differs from older App Router material.
 
@@ -132,7 +146,7 @@ The visible `<h1>` and the `<title>` serve different readers and must be indepen
 
 - Validates against `^[a-z0-9]+(-[a-z0-9]+)*$`.
 - A duplicate slug within the same parent path is rejected with a clear error.
-- Changing a published slug automatically writes a 301 into the redirect table (REQ-030).
+- Changing a published slug automatically writes a permanent redirect into the redirect table (REQ-030).
 - The CMS warns before changing the slug of a page that has organic traffic.
 
 **Note.** The existing slugs (`/services/drink-driving`, `/services/totting-up`) are good. Resist deepening the hierarchy — `/services/drink-driving` beats `/motoring/offences/drink-driving` for both crawlers and humans.
@@ -169,7 +183,7 @@ Raised from the usual P1 because two domains point at this site. Every page must
 - The page renders `<meta name="robots">` reflecting the values.
 - Default behaviour is `index, follow`.
 - `robotsIndex: false` also removes the page from the sitemap (REQ-032) in the same publish cycle.
-- Admin, auth and preview routes are `noindex` regardless of field state (REQ-035).
+- Admin and auth routes are `noindex` in metadata and by response header. Preview/staging **hosts** are protected by host-aware `X-Robots-Tag`; their shared static HTML does not carry a host-aware robots meta tag (REQ-035).
 
 ### REQ-007 — Open Graph fields per page
 
@@ -239,7 +253,7 @@ All schema is emitted as JSON-LD in `<script type="application/ld+json">`. No mi
 
 **P0**
 
-Every page carries a schema block describing the practice, generated from one CMS record so there is a single source of truth. The homepage already has a hand-written `LegalService` block at `app/(site)/page.tsx:23` — that becomes the template, moved behind the CMS.
+Every page carries a schema block describing the practice, generated from one CMS-backed configuration so there is a single source of truth. The current implementation centralizes the graph builders in `lib/cms/seo/json-ld.ts` and composes them across public routes; optional business fields and external Rich Results verification remain launch checks.
 
 **Fields (all from a single Business Information record)**
 
@@ -292,7 +306,7 @@ The site is a personal brand. Google needs to resolve "John Violaris" as an enti
 
 **P0**
 
-Fifteen service pages exist. Each should declare what it offers and who provides it.
+Each published service page should declare what it covers and who provides it.
 
 **Fields**
 
@@ -301,14 +315,14 @@ Fifteen service pages exist. Each should declare what it offers and who provides
 - `description`
 - `provider` — `@id` reference to the LegalService node
 - `areaServed` — inherits from the business record, overridable per service
-- `offers` — optional, only when a confirmed fixed fee exists
+- `offers` — omitted under the approved no-public-fees scope
 
 **Acceptance criteria**
 
 - Every `/services/[slug]` page emits `Service` schema alongside the site-wide block.
 - `provider` references the LegalService `@id` rather than restating the business.
 - Validates on the Rich Results Test.
-- No `offers` block is emitted for a service without a confirmed published price.
+- No `offers` block is emitted while the approved scope excludes public fee figures.
 
 ### REQ-013 — FAQPage schema for FAQ blocks
 
@@ -326,6 +340,8 @@ The homepage already uses `details`/`summary` FAQs. Where a page has genuine que
 - Only one `FAQPage` block per page.
 - Validates on the Rich Results Test.
 - The CMS documents that this aids AI-search comprehension but will not produce SERP dropdowns.
+
+**Current implementation note.** The questions visible on both Home and Fees are marked up once on `/fees`, their canonical editing/rendering context, rather than duplicating identical FAQ markup across two URLs.
 
 ### REQ-014 — BreadcrumbList on all non-home pages
 
@@ -360,7 +376,7 @@ Raised from the reference document's P2: for legal content, author and freshness
 - Every `/blog/[slug]` emits `BlogPosting`.
 - `dateModified` updates automatically on content save, never by hand.
 - `author` resolves to the Person entity, not a bare string.
-- A visible "Last reviewed" date renders on the page, matching `dateModified`.
+- A visible "Updated" date renders on the page, matching `dateModified`. A distinct legal-review date remains a future workflow until the CMS records who reviewed the article and when.
 
 ### REQ-016 — Review and AggregateRating schema
 
@@ -457,8 +473,7 @@ The hero already does this correctly — `components/sections/hero.tsx:124` rend
 - **`preload`, not `priority`.** Next 16 deprecated `priority` in favour of `preload`; the hero already uses the new prop. Note that the Next docs recommend `loading="eager"` or `fetchPriority="high"` over `preload` in most cases — worth measuring which performs better for the hero portrait.
 - Below-the-fold images lazy-load by default.
 - AVIF and WebP are negotiated automatically. Configure `images.formats` in `next.config.ts`, which is currently empty.
-- **Served filenames are URL-safe lowercase.** `/John Violaris 1.JPG` percent-encodes to `/John%20Violaris%201.JPG` in every request, canonical tag and OG tag. Rename to `john-violaris-portrait.jpg` before launch, while nothing external links to it.
-- **Delete `public/John Violaris 2.png`** — 9.2MB, referenced nowhere in the codebase, and publicly fetchable from the deployed site. If a version of it is needed, compress it and serve it through `next/image`.
+- **Served filenames are URL-safe lowercase.** The current referenced source is `public/Profile 7.png` (about 2.0 MB), which contains a space and uppercase character. Compress and rename it to a stable lowercase filename such as `john-violaris-portrait.png`, updating both the CMS default and share-image reader before launch.
 - Lighthouse reports zero CLS attributable to images.
 
 ### REQ-022 — Descriptive filenames on CMS upload
@@ -513,11 +528,11 @@ The decision is settled: **`johnviolaris.com` is canonical, `drivingjustice.co.u
 
 **Acceptance criteria**
 
-- `drivingjustice.co.uk/{path}` → 301 → `https://johnviolaris.com/{path}`, preserving path and query string.
+- `drivingjustice.co.uk/{path}` permanently redirects to `https://johnviolaris.com/{path}`, preserving path and query string (308 in the app implementation).
 - `www.drivingjustice.co.uk/{path}` redirects identically.
-- Redirect is configured at the **Vercel domain level**, not in application code, so it costs no function invocation. A host check in `proxy.ts` serves only as a backstop.
-- Both `johnviolaris.com` and `www.johnviolaris.com` resolve; the non-preferred variant 301s to the preferred one. Pick one and record it here: **_[decide at launch: apex or www]_**.
-- All HTTP requests 301 to HTTPS (Vercel handles this automatically once the domain is attached).
+- Done 2026-10-03: Vercel's domain settings permanently redirect all three aliases to the apex, path and query preserved (verified with `curl`), and `proxy.ts` applies the same rule behind them.
+- The apex `johnviolaris.com` is preferred; `www.johnviolaris.com` permanently redirects to it.
+- All HTTP requests permanently redirect to HTTPS (Vercel handles this once the domain is attached).
 - `drivingjustice.co.uk` is verified in Search Console as a separate property so the redirect can be monitored.
 
 **Note (308 vs 301).** Vercel issues 308 for permanent redirects. Google treats 308 and 301 identically for canonicalisation, so either is fine — do not spend time forcing 301.
@@ -536,6 +551,8 @@ If `drivingjustice.co.uk` has ever been live and indexed, its existing URLs carr
 - The mapping is recorded in the redirect table (REQ-029), not hardcoded.
 - If the domain has no history, record that finding here and skip the rest.
 
+**Current status (2026-10-03): done.** `drivingjustice.co.uk` was a parked GoDaddy lander with nothing of its own to carry over. The old johnviolaris.com (GoDaddy Website Builder) had only `/` and an empty store section under `/ols/` (checked 2026-09-25). `/` kept its address, and `/ols/:path*` permanently redirects to `/` from `next.config.ts`: the redirect table only answers inside the page routes, so this one mapping cannot live there.
+
 ### REQ-027 — Trailing slash policy
 
 **P1**
@@ -543,7 +560,7 @@ If `drivingjustice.co.uk` has ever been live and indexed, its existing URLs carr
 **Acceptance criteria**
 
 - Policy chosen and documented: **no trailing slash** (Next.js default, matches the current site's internal links).
-- The opposite variant 301s to the canonical variant.
+- The opposite variant permanently redirects to the canonical variant.
 - Every internal link, sitemap entry and canonical tag uses the no-slash form consistently.
 
 ### REQ-028 — Lowercase URL enforcement
@@ -552,7 +569,7 @@ If `drivingjustice.co.uk` has ever been live and indexed, its existing URLs carr
 
 **Acceptance criteria**
 
-- Requests containing uppercase path characters 301 to the lowercase equivalent.
+- Requests containing uppercase path characters permanently redirect (308) to the lowercase equivalent.
 - All internal links are lowercase.
 - Enforced in `proxy.ts`, before route resolution.
 
@@ -564,7 +581,7 @@ John should be able to retire or rename a page without a developer.
 
 **Fields**
 
-- `redirects` — collection of `{ source, destination, type: 301 | 302, notes, created_at }`
+- Target editor model: `{ source, destination, type: permanent | temporary, notes, created_at }`. The table currently stores `source_path`, `destination_path`, `permanent`, `active`, `source_kind` and `source_entity_id`; notes remain future UI work.
 
 **Acceptance criteria**
 
@@ -575,7 +592,7 @@ John should be able to retire or rename a page without a developer.
 - Lookup is cached, so the table does not add a database round-trip to every request.
 - A new redirect takes effect within 60 seconds without a deploy.
 
-**Implementation note.** `proxy.ts` currently calls `updateSession` for Supabase auth. Redirect handling must run **before** session refresh — a redirected request should never pay for a session lookup — and its `matcher` must continue to exclude `_next/static`, `_next/image` and asset extensions.
+**Current status (2026-10-03): partial.** The table (migration `20260927215019`, applied to production 2026-10-03) stores redirects with a `permanent` boolean, `source_kind` and entity id, rejects loops and flattens chains. Supported top-level, blog and service dynamic routes consult it immediately before returning a 404. There is no redirect-management UI, notes field, generic proxy-wide lookup or demonstrated cross-request cache, so REQ-029 is not complete. Host and lowercase redirects do run in `proxy.ts` before session refresh; its matcher continues to exclude Next assets and image files.
 
 ### REQ-030 — Slug changes auto-create redirects
 
@@ -583,9 +600,11 @@ John should be able to retire or rename a page without a developer.
 
 **Acceptance criteria**
 
-- Changing the slug of a published page automatically inserts a 301 from old path to new path.
+- Changing the slug of a page that remains published automatically inserts a permanent redirect (308 in the current Next implementation) from old path to new path.
 - The auto-created entry is flagged in the CMS as system-generated, and is editable.
 - The operator sees a confirmation naming both URLs before the change is applied.
+
+**Current status (2026-10-03): partial.** Published blog and ordinary service slug changes are captured transactionally and marked by `source_kind`; service renames also update related article links. Draft destinations do not receive an active redirect. The editor does not yet expose or confirm the generated entry.
 
 ### REQ-031 — 404 handling with correct status code
 
@@ -638,7 +657,7 @@ Build `app/robots.ts` returning `MetadataRoute.Robots`.
 
 **Acceptance criteria**
 
-- `/robots.txt` allows all crawlers by default and disallows `/admin`, `/auth`, `/api`, and any preview path.
+- `/robots.txt` allows all crawlers by default and disallows `/admin`, `/auth` and `/api`. Preview is a host distinction rather than a path namespace and is handled by `X-Robots-Tag` (REQ-035).
 - It references the sitemap at `https://johnviolaris.com/sitemap.xml`.
 - The rules are readable from `site_settings` so they can be adjusted without a deploy.
 - **A blocked page can still be indexed without its content.** To keep something out of the index, use `noindex` (REQ-006); `robots.txt` only prevents crawling. Never use both on the same URL — a crawler blocked from fetching the page cannot see the `noindex`.
@@ -690,9 +709,9 @@ Targets are measured on **mobile**, Lighthouse simulated 4G, mid-tier device.
 
 **Acceptance criteria**
 
-- The hero portrait is the LCP element on most pages; it is served through `next/image`, preloaded, and correctly sized for mobile viewports (already the case at `components/sections/hero.tsx:124`).
-- Source images are optimised before upload. The hero JPEG is a reasonable 366KB; the unreferenced 9.2MB PNG beside it is not (REQ-021).
-- The hero uses `motion` for scroll-driven scale on the portrait. Confirm this does not delay LCP on mobile, and that it stays inert under `prefers-reduced-motion`.
+- The hero portrait is the LCP element on the home page; it is served through `next/image` with `loading="eager"`, `fetchPriority="high"` and responsive sizes.
+- Source images are optimised before upload. The current referenced `public/Profile 7.png` is about 2.0 MB and still needs source compression/renaming (REQ-021).
+- The hero uses `LazyMotion`/`motion/react-m` for scroll-driven scale, and the testimonial marquee uses `motion/react-mini`. Rerun mobile Lighthouse on the release preview and confirm reduced-motion behavior before claiming a budget improvement.
 - Fonts are preloaded. `next/font` already handles this for the three faces in `app/layout.tsx`.
 - Lighthouse mobile shows LCP under 2.5s on home, a service page, and an article.
 
@@ -703,7 +722,6 @@ Targets are measured on **mobile**, Lighthouse simulated 4G, mid-tier device.
 **Acceptance criteria**
 
 - Every image has explicit dimensions (REQ-021).
-- The TidyCal embed, if inline, has reserved space sized before load.
 - The cookie/consent banner (REQ-054) overlays rather than pushing content down.
 - The mobile contact bar animates in without displacing page content.
 - `next/font` fallback metrics are configured to minimise swap shift.
@@ -732,8 +750,7 @@ Every third-party script is a tax on the numbers above. Keep the list short and 
 **Acceptance criteria**
 
 - All third-party scripts load via `next/script` with an explicit strategy.
-- The expected list is short: GA4, a consent manager, TidyCal, and possibly a review widget. Anything beyond that needs a justification.
-- The TidyCal embed loads only on pages that show a booking widget, not site-wide.
+- The expected list is short: GA4, the consent UI, and possibly a review widget. Anything beyond that needs a justification.
 - A review-platform widget, if used, loads lazily and never blocks render.
 - Scripts can be disabled from the CMS without a deploy.
 
@@ -823,7 +840,7 @@ This section is about the operator experience: John making changes without calli
 
 **Acceptance criteria**
 
-- Every editable content type — service, service page, blog post, fee, static page, location — exposes an SEO panel containing the full §1 field set.
+- Every editable, indexable content type — service, service page, blog post, static page and, when introduced, location — exposes an SEO panel containing the full §1 field set.
 - The panel shows a live Google-result preview: how the title and description will appear in search.
 - Character counters with warning thresholds on title and description.
 - The panel is collapsed by default so it does not clutter ordinary content editing.
@@ -891,9 +908,11 @@ Cheap to build, and it catches the errors that otherwise accumulate silently ove
 
 ---
 
-## 9. Content type field map
+## 9. Content type field map (target and implemented model)
 
-The migration deliberately keeps most fields in a `content` jsonb column so the field list can be settled while building the admin UI, without a migration per field. This section defines what belongs in each payload, so those decisions are made once.
+The migrations deliberately keep most fields in a `content` jsonb column so the field list can evolve without a migration per field. The lists below describe the broader target model. The implemented model is narrower and must not be mistaken for completed fields.
+
+Today, `seo_metadata.content` is the standalone, path-keyed override source. It supports `title`, `description`, `canonical`, Open Graph title/description/image/alt, `noIndex` and `noFollow`. Visible H1 content is edited in the relevant content form. There is no embedded per-entity `seo` payload, custom JSON-LD field, Twitter-specific field set, CMS robots/script registry, analytics token setting, or article reviewed-by/related-post workflow yet.
 
 ### Shared SEO payload (`seo_metadata.content`, keyed by `path`)
 
@@ -905,7 +924,7 @@ twitterCard, twitterTitle, twitterDescription, twitterImage,
 customJsonLd
 ```
 
-The same shape is embedded under a `seo` key inside each content row's own `content` jsonb, so an entity carries its metadata with it. `seo_metadata` is for routes with no backing row — the homepage, `/about`, `/contact`.
+This is a target shape, not the current stored payload. The current implementation uses the standalone `seo_metadata` row for every registered public route.
 
 ### `site_settings` (key/value)
 
@@ -926,9 +945,9 @@ Nav label, card summary, offence-rail copy, icon key, group membership, plus `se
 
 Hero copy, overview, penalties, legal framework, defence considerations, process steps, evidence checklist, FAQ items (REQ-013), related services, CTA overrides, plus `seo`.
 
-### `fees.content`
+### Fees-page content
 
-Description, inclusions list, exclusions, VAT treatment, disbursements, key stages, typical timescales, conditions. See REQ-061 — this content has a regulatory dimension, not only a marketing one.
+There is deliberately no fee-schedule entity or fee-management admin. General Fees-page copy is part of the static-page/website-content CMS and may explain the consultation, how the work is scoped and that a case-specific fee is agreed privately. It must not expose figures, ranges, fee cards or structured-data offers unless the approved product scope changes.
 
 ### `testimonials.content`
 
@@ -938,11 +957,10 @@ Matter type, source platform, verification status, date, consent-to-publish flag
 
 Excerpt, body blocks, featured image with alt, author reference, reviewed-by, last-reviewed date, related service, related posts, plus `seo`.
 
-### Fields to add when the work starts
+### Current database seams
 
-- `redirects` table (REQ-029) — not in the current migration
-- `locations` table (REQ-043) — not in the current migration
-- `enquiries` table with UTM capture (REQ-056) — not in the current migration
+- `redirects` plus enquiry referrer/UTM/`gclid` columns are implemented in the pending `20260927215019_redirects_and_enquiry_attribution.sql` migration; production remains unchanged until it is applied and verified.
+- `locations` (REQ-043) is not built.
 
 ---
 
@@ -959,7 +977,7 @@ The rationale is proportionate: John needs to know which pages generate enquirie
 **Acceptance criteria**
 
 - GA4 loads through `next/script` with `strategy="afterInteractive"`.
-- The measurement ID comes from an environment variable, with separate properties for production and preview.
+- The measurement ID comes from an environment variable set in Vercel Production only; Preview and local environments leave it unset.
 - Analytics does **not** load on preview deployments or `localhost`.
 - Page views fire correctly across client-side App Router navigations, not just on first load.
 
@@ -988,13 +1006,11 @@ Every path to John is tracked, so it is possible to tell which pages actually pr
 
 | Event                 | Trigger                              | Parameters                          |
 | --------------------- | ------------------------------------ | ----------------------------------- |
-| `form_submit`         | Contact form submitted successfully  | `page_path`, `matter_type`          |
-| `form_error`          | Submission fails validation or send  | `page_path`, `error_type`           |
+| `form_submit`         | Enquiry stored successfully           | `page_path`                         |
+| `form_error`          | Validation or server-side submission fails | `page_path`, `error_type`       |
 | `phone_click`         | Any `tel:` link clicked              | `page_path`, `location` (header/footer/mobile bar/hero) |
 | `whatsapp_click`      | Any WhatsApp link clicked            | `page_path`, `location`             |
 | `email_click`         | Any `mailto:` link clicked           | `page_path`                         |
-| `booking_click`       | TidyCal booking CTA clicked          | `page_path`                         |
-| `booking_completed`   | TidyCal confirms a booking           | where the integration allows        |
 
 **Acceptance criteria**
 
@@ -1014,6 +1030,8 @@ Every path to John is tracked, so it is possible to tell which pages actually pr
 - They are stored with the enquiry record when the form is submitted.
 - The admin enquiry view shows the source, so John can see which channel produced the matter.
 - Captured parameters never appear in a URL that could be shared or indexed.
+
+**Current status (2026-09-27): implemented locally, pending migration and end-to-end verification.** External referrer origin/path, all five UTM fields and `gclid` use first-touch session storage only after analytics acceptance, are normalized again by the Server Action, and appear in the admin detail view. They are not included in enquiry emails or GA events.
 
 ### REQ-057 — Search Console and Bing Webmaster Tools
 
@@ -1074,33 +1092,26 @@ Some foundations already exist: a skip link, a `<main id="main">` landmark, keyb
 
 ## 12. Regulatory and content constraints
 
-**This section has no equivalent in the source document, and it is the most important difference.** A US contractor's website has marketing constraints. A solicitor's website has regulatory ones. Several items here are compliance obligations, not optimisations — and they interact directly with SEO, because the Fees page is simultaneously a conversion page, a ranking asset, and a regulated disclosure.
+**This section has no equivalent in the source document, and it is the most important difference.** A US contractor's website has marketing constraints. A solicitor's website has regulatory ones. Several items here are compliance obligations, not optimisations. The approved product scope does not publish fee figures; that decision must remain distinct from the separate question of which regulatory disclosures apply to John's practising arrangement.
 
 > **Every item below must be confirmed with John, and with his firm's compliance officer if he practises through an SRA-regulated firm.** Nothing here should be implemented from this document alone. It is written to make sure the right questions get asked before launch, not to substitute for compliance advice.
 
-### REQ-061 — Price and service transparency on the Fees page
+### REQ-061 — Approved no-public-fees scope
 
-**P1 — confirm with John before launch**
+**Resolved product decision; regulatory applicability requires separate professional confirmation**
 
-The SRA Transparency Rules require regulated firms to publish price and service information for certain prescribed work. **Motoring offences — summary offences only, in the Magistrates' Court — is explicitly one of the prescribed areas**, which puts a substantial part of John's practice directly in scope.
+John has decided that the website will not display public fee figures and that the CMS will not contain a fee-schedule editor. `/fees` remains an explanatory page: it describes the initial consultation, the factors that affect the work and that the scope and fee are agreed privately before instruction.
 
-**Where in scope, the published information generally needs to cover**
+This is the implemented product behavior, not a missing feature. No price, range or offer should be inferred for metadata or structured data.
 
-- Total cost, or an average or realistic range, with the basis of the charge
-- Whether VAT is included, and at what rate
-- Likely disbursements, with cost or best estimate
-- The key stages of the matter
-- Typical timescales
-- The qualifications and experience of whoever does the work, and of their supervisor
+The separate compliance question remains: the responsible regulated professional must confirm whether John's practising arrangement creates any mandatory price-and-service publication duty. If that advice requires public disclosures, it changes the approved scope and this PRD/SEO specification must be revised before implementation. This document does not make that legal determination.
 
 **Acceptance criteria**
 
-- Confirm with John whether the rules apply to his practice and in what form.
-- If they apply, the Fees page carries the required information and the CMS fee fields (§9) accommodate all of it.
-- Fee content is CMS-editable, since the rules require it to be kept up to date.
-- The information is reachable in a small number of clicks from the homepage, clearly signposted.
-
-**Why it sits in an SEO document.** "Solicitor fees" queries convert well, and a compliant transparency disclosure is substantial, genuinely useful content — which is also what ranks. The compliance requirement and the SEO opportunity point the same way here.
+- No public page, metadata block or JSON-LD object exposes a fee figure, range or `Offer`.
+- There is no fee-schedule table or fee-management admin route.
+- General Fees-page explanatory copy remains editable through Website Content.
+- The no-public-fees decision and its regulatory basis are recorded during final compliance sign-off.
 
 ### REQ-062 — Regulatory information in the footer
 
@@ -1130,7 +1141,7 @@ Legal advice is "Your Money or Your Life" content in Google's terms, held to the
 **Acceptance criteria**
 
 - Every article carries a visible byline attributing it to John, with his role and qualification.
-- Every article shows a visible last-reviewed date matching `dateModified` (REQ-015).
+- Every article shows a visible Updated date matching `dateModified` (REQ-015). A separate last-reviewed date and named review workflow remain outstanding.
 - The byline links to the About page, which carries the `Person` schema (REQ-011).
 - Statutory references in article content are accurate and dated — legal content that cites a superseded provision is worse than no content.
 - A documented review cycle exists for keeping content current, with the interval recorded in the CMS per article.
@@ -1169,43 +1180,43 @@ Work through this before the site is opened to crawlers. Record the result of ea
 
 **Indexing and crawl**
 
-- [ ] `robots.txt` live, correct, referencing the sitemap
-- [ ] `sitemap.xml` live, complete, no unpublished or admin URLs
+- [x] `robots.txt` live, correct, referencing the sitemap
+- [x] `sitemap.xml` live, complete, no unpublished or admin URLs
 - [ ] Search Console verified for `johnviolaris.com`, sitemap submitted
 - [ ] Search Console verified for `drivingjustice.co.uk`, redirect confirmed
 - [ ] Bing Webmaster Tools verified
-- [ ] Every page's rendering mode audited and recorded
-- [ ] No stray `noindex` on a page that should be indexed — the single most common launch-day error
-- [ ] Vercel preview deployments confirmed `noindex`
+- [x] Every page's rendering mode audited and recorded (`next build`: every public route is static or SSG)
+- [x] No stray `noindex` on a page that should be indexed — the single most common launch-day error
+- [x] Vercel preview deployments confirmed `noindex`
 
 **Domains and redirects**
 
-- [ ] `drivingjustice.co.uk` 301s path-for-path to `johnviolaris.com`
-- [ ] apex/www policy decided, enforced, canonical tags agree
-- [ ] HTTP → HTTPS enforced, SSL active on both domains
-- [ ] Legacy URL inventory complete, or absence of history recorded
-- [ ] Trailing-slash and lowercase policies enforced
-- [ ] 404 returns HTTP 404, verified with `curl -I`
+- [x] `drivingjustice.co.uk` permanently redirects path-for-path to `johnviolaris.com`
+- [x] apex/www policy decided, enforced, canonical tags agree
+- [x] HTTP → HTTPS enforced, SSL active on both domains
+- [x] Legacy URL inventory complete, or absence of history recorded
+- [x] Trailing-slash and lowercase policies enforced
+- [x] 404 returns HTTP 404, verified with `curl -I`
 
 **Metadata and schema**
 
-- [ ] Every page has a unique title and description
-- [ ] Every page has exactly one `<h1>`
-- [ ] Canonical tags present, absolute, self-referencing
+- [x] Every page has a unique title and description
+- [x] Every page has exactly one `<h1>`
+- [x] Canonical tags present, absolute, self-referencing
 - [ ] Rich Results Test passes on home, service page, article, about
-- [ ] No schema field contains placeholder or invented data
-- [ ] `sameAs` URLs all resolve
+- [x] No schema field contains placeholder or invented data
+- [x] `sameAs` URLs all resolve
 - [ ] OG previews checked in WhatsApp, LinkedIn, iMessage
 
 **Performance and accessibility**
 
 - [ ] Lighthouse mobile 90+ on home, service page, article
 - [ ] LCP < 2.5s, CLS < 0.1, INP < 200ms on mobile
-- [ ] Hero image optimised and served through `next/image`
-- [ ] Image filenames URL-safe; unreferenced `John Violaris 2.png` removed from `public/`
-- [ ] Lighthouse accessibility 95+
+- [x] Hero image optimised and served through `next/image`
+- [ ] Referenced `public/Profile 7.png` compressed, renamed to a URL-safe lowercase filename and all references updated
+- [x] Lighthouse accessibility 95+
 - [ ] Keyboard and screen-reader passes complete
-- [ ] Tested at 375px, 768px, 1024px, 1440px
+- [x] Tested at 375px, 768px, 1024px, 1440px
 
 **Analytics and consent**
 
@@ -1214,17 +1225,18 @@ Work through this before the site is opened to crawlers. Record the result of ea
 - [ ] Consent Mode v2 configured, defaults denied
 - [ ] All conversion events verified in DebugView
 - [ ] No personal data in any event parameter
-- [ ] Cookie policy page live and accurate
+- [x] Cookie policy page live and accurate
 
 **Compliance**
 
 - [ ] SRA number confirmed and rendered, or confirmed not applicable
 - [ ] Regulatory footer information confirmed with John
-- [ ] Fees page transparency requirements confirmed and met
+- [x] Product scope records no public fee figures and no fee-schedule admin
+- [ ] Regulatory basis for the no-public-fees decision recorded during compliance sign-off
 - [ ] Complaints and Legal Ombudsman information published
-- [ ] No guaranteed-outcome language anywhere, meta descriptions included
+- [ ] No guaranteed-outcome language anywhere, meta descriptions included (2026-10-03 scan: Special Reasons says "No ban if accepted" and "Disqualification avoided entirely", although the court keeps a discretion; John to reword in the CMS)
 - [ ] No fabricated credentials, results or reviews
-- [ ] Privacy policy and terms live
+- [x] Privacy notice live (`/privacy`, 2026-10-03). There is no website terms page; add one only if John wants one
 
 **First month after launch**
 
@@ -1301,7 +1313,7 @@ Work through this before the site is opened to crawlers. Record the result of ea
 | **REQ-058** | GTM as an optional swap-in                      | **P3**   | §10     |
 | **REQ-059** | WCAG 2.2 AA                                     | **P1**   | §11     |
 | **REQ-060** | Heading hierarchy and landmarks                 | **P1**   | §11     |
-| **REQ-061** | Price and service transparency on the Fees page | **P1**   | §12     |
+| **REQ-061** | Approved no-public-fees scope                   | **P1**   | §12     |
 | **REQ-062** | Regulatory information in the footer            | **P1**   | §12     |
 | **REQ-063** | E-E-A-T signals on legal content                | **P1**   | §12     |
 | **REQ-064** | No guaranteed outcomes                          | **P0**   | §12     |
@@ -1309,17 +1321,16 @@ Work through this before the site is opened to crawlers. Record the result of ea
 
 ---
 
-## Open questions for John
+## Remaining client and external confirmations
 
-Answer these before SEO implementation begins. Each one blocks or reshapes a requirement above.
+These affect launch configuration or professional compliance sign-off. They do not reopen the settled TidyCal or public-fees scope decisions.
 
-1. **SRA number and regulatory status.** Is John a sole practitioner, a partner, or employed by a regulated firm? This determines REQ-061 and REQ-062 entirely, and affects the schema type in REQ-010. `lib/site-config.ts` holds `sraNumber: null` until answered.
+1. **SRA number and regulatory status.** Is John a sole practitioner, a partner, or employed by a regulated firm? This affects REQ-062, the schema type in REQ-010 and the professional sign-off recorded for REQ-061. `lib/site-config.ts` holds `sraNumber: null` until answered.
 2. **Business address.** Is there a publishable office address? If yes, a Google Business Profile becomes worth pursuing and REQ-010 gains address, geo and hours. If no, the site stays a national-coverage entity.
-3. **Fees.** Which services have confirmed fixed fees? Needed for REQ-012 `offers` and for the REQ-061 transparency disclosure.
-4. **Review platforms.** Which profiles exist — ReviewSolicitors, Trustpilot, Google? Needed for `sameAs` (REQ-010) and to decide whether REQ-016 is worth building.
-5. **`drivingjustice.co.uk` history.** Has it ever been live and indexed? Determines whether REQ-026 is a real piece of work or a one-line note.
-6. **Contact details.** Phone, WhatsApp and TidyCal URL are still placeholders in `lib/site-config.ts`. They must be real before launch — they are a schema input, a conversion path, and a tracked event.
-7. **Location programme.** Which towns and Magistrates' Courts would matter most, when the time comes? Not needed for launch, but it shapes what REQ-044 should look like.
+3. **Review platforms.** Which profiles exist — ReviewSolicitors, Trustpilot, Google? Needed for `sameAs` (REQ-010) and to decide whether REQ-016 is worth building.
+4. **`drivingjustice.co.uk` history.** Has it ever been live and indexed? Determines whether REQ-026 is a real piece of work or a one-line note.
+5. **Production contact details.** Confirm the phone, WhatsApp and email values used by the Vercel production deployment. They are schema inputs, conversion paths and tracked events.
+6. **Location programme.** Which towns and Magistrates' Courts would matter most, when the time comes? Not needed for launch, but it shapes what REQ-044 should look like.
 
 ---
 
