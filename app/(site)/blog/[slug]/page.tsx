@@ -13,6 +13,7 @@ import {
   getServices,
   getSiteConfig,
 } from "@/lib/cms/queries";
+import { redirectFromCms } from "@/lib/cms/redirects";
 
 import {
   articleId,
@@ -65,7 +66,10 @@ export default async function ArticlePage({
     getSiteConfig(),
   ]);
 
-  if (!article) notFound();
+  if (!article) {
+    await redirectFromCms(path);
+    notFound();
+  }
 
   const structured = await structuredDataFor(path, article.title);
   // What the index calls itself, which is also the breadcrumb back to it.

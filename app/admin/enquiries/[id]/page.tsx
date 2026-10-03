@@ -118,6 +118,27 @@ export default async function AdminEnquiryPage({
             <DetailRow label="Sent from">
               {enquiry.source_path || "Unknown page"}
             </DetailRow>
+            {enquiry.referrer ? (
+              <DetailRow label="External referrer">{enquiry.referrer}</DetailRow>
+            ) : null}
+            {enquiry.utm_source ? (
+              <DetailRow label="UTM source">{enquiry.utm_source}</DetailRow>
+            ) : null}
+            {enquiry.utm_medium ? (
+              <DetailRow label="UTM medium">{enquiry.utm_medium}</DetailRow>
+            ) : null}
+            {enquiry.utm_campaign ? (
+              <DetailRow label="UTM campaign">{enquiry.utm_campaign}</DetailRow>
+            ) : null}
+            {enquiry.utm_term ? (
+              <DetailRow label="UTM term">{enquiry.utm_term}</DetailRow>
+            ) : null}
+            {enquiry.utm_content ? (
+              <DetailRow label="UTM content">{enquiry.utm_content}</DetailRow>
+            ) : null}
+            {enquiry.gclid ? (
+              <DetailRow label="Google Ads click ID">{enquiry.gclid}</DetailRow>
+            ) : null}
           </dl>
         </section>
 

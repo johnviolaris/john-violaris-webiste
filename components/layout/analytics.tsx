@@ -126,9 +126,10 @@ function ConsentedAnalytics({ id }: { id: string }) {
       {bannerOpen ? (
         <section className="consent-banner" aria-label="Cookie choice">
           <p>
-            <strong>May we use analytics cookies?</strong> Google Analytics
-            would show John which pages help people get in touch. The cookies
-            are only set if you accept.{" "}
+            <strong>May we use analytics storage?</strong> This site and Google
+            Analytics would show John which pages and campaigns help people get
+            in touch. Browser storage and analytics cookies are only used if
+            you accept.{" "}
             <Link href="/cookies">Cookie policy</Link>
           </p>
           {/* Two identical buttons: rejecting is exactly as easy as accepting. */}

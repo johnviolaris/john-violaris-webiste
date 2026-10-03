@@ -63,8 +63,9 @@ export function ServiceForm({ service, groups }: ServiceFormProps) {
   const [published, setPublished] = useState(service?.published ?? false);
   const [featured, setFeatured] = useState(service?.featured ?? false);
 
-  // Until the slug has been touched, it follows the name. It can only be set
-  // on a new service: once one exists its URL is fixed (see `saveService`).
+  // Until the slug has been touched, it follows the name. Existing offence
+  // pages may also be corrected: the database preserves the former address as
+  // a permanent redirect. A custom-href service keeps its internal key fixed.
   const [slug, setSlug] = useState(initialValues.slug);
   const [slugTouched, setSlugTouched] = useState(Boolean(service));
 
@@ -131,13 +132,13 @@ export function ServiceForm({ service, groups }: ServiceFormProps) {
             />
           </Field>
 
-          {service ? (
+          {service && !service.path.startsWith("/services/") ? (
             <div className="space-y-1.5">
               <p className="text-sm leading-none font-medium">Address</p>
               <p className="font-mono text-sm">{service.path}</p>
               <p className="text-xs text-muted-foreground">
-                Fixed once a service exists — articles, the main menu and search
-                engines already link to it.
+                This service uses a standalone page, so its internal catalogue
+                key is not editable here.
               </p>
               <input type="hidden" name="slug" value={service.values.slug} />
             </div>
@@ -145,7 +146,11 @@ export function ServiceForm({ service, groups }: ServiceFormProps) {
             <Field
               label="URL slug"
               labelFor={`${formId}-slug`}
-              hint={`The page will live at /services/${slug || "…"}. Choose carefully: it cannot be changed once the service is added.`}
+              hint={
+                service
+                  ? `The page will move to /services/${slug || "…"}. Its previous address will redirect permanently.`
+                  : `The page will live at /services/${slug || "…"}.`
+              }
               error={state.fieldErrors.slug}
               errorId={errorId("slug")}
             >

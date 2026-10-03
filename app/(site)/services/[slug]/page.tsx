@@ -15,6 +15,7 @@ import {
   getServices,
   getSiteConfig,
 } from "@/lib/cms/queries";
+import { redirectFromCms } from "@/lib/cms/redirects";
 import {
   breadcrumbNode,
   graph,
@@ -77,7 +78,10 @@ export default async function ServicePage({
     getServiceDescriptions(),
     getSiteConfig(),
   ]);
-  if (!service) notFound();
+  if (!service) {
+    await redirectFromCms(path);
+    notFound();
+  }
   const structured = await structuredDataFor(path, `${service.name} Solicitor`);
 
   // The offence is prefilled into the chat, so a message arriving from this

@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { after } from "next/server";
 
 import { sendEnquiryEmails } from "@/lib/email/enquiry";
+import { readEnquiryAttribution } from "@/lib/enquiries/attribution";
 import {
   emptyEnquiryValues,
   enquiryFields,
@@ -147,6 +148,7 @@ export async function submitEnquiry(
       description: values.description,
       source_path: sourcePath,
       ip_hash: ipHash,
+      ...readEnquiryAttribution(formData),
     })
     .select(enquirySelect)
     .single<Enquiry>();

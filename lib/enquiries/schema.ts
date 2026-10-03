@@ -101,13 +101,20 @@ export type Enquiry = {
   visitor_confirmed_at: string | null;
   email_error: string | null;
   source_path: string | null;
+  referrer: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_term: string | null;
+  utm_content: string | null;
+  gclid: string | null;
   created_at: string;
   updated_at: string;
 };
 
 /** Columns making up an `Enquiry`, for `.select()`. */
 export const enquirySelect =
-  "id, first_name, last_name, phone, email, matter_type, court_date, court_location, description, status, admin_notified_at, visitor_confirmed_at, email_error, source_path, created_at, updated_at";
+  "id, first_name, last_name, phone, email, matter_type, court_date, court_location, description, status, admin_notified_at, visitor_confirmed_at, email_error, source_path, referrer, utm_source, utm_medium, utm_campaign, utm_term, utm_content, gclid, created_at, updated_at";
 
 /**
  * What a row in the inbox list or on the dashboard actually shows.

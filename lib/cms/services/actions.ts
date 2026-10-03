@@ -13,7 +13,7 @@ import {
   type CmsFormState,
 } from "@/lib/cms/form";
 import { revalidateFor } from "@/lib/cms/revalidate";
-import { dropSeoOverride } from "@/lib/cms/seo/overrides";
+import { dropSeoOverride, moveSeoOverride } from "@/lib/cms/seo/overrides";
 import {
   serviceFields,
   serviceRules,
@@ -76,10 +76,10 @@ async function endOfGroup(
 /**
  * Create or update a service.
  *
- * The slug is taken on create and never changed afterwards. `/services/<slug>`
- * is the offence page's address, and articles store it as their related
- * service, the main navigation links to one of them by hand, and search
- * engines have the rest. A rename would break every one of those silently.
+ * Existing URL slugs may be corrected. The database captures the previous
+ * address as a permanent redirect in the same transaction and updates related
+ * article links; this action also moves the page's SEO override and rebuilds
+ * both paths.
  */
 export async function saveService(
   _previous: CmsFormState<ServiceField>,
@@ -96,8 +96,8 @@ export async function saveService(
 
   const supabase = await createClient();
 
-  // What the form does not carry: the slug once set, the position, and the
-  // police station's link to its own page.
+  // What the form does not carry: the position and the police station's link
+  // to its own page.
   let existing: StoredService | null = null;
 
   if (serviceId) {
@@ -115,7 +115,11 @@ export async function saveService(
     }
 
     existing = data;
-    submitted.slug = data.slug;
+
+    // A service with a custom href uses its slug only as a catalogue key. The
+    // editor does not expose it, and an action request may not change it by
+    // forging the hidden form value.
+    if (data.content.href) submitted.slug = data.slug;
   }
 
   const validation = validateFields(submitted, serviceRules);
@@ -146,15 +150,28 @@ export async function saveService(
       ? existing.sort_order
       : await endOfGroup(supabase, values.group, serviceId);
 
+  const renamedFrom =
+    existing &&
+    !existing.content.href &&
+    existing.slug !== values.slug
+      ? existing.slug
+      : null;
+  const paths = [
+    `/services/${values.slug}`,
+    ...(renamedFrom ? [`/services/${renamedFrom}`] : []),
+  ];
+
   const state = await cmsWrite<ServiceField, { id: string } | null>({
     entity: "services",
     values,
     successMessage: published ? "Service saved and published." : "Draft saved.",
+    paths,
     run: async (client) =>
       serviceId
         ? client
             .from("services")
             .update({
+              slug: values.slug,
               name: values.name,
               published,
               sort_order: sortOrder,
@@ -175,6 +192,13 @@ export async function saveService(
             .select("id")
             .maybeSingle(),
   });
+
+  if (state.status === "success" && renamedFrom) {
+    await moveSeoOverride(
+      `/services/${renamedFrom}`,
+      `/services/${values.slug}`,
+    );
+  }
 
   if (state.status === "success" && !serviceId && state.data?.id) {
     // Straight into the editor for the service that now exists, so the next

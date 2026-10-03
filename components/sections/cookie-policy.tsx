@@ -1,6 +1,7 @@
 import { CookieSettingsButton } from "@/components/layout/analytics";
 import { Container } from "@/components/ui/container";
 import { consentStorageKey, gaMeasurementId } from "@/lib/analytics";
+import { enquiryAttributionStorageKey } from "@/lib/enquiries/attribution";
 
 /**
  * The cookie policy's body (REQ-054).
@@ -8,7 +9,8 @@ import { consentStorageKey, gaMeasurementId } from "@/lib/analytics";
  * Written in code rather than the CMS, and on purpose: it describes what the
  * code stores, so it has to change when the code does, and it follows the
  * analytics switch by itself. With no measurement ID configured it says the
- * site sets no cookies for visitors, which is then the truth.
+ * site sets no cookies or campaign-attribution storage for visitors, which is
+ * then the truth.
  *
  * Checked 2026-09-25: the ReviewSolicitors panels set no cookies on this
  * domain and their responses carry no `Set-Cookie`.
@@ -22,6 +24,13 @@ export function CookiePolicy() {
           purpose:
             "Remembers whether you accepted or rejected analytics cookies, so you are not asked on every page. Kept in your browser’s storage rather than as a cookie.",
           kept: "Until you clear your browser’s data",
+        },
+        {
+          name: enquiryAttributionStorageKey,
+          by: "This site, only if you accept analytics",
+          purpose:
+            "Keeps the external referrer and campaign tags that brought you here for this browser tab. They are attached only if you choose to send an enquiry, and are not sent to Google.",
+          kept: "Until you close this browser tab",
         },
         {
           name: "_ga",
@@ -48,13 +57,14 @@ export function CookiePolicy() {
             {gaMeasurementId ? (
               <p>
                 Nothing is stored in your browser until you answer the cookie
-                question. Your answer is then remembered, and if you accept,
-                Google Analytics sets two cookies. All three are listed here.
+                question. Your answer is then remembered. If you accept, this
+                site keeps campaign attribution for this tab and Google
+                Analytics sets two cookies. All four are listed here.
               </p>
             ) : (
               <p>
                 This site does not use analytics or advertising cookies, and it
-                sets no cookies for visitors at all.
+                sets no cookies or campaign-attribution storage for visitors.
               </p>
             )}
             {rows.length > 0 ? (

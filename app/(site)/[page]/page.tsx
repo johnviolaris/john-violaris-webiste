@@ -18,6 +18,7 @@ import { Icon } from "@/components/ui/icons";
 import { JsonLd } from "@/components/ui/json-ld";
 import { Lines, Paragraphs } from "@/components/ui/lines";
 import { getPagesContent, getSiteConfig } from "@/lib/cms/queries";
+import { redirectFromCms } from "@/lib/cms/redirects";
 import {
   breadcrumbNode,
   graph,
@@ -87,7 +88,10 @@ export default async function InformationPage({
   params: Promise<{ page: string }>;
 }) {
   const { page } = await params;
-  if (!pages[page]) notFound();
+  if (!pages[page]) {
+    await redirectFromCms(`/${page}`);
+    notFound();
+  }
 
   /*
    * This page's own group, plus the two that hold sections it shares. `shared`

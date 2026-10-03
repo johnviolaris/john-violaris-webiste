@@ -1,9 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useActionState, useEffect, useId, useRef } from "react";
+import { useActionState, useEffect, useId, useRef, useState } from "react";
 
 import { useEnquiryTracking } from "@/components/layout/analytics";
+import {
+  enquiryAttributionUpdatedEvent,
+  readStoredEnquiryAttribution,
+} from "@/components/layout/enquiry-attribution";
 import { Container } from "@/components/ui/container";
 import { Icon } from "@/components/ui/icons";
 import { submitEnquiry } from "@/lib/enquiries/actions";
@@ -14,6 +18,10 @@ import {
   matterTypes,
   type EnquiryField,
 } from "@/lib/enquiries/schema";
+import {
+  emptyEnquiryAttribution,
+  enquiryAttributionFields,
+} from "@/lib/enquiries/attribution";
 import { useSiteConfig } from "@/components/layout/site-config-provider";
 
 /**
@@ -35,9 +43,23 @@ export function ContactEnquiryForm() {
   const formId = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const alertRef = useRef<HTMLParagraphElement>(null);
+  const [attribution, setAttribution] = useState(emptyEnquiryAttribution);
 
   // `form_submit` or `form_error`, once per submission, when consent allows.
   useEnquiryTracking(state);
+
+  // The layout records first-touch campaign details before a visitor reaches
+  // this form. Listen as well as reading immediately so effect ordering and
+  // client-side navigation cannot leave the hidden values stale.
+  useEffect(() => {
+    const sync = () => setAttribution(readStoredEnquiryAttribution());
+
+    sync();
+    window.addEventListener(enquiryAttributionUpdatedEvent, sync);
+
+    return () =>
+      window.removeEventListener(enquiryAttributionUpdatedEvent, sync);
+  }, []);
 
   /**
    * React resets the form once an action settles, but its value tracker is not
@@ -143,6 +165,14 @@ export function ContactEnquiryForm() {
           ) : (
             <form ref={formRef} className="enquiry-form" action={formAction}>
               <input type="hidden" name="sourcePath" value={pathname} />
+              {enquiryAttributionFields.map((field) => (
+                <input
+                  key={field}
+                  type="hidden"
+                  name={field}
+                  value={attribution[field]}
+                />
+              ))}
               {/* Honeypot. Hidden from sight, assistive technology and tab order. */}
               <div className="enquiry-honeypot" aria-hidden="true">
                 <label htmlFor={`${formId}-${honeypotField}`}>
