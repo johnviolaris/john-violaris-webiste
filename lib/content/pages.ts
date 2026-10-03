@@ -273,7 +273,7 @@ export const aboutBackgroundDefaults: AboutBackgroundContent = {
       title: "Practice",
       paragraphs: [
         "John qualified in 2005 and has specialised in criminal defence at the police station and magistrates’ court ever since.",
-        "John currently practices at Darryl Ingram Solicitors and is a Duty Solicitor serving local courts and police stations in the Greater London area. His experience spans all crime representing people from all backgrounds. His current practice is focused on motoring defences and trial representation.",
+        "John currently practises at Darryl Ingram Solicitors and is a Duty Solicitor serving local courts and police stations in the Greater London area. His experience spans all crime representing people from all backgrounds. His current practice is focused on motoring defences and trial representation.",
       ],
     },
     {
