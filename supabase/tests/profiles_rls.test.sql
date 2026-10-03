@@ -10,7 +10,7 @@ select col_default_is(
   'public',
   'profiles',
   'role',
-  '''user''::text',
+  'user',
   'new profiles default to the user role'
 );
 select col_has_check(
