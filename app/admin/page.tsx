@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AlertTriangle, ArrowRight } from "lucide-react";
 
 import { EnquiryStatusBadge } from "@/components/admin/enquiry-status-badge";
-import { getAdminSession } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import {
   countEnquiries,
   countUndeliveredEnquiries,
@@ -19,10 +19,11 @@ import { formatUkShortDateTime } from "@/lib/format";
 const recentLimit = 5;
 
 export default async function AdminPage() {
+  const session = await requireAdmin();
+
   // Five rows and two numbers. Asking for the whole inbox and slicing it here
   // meant fetching every description on the way to a list that shows none.
-  const [session, counts, latest, undelivered] = await Promise.all([
-    getAdminSession(),
+  const [counts, latest, undelivered] = await Promise.all([
     countEnquiries(),
     listEnquiries("all", recentLimit),
     countUndeliveredEnquiries(),

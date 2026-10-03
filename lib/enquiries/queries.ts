@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 
+import { createAuthorizedAdminClient } from "@/lib/auth";
 import {
   enquiryListSelect,
   enquirySelect,
@@ -10,7 +11,6 @@ import {
   type EnquiryListItem,
   type EnquiryStatus,
 } from "@/lib/enquiries/schema";
-import { createClient } from "@/utils/supabase/server";
 
 /**
  * Admin-side reads for the enquiry inbox.
@@ -18,7 +18,8 @@ import { createClient } from "@/utils/supabase/server";
  * These go through the cookie-backed client, not the secret key, so the
  * "Admins can read enquiries" policy is what actually authorises them. A
  * non-admin session returns no rows rather than an error — which is why the
- * pages using these also sit behind `requireAdmin()`.
+ * `createAuthorizedAdminClient()` verifies the role before the query begins;
+ * the admin layout remains a shared UI guard, not the security boundary.
  *
  * Kept apart from `admin-actions.ts` on purpose: a file marked `"use server"`
  * publishes every export as a callable endpoint, and reads have no business
@@ -39,7 +40,7 @@ export const listEnquiries = cache(async function listEnquiries(
   filter: EnquiryFilter = "all",
   limit: number = listLimit,
 ): Promise<EnquiryListItem[]> {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   let query = supabase
     .from("enquiries")
@@ -65,7 +66,7 @@ export const listEnquiries = cache(async function listEnquiries(
 export const getEnquiry = cache(async function getEnquiry(
   id: string,
 ): Promise<Enquiry | null> {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("enquiries")
@@ -89,7 +90,7 @@ export type EnquiryCounts = Record<EnquiryFilter, number>;
  * Postgres counts against the status index without returning any rows.
  */
 export const countEnquiries = cache(async function countEnquiries(): Promise<EnquiryCounts> {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const results = await Promise.all(
     enquiryStatuses.map(async (status) => {
@@ -112,7 +113,7 @@ export const countEnquiries = cache(async function countEnquiries(): Promise<Enq
 
 /** Just the unactioned count, for the sidebar badge. */
 export const countNewEnquiries = cache(async function countNewEnquiries(): Promise<number> {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { count } = await supabase
     .from("enquiries")
@@ -129,7 +130,7 @@ export const countNewEnquiries = cache(async function countNewEnquiries(): Promi
  */
 export const countUndeliveredEnquiries = cache(
   async function countUndeliveredEnquiries(): Promise<number> {
-    const supabase = await createClient();
+    const supabase = await createAuthorizedAdminClient();
 
     const { count } = await supabase
       .from("enquiries")

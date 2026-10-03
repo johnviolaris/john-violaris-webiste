@@ -48,7 +48,9 @@ function fillCopy(testimonials: Testimonial[]): Testimonial[] {
  * Driven through `useAnimate` rather than the declarative `animate` prop
  * because that hands back playback controls — auto-scrolling text has to be
  * stoppable to be readable, so it pauses on hover and on focus. The same handle
- * is what `start` seeks with.
+ * is what `start` seeks with. It must be the full `motion/react` build: the
+ * `motion/react-mini` one animates through the Web Animations API, which has no
+ * `y` property, so the columns stood still.
  *
  * Speed and starting point are both given per card, not per pass. How many
  * cards make up a pass depends on how many reviews there are and how often a

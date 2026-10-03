@@ -12,7 +12,7 @@ import type {
   TestimonialRow,
 } from "@/lib/cms/types";
 import type { SectionContent } from "@/lib/cms/sections/schema";
-import { createClient } from "@/utils/supabase/server";
+import { createAuthorizedAdminClient } from "@/lib/auth";
 
 /**
  * Admin-side content reads.
@@ -22,7 +22,8 @@ import { createClient } from "@/utils/supabase/server";
  *  - They go through the cookie-backed client, so the "Admins can manage..."
  *    policies are what authorises them. A non-admin session sees no rows rather
  *    than an error, which is why every page using these also sits behind
- *    `requireAdmin()`.
+ *    `createAuthorizedAdminClient()` also performs the admin check before any
+ *    query begins; the layout is only a shared UI guard.
  *  - They return whole rows — id, publish state, sort order — because an
  *    editing form needs the fields a visitor never sees.
  *  - They see drafts. That is the entire point of them.
@@ -50,7 +51,7 @@ function logFailure(what: string, error: unknown) {
 export const listServices = cache(async function listServices(): Promise<
   ServiceRow[]
 > {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("services")
@@ -71,7 +72,7 @@ export const listServices = cache(async function listServices(): Promise<
 export const getService = cache(async function getService(
   id: string,
 ): Promise<ServiceRow | null> {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("services")
@@ -98,7 +99,7 @@ export const getService = cache(async function getService(
 export const getServicePageFor = cache(async function getServicePageFor(
   serviceId: string,
 ): Promise<ServicePageRow | null> {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("service_pages")
@@ -130,7 +131,7 @@ export type ServicePageSummary = Pick<
 export const listServicePages = cache(async function listServicePages(): Promise<
   Record<string, ServicePageSummary>
 > {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("service_pages")
@@ -154,7 +155,7 @@ export const listServicePages = cache(async function listServicePages(): Promise
 export const listTestimonials = cache(async function listTestimonials(): Promise<
   TestimonialRow[]
 > {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("testimonials")
@@ -175,7 +176,7 @@ export const listTestimonials = cache(async function listTestimonials(): Promise
 export const getTestimonial = cache(async function getTestimonial(
   id: string,
 ): Promise<TestimonialRow | null> {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("testimonials")
@@ -211,7 +212,7 @@ export type AdminBlogPost = BlogPostRow & {
 export const listBlogPosts = cache(async function listBlogPosts(): Promise<
   AdminBlogPost[]
 > {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("blog_posts")
@@ -232,7 +233,7 @@ export const listBlogPosts = cache(async function listBlogPosts(): Promise<
 export const getBlogPost = cache(async function getBlogPost(
   id: string,
 ): Promise<BlogPostRow | null> {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("blog_posts")
@@ -251,7 +252,7 @@ export const getBlogPost = cache(async function getBlogPost(
 
 export const listBlogCategories = cache(
   async function listBlogCategories(): Promise<BlogCategoryRow[]> {
-    const supabase = await createClient();
+    const supabase = await createAuthorizedAdminClient();
 
     const { data, error } = await supabase
       .from("blog_categories")
@@ -277,7 +278,7 @@ export const listBlogCategories = cache(
  */
 export const countPostsByCategory = cache(
   async function countPostsByCategory(): Promise<Record<string, number>> {
-    const supabase = await createClient();
+    const supabase = await createAuthorizedAdminClient();
 
     const { data, error } = await supabase
       .from("blog_posts")
@@ -308,7 +309,7 @@ export const countPostsByCategory = cache(
 export const listSeoMetadata = cache(async function listSeoMetadata(): Promise<
   SeoRow[]
 > {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("seo_metadata")
@@ -330,7 +331,7 @@ export const listSeoMetadata = cache(async function listSeoMetadata(): Promise<
 export const getSeoRow = cache(async function getSeoRow(
   path: string,
 ): Promise<SeoRow | null> {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("seo_metadata")
@@ -350,7 +351,7 @@ export const getSeoRow = cache(async function getSeoRow(
 export const listSiteSettings = cache(async function listSiteSettings(): Promise<
   SiteSettingRow[]
 > {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("site_settings")
@@ -382,7 +383,7 @@ export const listSiteSettings = cache(async function listSiteSettings(): Promise
 export const getPageSections = cache(async function getPageSections(
   page: string,
 ): Promise<Record<string, SectionContent>> {
-  const supabase = await createClient();
+  const supabase = await createAuthorizedAdminClient();
 
   const { data, error } = await supabase
     .from("page_sections")
@@ -412,7 +413,7 @@ export const listEditedSections = cache(
   async function listEditedSections(): Promise<
     { page: string; section: string; updated_at: string }[]
   > {
-    const supabase = await createClient();
+    const supabase = await createAuthorizedAdminClient();
 
     const { data, error } = await supabase
       .from("page_sections")

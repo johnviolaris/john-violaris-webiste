@@ -2,7 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import {
+  domAnimation,
+  LazyMotion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "motion/react";
+import * as m from "motion/react-m";
 import { useEffect, useRef, useState } from "react";
 
 import { OffenceStrip } from "@/components/sections/offence-strip";
@@ -143,64 +150,66 @@ export function Hero({
             <div ref={mobileScrollStageRef} className="hero-profile-stage">
               <div className="hero-profile">
                 <figure className="hero-portrait">
-                  <motion.div
-                    className="hero-photo-layer hero-photo-primary"
-                    style={{
-                      scale: prefersReducedMotion ? 1 : activePortraitScale,
-                    }}
-                  >
-                    {/*
-                      The home page's largest paint. Already in the server
-                      HTML, so the browser finds it without a preload; what it
-                      needs is to be fetched first rather than queued behind
-                      the scripts. The Next 16 image docs recommend exactly
-                      this over `preload`.
-                    */}
-                    <Image
-                      src={content.portrait}
-                      alt={content.portraitAlt}
-                      fill
-                      loading="eager"
-                      fetchPriority="high"
-                      sizes="(max-width: 639px) calc(100vw - 62px), (max-width: 1023px) 34vw, 28vw"
-                      className="hero-portrait-image hero-portrait-image-primary"
-                    />
-                    <figcaption className="portrait-caption">
-                      <span>{config.name}</span>
-                      <small>{config.role}</small>
-                    </figcaption>
-                  </motion.div>
-                  <motion.aside
-                    className="hero-scroll-card"
-                    aria-label="John’s personal commitment"
-                    style={{
-                      y: prefersReducedMotion ? "0%" : activeCardY,
-                      rotate: prefersReducedMotion ? 0 : activeCardRotate,
-                    }}
-                  >
-                    <div className="letter-top">
-                      <span>{content.cardLabel}</span>
-                      <span>01 / {config.initials}</span>
-                    </div>
-                    <div className="letter-monogram" aria-hidden="true">
-                      J<span>V</span>
-                      <i>.</i>
-                    </div>
-                    <div className="letter-body">
-                      <span className="eyebrow">{content.cardEyebrow}</span>
-                      <p>
-                        <Lines values={content.cardBody} />{" "}
-                        <em>{content.cardBodyEmphasis}</em>
-                      </p>
-                      <div className="letter-rule" />
-                      <span className="letter-name">{config.name}</span>
-                      <span className="letter-role">{content.cardRole}</span>
-                    </div>
-                    <Link href="/about" className="letter-footer">
-                      {content.cardFooterLabel}{" "}
-                      <Icon name="arrowRight" size={18} />
-                    </Link>
-                  </motion.aside>
+                  <LazyMotion features={domAnimation} strict>
+                    <m.div
+                      className="hero-photo-layer hero-photo-primary"
+                      style={{
+                        scale: prefersReducedMotion ? 1 : activePortraitScale,
+                      }}
+                    >
+                      {/*
+                        The home page's largest paint. Already in the server
+                        HTML, so the browser finds it without a preload; what it
+                        needs is to be fetched first rather than queued behind
+                        the scripts. The Next 16 image docs recommend exactly
+                        this over `preload`.
+                      */}
+                      <Image
+                        src={content.portrait}
+                        alt={content.portraitAlt}
+                        fill
+                        loading="eager"
+                        fetchPriority="high"
+                        sizes="(max-width: 639px) calc(100vw - 62px), (max-width: 1023px) 34vw, 28vw"
+                        className="hero-portrait-image hero-portrait-image-primary"
+                      />
+                      <figcaption className="portrait-caption">
+                        <span>{config.name}</span>
+                        <small>{config.role}</small>
+                      </figcaption>
+                    </m.div>
+                    <m.aside
+                      className="hero-scroll-card"
+                      aria-label="John’s personal commitment"
+                      style={{
+                        y: prefersReducedMotion ? "0%" : activeCardY,
+                        rotate: prefersReducedMotion ? 0 : activeCardRotate,
+                      }}
+                    >
+                      <div className="letter-top">
+                        <span>{content.cardLabel}</span>
+                        <span>01 / {config.initials}</span>
+                      </div>
+                      <div className="letter-monogram" aria-hidden="true">
+                        J<span>V</span>
+                        <i>.</i>
+                      </div>
+                      <div className="letter-body">
+                        <span className="eyebrow">{content.cardEyebrow}</span>
+                        <p>
+                          <Lines values={content.cardBody} />{" "}
+                          <em>{content.cardBodyEmphasis}</em>
+                        </p>
+                        <div className="letter-rule" />
+                        <span className="letter-name">{config.name}</span>
+                        <span className="letter-role">{content.cardRole}</span>
+                      </div>
+                      <Link href="/about" className="letter-footer">
+                        {content.cardFooterLabel}{" "}
+                        <Icon name="arrowRight" size={18} />
+                      </Link>
+                    </m.aside>
+                  </LazyMotion>
                 </figure>
               </div>
             </div>
