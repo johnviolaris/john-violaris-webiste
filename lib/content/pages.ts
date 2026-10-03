@@ -746,4 +746,11 @@ export const pageIntroDefaults: Record<string, PageIntroContent> = {
     description:
       "Everything this site keeps in your browser, what it is for and how long it stays.",
   },
+  privacy: {
+    eyebrow: "Privacy notice",
+    title: "Your information.",
+    emphasis: "And your rights.",
+    description:
+      "What happens to the details you send through this website: why they are used, who can see them, how long they are kept and what you can ask for.",
+  },
 };

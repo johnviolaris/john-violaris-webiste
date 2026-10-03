@@ -877,6 +877,14 @@ export const pageGroups: PageGroup[] = [
   },
 
   {
+    key: "privacy",
+    label: "Privacy notice",
+    description:
+      "The privacy notice's opening. The notice below it describes what the site actually does with an enquiry, so it is kept in the code rather than edited here.",
+    sections: [introSection("privacy")],
+  },
+
+  {
     key: "contact",
     label: "Contact",
     description: "The contact page, beside the enquiry form.",

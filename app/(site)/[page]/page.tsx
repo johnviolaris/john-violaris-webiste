@@ -10,6 +10,7 @@ import { FeesPreview } from "@/components/sections/fees-preview";
 import { MeetJohn } from "@/components/sections/meet-john";
 import { PoliceStation } from "@/components/sections/police-station";
 import { PoliceStationDetail } from "@/components/sections/police-station-detail";
+import { PrivacyNotice } from "@/components/sections/privacy-notice";
 import { ProcessSteps } from "@/components/sections/process-steps";
 import { ServicesGrid } from "@/components/sections/services-grid";
 import { Container } from "@/components/ui/container";
@@ -49,7 +50,7 @@ import {
 import { whatsappHref } from "@/lib/site-config";
 
 /**
- * The seven pages this route renders.
+ * The eight pages this route renders.
  *
  * The opening copy comes from `lib/content/pages.ts`, which is also what the
  * CMS falls back to, so the heading here and the heading in the editor cannot
@@ -320,6 +321,7 @@ export default async function InformationPage({
         </>
       )}
       {page === "cookies" && <CookiePolicy />}
+      {page === "privacy" && <PrivacyNotice config={config} />}
       {page !== "contact" && (
         <CtaBanner content={shared("cta", ctaDefaults)} config={config} />
       )}

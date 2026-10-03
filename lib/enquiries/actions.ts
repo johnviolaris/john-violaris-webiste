@@ -54,7 +54,11 @@ function hashIpAddress(forwardedFor: string | null, realIp: string | null) {
 
   if (!address) return null;
 
-  const salt = process.env.ENQUIRY_IP_SALT ?? "";
+  // A deployment without its own salt still gets a secret one. The
+  // server-only Supabase key never leaves the server, so the digest cannot be
+  // reversed by hashing every IPv4 address in turn.
+  const salt =
+    process.env.ENQUIRY_IP_SALT || process.env.SUPABASE_SECRET_KEY || "";
 
   return createHash("sha256").update(`${salt}:${address}`).digest("hex");
 }

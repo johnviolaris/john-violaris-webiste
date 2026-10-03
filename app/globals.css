@@ -2410,6 +2410,17 @@ body {
   border: 0;
   cursor: pointer;
 }
+/* Inline links in the policy pages and the enquiry form's small print. */
+.policy-body a:not(.action-button),
+.enquiry-preview-note a {
+  text-decoration: underline;
+  text-decoration-color: var(--color-gold);
+  text-underline-offset: 3px;
+}
+.policy-body a:not(.action-button):hover,
+.enquiry-preview-note a:hover {
+  color: var(--color-navy);
+}
 .article-disclaimer {
   margin-top: 44px;
   padding: 20px 22px;

@@ -101,6 +101,7 @@ export function SiteFooter({
               .join(" · ")}
           </span>
           <nav className="footer-bottom-links" aria-label="Legal">
+            <Link href="/privacy">Privacy notice</Link>
             <Link href="/cookies">Cookie policy</Link>
             <CookieSettingsButton />
           </nav>

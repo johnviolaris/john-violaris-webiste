@@ -125,6 +125,15 @@ const fixedPages: { path: string; label: string; defaults: RouteDefaults }[] = [
         "Everything this site keeps in your browser, what it is for and how long it stays.",
     },
   },
+  {
+    path: "/privacy",
+    label: "Privacy notice",
+    defaults: {
+      title: "Privacy Notice",
+      description:
+        "How the details you send through this website are used, who can see them, how long they are kept and the rights you have over them.",
+    },
+  },
 ];
 
 /**

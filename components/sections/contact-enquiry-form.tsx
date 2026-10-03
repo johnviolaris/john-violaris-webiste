@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useActionState, useEffect, useId, useRef, useState } from "react";
 
@@ -330,7 +331,9 @@ export function ContactEnquiryForm() {
                 Your enquiry goes to John and is stored securely so that he can
                 respond. Please keep it to a brief outline — do not send
                 confidential documents or full case papers until John has
-                confirmed he is able to act.
+                confirmed he is able to act. The{" "}
+                <Link href="/privacy">privacy notice</Link> explains how your
+                details are handled.
               </p>
             </form>
           )}
