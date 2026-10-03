@@ -211,6 +211,17 @@ const nextConfig: NextConfig = {
     "/share-image": ["./assets/fonts/**", "./public/Profile 7.png"],
   },
 
+  /**
+   * The legacy URL inventory (REQ-026). The GoDaddy Website Builder site this
+   * one replaced had a home page and an empty online-store section under
+   * `/ols/` (checked 2026-09-25). The home page kept its address; anything
+   * search engines still hold under `/ols/` goes there too. Here rather than
+   * in the CMS redirect table, which only answers inside the page routes.
+   */
+  async redirects() {
+    return [{ source: "/ols/:path*", destination: "/", permanent: true }];
+  },
+
   async headers() {
     return [
       {
