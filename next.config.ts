@@ -93,6 +93,13 @@ const reviewSolicitorsSources = [
 const reviewSolicitorsStyleSources = ["https://fonts.googleapis.com"];
 const reviewSolicitorsFontSources = ["https://fonts.gstatic.com"];
 const reviewSolicitorsImageSources = ["https://ui-avatars.com"];
+/*
+ * After consent, Google's tag sends each hit to google-analytics.com and a
+ * second copy to www.google.com/g/collect (seen on the live site 2026-10-04,
+ * measurement ID G-K8HCZ0QKTE; Google lists the host for properties with
+ * Google signals on). Blocking it only filled the console with CSP errors.
+ */
+const googleAnalyticsSecondarySources = ["https://www.google.com"];
 
 /**
  * A static-compatible policy. A nonce policy would force every public route
@@ -124,6 +131,7 @@ const contentSecurityPolicy = [
     "https://www.google-analytics.com",
     "https://*.google-analytics.com",
     "https://*.googletagmanager.com",
+    ...googleAnalyticsSecondarySources,
     ...reviewSolicitorsSources,
     ...reviewSolicitorsImageSources,
   ]
@@ -142,6 +150,7 @@ const contentSecurityPolicy = [
     "https://*.google-analytics.com",
     "https://*.analytics.google.com",
     "https://*.googletagmanager.com",
+    ...googleAnalyticsSecondarySources,
     ...reviewSolicitorsSources,
   ]
     .filter(Boolean)
