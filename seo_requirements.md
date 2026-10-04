@@ -49,14 +49,13 @@ An honest snapshot, so nobody re-specifies work that exists or assumes work that
 - The redirect table (migration `20260927215019`, applied to production 2026-10-03) records published blog and service slug changes automatically, and the page, article and service routes consult it before a 404. The old site's only other URLs, under `/ols/`, redirect to `/` (REQ-026).
 - Core website copy, services, service pages, articles, site settings and SEO metadata are CMS-backed.
 - Supabase authentication, an admin-role check before every admin read, and RLS protect the CMS and enquiries. The site has no public sign-up form.
-- GA4 consent mode, the cookie banner, cookie policy, contact-conversion events and consent-gated referrer/UTM/`gclid` capture on enquiries (REQ-056) are implemented and activate when a production measurement ID is supplied.
+- GA4 consent mode, the cookie banner, cookie policy, contact-conversion events and consent-gated referrer/UTM/`gclid` capture on enquiries (REQ-056) are live (measurement ID set in Production 2026-10-04).
 - A privacy notice at `/privacy`, linked from the footer and the enquiry form.
 - The enquiry journey stores submissions and supports Resend notification and confirmation emails.
 - Schema verification covers every public sitemap URL. CI runs lint, type checks, unit tests, the CMS/SEO/runtime/schema verifiers and the pgTAP database suites.
 
 **Built, but not active in production (external configuration)**
 
-- `NEXT_PUBLIC_GA_MEASUREMENT_ID` is not set in the current Vercel project, so analytics, the consent banner and campaign capture are off on the live site.
 - Search Console and Bing Webmaster Tools verification and sitemap submission need those accounts.
 - Public sign-ups are still enabled in the hosted Supabase Auth settings, although the site offers no sign-up form.
 
@@ -1221,8 +1220,8 @@ Work through this before the site is opened to crawlers. Record the result of ea
 **Analytics and consent**
 
 - [ ] GA4 firing, page views correct across client-side navigation
-- [ ] Consent banner compliant; reject as easy as accept
-- [ ] Consent Mode v2 configured, defaults denied
+- [x] Consent banner compliant; reject as easy as accept
+- [x] Consent Mode v2 configured, defaults denied
 - [ ] All conversion events verified in DebugView
 - [ ] No personal data in any event parameter
 - [x] Cookie policy page live and accurate

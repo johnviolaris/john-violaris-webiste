@@ -676,14 +676,15 @@ admin for John.
 
 Outside the repository, as of 2026-10-03:
 
-- **Vercel (`john-violaris` team).** `NEXT_PUBLIC_GA_MEASUREMENT_ID` is not set
-  in Production, so analytics is off on the live site. The project was
-  recreated when it moved teams, so also check that `SUPABASE_SECRET_KEY`,
-  `RESEND_API_KEY`, `ENQUIRY_FROM_EMAIL`, `ENQUIRY_NOTIFICATION_EMAIL` and
-  `ENQUIRY_IP_SALT` came across, then send one test enquiry.
-- **Resend.** Send from John's domain (`alert.johnviolaris.com` already has
-  Resend's DNS records) rather than the developer's, and confirm where
-  notifications go.
+- **Vercel (`john-violaris` team).** The project was recreated when it moved
+  teams. `NEXT_PUBLIC_GA_MEASUREMENT_ID` was re-added on 2026-10-04 and
+  analytics is live; check that `SUPABASE_SECRET_KEY`, `RESEND_API_KEY`,
+  `ENQUIRY_FROM_EMAIL`, `ENQUIRY_NOTIFICATION_EMAIL` and `ENQUIRY_IP_SALT` came
+  across too, then send one test enquiry.
+- **Resend.** Send from John's domain rather than the developer's.
+  `alert.johnviolaris.com` has Resend's DNS records, but in a different Resend
+  account from the development key, whose only domain is `mail.codsmith.online`;
+  the From address must belong to the same account as `RESEND_API_KEY`.
 - **Supabase.** Turn off public sign-ups and turn on leaked-password protection
   under Authentication. The sign-up form is gone, but the Auth API still
   accepts a sign-up made with the public key.
