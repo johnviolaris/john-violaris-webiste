@@ -56,7 +56,7 @@ An honest snapshot, so nobody re-specifies work that exists or assumes work that
 
 **Built, but not active in production (external configuration)**
 
-- Bing Webmaster Tools and a Search Console property for `drivingjustice.co.uk` (optional; `johnviolaris.com` is verified with its sitemap submitted).
+- Search Console (under John's or a business Google account, not a personal one) and, optionally, Bing Webmaster Tools.
 - Public sign-ups are still enabled in the hosted Supabase Auth settings, although the site offers no sign-up form.
 
 **Major work still outstanding**
@@ -1181,7 +1181,7 @@ Work through this before the site is opened to crawlers. Record the result of ea
 
 - [x] `robots.txt` live, correct, referencing the sitemap
 - [x] `sitemap.xml` live, complete, no unpublished or admin URLs
-- [x] Search Console verified for `johnviolaris.com`, sitemap submitted (2026-10-04, Domain property, DNS TXT)
+- [ ] Search Console verified for `johnviolaris.com`, sitemap submitted (under John's or a business Google account)
 - [ ] Search Console verified for `drivingjustice.co.uk`, redirect confirmed
 - [ ] Bing Webmaster Tools verified
 - [x] Every page's rendering mode audited and recorded (`next build`: every public route is static or SSG)
