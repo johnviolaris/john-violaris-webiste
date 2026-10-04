@@ -732,8 +732,11 @@ Outside the repository, as of 2026-10-03:
   accepts a sign-up made with the public key. Password reset needs the URL
   configuration, email template and custom SMTP set out under
   [Admin accounts and passwords](#admin-accounts-and-passwords).
-- **Google Search Console** (and Bing Webmaster Tools). Verify both domains and
-  submit `https://johnviolaris.com/sitemap.xml`.
+- **Google Search Console.** Done 2026-10-04: a Domain property for
+  `johnviolaris.com`, verified by a `google-site-verification` TXT record at
+  GoDaddy (keep it, or verification lapses), with the sitemap submitted.
+  Optional: a property for `drivingjustice.co.uk`, and Bing Webmaster Tools
+  (it can import the Search Console property).
 - **From John.** The SRA number and regulatory status, the complaints and Legal
   Ombudsman wording, and what the privacy notice should add: an ICO number, a
   retention period, or the firm's name if the firm is the data controller. The
