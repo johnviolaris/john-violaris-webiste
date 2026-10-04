@@ -177,6 +177,43 @@ assert.doesNotMatch(
   /Request admin access|Create an account to request access|>\s*Sign up\s*</i,
   "the invite-only sign-in page must not expose public registration",
 );
+assert.match(
+  authHtml,
+  /href="\/auth\/forgot-password"/,
+  "the sign-in page must link to password recovery",
+);
+
+const { response: forgot } = await request("/auth/forgot-password");
+assert.equal(forgot.status, 200, "the password reset page must render");
+assert.match(header(forgot, "x-robots-tag"), /\bnoindex\b/);
+assert.match(await forgot.text(), /Reset your password/);
+
+const { response: update } = await request("/auth/update-password", {
+  redirect: "manual",
+});
+assert.ok(
+  [303, 307, 308].includes(update.status),
+  `/auth/update-password must redirect without a session, received ${update.status}`,
+);
+assert.equal(
+  new URL(header(update, "location"), baseUrl).pathname,
+  "/auth/forgot-password",
+);
+
+// A forged reset link, with a `next` pointing off the site. It must neither
+// verify nor carry the visitor anywhere but the request form.
+const { response: forgedLink } = await request(
+  "/auth/confirm?token_hash=forged&type=recovery&next=//evil.example/",
+  { redirect: "manual" },
+);
+assert.ok(
+  [303, 307, 308].includes(forgedLink.status),
+  `/auth/confirm must redirect a bad link, received ${forgedLink.status}`,
+);
+const forgedTarget = new URL(header(forgedLink, "location"), baseUrl);
+assert.equal(forgedTarget.origin, baseUrl.origin, "a reset link must never leave the site");
+assert.equal(forgedTarget.pathname, "/auth/forgot-password");
+assert.equal(forgedTarget.searchParams.get("error"), "link");
 
 console.log(
   "Runtime smoke checks passed: public, 404, canonical redirects, auth, admin, and headers.",

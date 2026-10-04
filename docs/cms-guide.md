@@ -6,9 +6,15 @@ to date. Nothing here needs any technical knowledge.
 
 ## Signing in
 
-Go to **https://johnviolaris.com/admin** and sign in with the email address and
-password you were given. There is no sign-up page: accounts are created for you.
-If you forget your password, ask your developer to reset it.
+Go to **https://johnviolaris.com/admin** and sign in with your email address and
+password. There is no sign-up page: accounts are created for you.
+
+**Choosing or resetting your password.** On the sign-in page, click **Forgot
+your password?**, enter your email address and press **Email me a reset link**.
+Open the email and follow its link, then type your new password twice and press
+**Save new password**: you go straight to the dashboard. The link works once and
+expires after an hour, so ask for another if it has run out. Use the same steps
+the first time, to choose your own password for a new account.
 
 The menu on the left lists every section. **Log out** is at the bottom of it.
 Log out when you are using a shared computer.

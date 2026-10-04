@@ -551,6 +551,48 @@ should not be answered by reading the public page. The copy framing the
 section — the heading, the button, the note — is ordinary page content and is
 editable under Website Content.
 
+## Admin accounts and passwords
+
+There is no public sign-up. An admin account is created in the Supabase
+dashboard and given the role by hand:
+
+1. Authentication → Users → Add user → Create new user, with "Auto Confirm
+   User" ticked. Any password will do if the person will set their own through
+   the reset flow below.
+2. In the SQL Editor:
+   `update public.profiles set role = 'admin' where id = (select id from auth.users where email = '…');`
+
+`requireAdmin()` and the RLS policies check `profiles.role`; an account without
+the admin role sees nothing. Turn off "Allow new users to sign up" under
+Authentication → Sign In / Providers: creating users from the dashboard works
+without it.
+
+### Password reset
+
+Supabase's own recovery flow. "Forgot your password?" on `/auth` leads to
+`/auth/forgot-password`, which calls `resetPasswordForEmail` and always answers
+"check your email", so the form never reveals which addresses have accounts.
+The emailed link opens `/auth/confirm`, which verifies it (`verifyOtp` for a
+`token_hash`, `exchangeCodeForSession` for the default template's `code`), signs
+the visitor in and sends them to `/auth/update-password`. Saving a new password
+signs out every other session. The `next` parameter is followed only when it is
+a plain path on this site (`lib/auth-redirect.ts`).
+
+It depends on three dashboard settings that this repository cannot hold:
+
+- **URL Configuration.** Site URL `https://johnviolaris.com`. Redirect URLs
+  include `https://johnviolaris.com/auth/confirm` (and
+  `http://localhost:3000/auth/confirm` for local testing).
+- **Reset Password email template** (Authentication → Emails). Its link should
+  be `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/auth/update-password`.
+  With the default template the reset still works, but only in the browser
+  that asked for the email (PKCE): a phone's mail app that opens links in its
+  own browser fails.
+- **Custom SMTP.** Supabase's built-in email delivers only to members of the
+  project's Supabase team, two messages an hour. Anyone else, John included,
+  receives nothing until a custom SMTP server is set under Authentication →
+  Emails.
+
 ## Enquiries
 
 An enquiry is written to `public.enquiries` first, and the visitor is told it
@@ -687,7 +729,9 @@ Outside the repository, as of 2026-10-03:
   the From address must belong to the same account as `RESEND_API_KEY`.
 - **Supabase.** Turn off public sign-ups and turn on leaked-password protection
   under Authentication. The sign-up form is gone, but the Auth API still
-  accepts a sign-up made with the public key.
+  accepts a sign-up made with the public key. Password reset needs the URL
+  configuration, email template and custom SMTP set out under
+  [Admin accounts and passwords](#admin-accounts-and-passwords).
 - **Google Search Console** (and Bing Webmaster Tools). Verify both domains and
   submit `https://johnviolaris.com/sitemap.xml`.
 - **From John.** The SRA number and regulatory status, the complaints and Legal

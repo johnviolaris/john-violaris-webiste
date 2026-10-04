@@ -67,6 +67,14 @@ function SignInForm() {
       <Button className="h-10 w-full" type="submit" disabled={pending}>
         {pending ? "Signing in…" : "Sign in"}
       </Button>
+      <p className="text-center text-sm">
+        <Link
+          href="/auth/forgot-password"
+          className="text-muted-foreground underline-offset-4 hover:text-navy hover:underline"
+        >
+          Forgot your password?
+        </Link>
+      </p>
     </form>
   );
 }
