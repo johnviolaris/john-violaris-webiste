@@ -228,7 +228,12 @@ const nextConfig: NextConfig = {
    * in the CMS redirect table, which only answers inside the page routes.
    */
   async redirects() {
-    return [{ source: "/ols/:path*", destination: "/", permanent: true }];
+    return [
+      { source: "/ols/:path*", destination: "/", permanent: true },
+      // Pages declare /favicon.svg, but browsers still ask for /favicon.ico
+      // now and then, and each request was a 404 in the logs.
+      { source: "/favicon.ico", destination: "/favicon.svg", permanent: true },
+    ];
   },
 
   async headers() {
