@@ -45,30 +45,48 @@ export function toService(row: ServiceLike): Service {
   };
 }
 
+type ServiceGroupLike = {
+  name: string;
+  motoring: boolean;
+};
+
 /**
  * Rebuild the grouped catalogue the mega-menu renders.
  *
- * Rows must arrive ordered by `sort_order`. Groups come out in the order their
- * first member appears, and members keep the order they arrived in, which is
- * why the seed numbers services across the whole catalogue rather than
- * restarting at each group.
+ * Groups come out in the order of `groups`, and only those with a service in
+ * them: a group being prepared has nothing to show. Services must arrive
+ * ordered by `sort_order` and keep that order within their group.
+ *
+ * A service naming a group missing from `groups` still appears, in a group of
+ * its own at the end, treated as motoring as every group is by default. The
+ * database creates the row for any group a service names, so this is only
+ * the fallback's and a stale read's case — but losing a service from the
+ * menu would be the worse failure.
  */
-export function toServiceGroups(rows: ServiceLike[]): ServiceGroup[] {
-  const groups = new Map<string, ServiceGroup>();
+export function toServiceGroups(
+  rows: ServiceLike[],
+  groups: ServiceGroupLike[],
+): ServiceGroup[] {
+  const byName = new Map<string, ServiceGroup>(
+    groups.map((group) => [
+      group.name,
+      { heading: group.name, motoring: group.motoring, services: [] },
+    ]),
+  );
 
   for (const row of rows) {
     const heading = row.content.group;
-    let group = groups.get(heading);
+    let group = byName.get(heading);
 
     if (!group) {
-      group = { heading, services: [] };
-      groups.set(heading, group);
+      group = { heading, motoring: true, services: [] };
+      byName.set(heading, group);
     }
 
     group.services.push(toService(row));
   }
 
-  return [...groups.values()];
+  return [...byName.values()].filter((group) => group.services.length > 0);
 }
 
 /** Service intros, keyed by href, as `serviceDescriptions` is today. */

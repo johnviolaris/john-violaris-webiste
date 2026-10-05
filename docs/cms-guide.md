@@ -90,6 +90,23 @@ page. Services sit in groups, which become the menu's columns.
 Untick **Published** to take a service off the menu and the site without losing
 anything.
 
+**Groups** are the headings of the services menu, such as "Drugs & Alcohol".
+
+- **Add group** on the Services list creates one. It goes at the end of the
+  menu and appears on the site once a published service is in it.
+- Each group's heading on the list has **Add service** (the new service starts
+  in that group), **Edit group**, and arrows that move the whole group up or
+  down the menu.
+- **Edit group** renames it. Every service in it moves with it, so there is
+  only ever one place to change a heading.
+- **Motoring offences**, on the group, decides how its offence pages read.
+  Ticked, a page treats the reference line as the statute and asks the client
+  for their driving record. Untick it for general crime or representation.
+- A group can be deleted once it is empty. Move its services to another group,
+  or delete them, first.
+- A service picks its group from a list, so a typo can never create a second
+  group by mistake.
+
 ## Service Pages: the long page for each offence
 
 **Service Pages** holds the full page for each offence: the heading, the

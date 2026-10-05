@@ -26,6 +26,7 @@ import {
 import {
   seedBlogCategories,
   seedBlogPosts,
+  seedServiceGroups,
   seedServicePages,
   seedServices,
   seedTestimonials,
@@ -79,7 +80,11 @@ function expect(label, fromSeed, fromStatic) {
 const categoryName = (slug) =>
   seedBlogCategories.find((category) => category.slug === slug)?.name;
 
-expect("service catalogue", toServiceGroups(seedServices), serviceGroups);
+expect(
+  "service catalogue",
+  toServiceGroups(seedServices, seedServiceGroups),
+  serviceGroups,
+);
 
 expect(
   "service descriptions",

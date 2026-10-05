@@ -12,6 +12,7 @@ import {
 import {
   seedBlogCategories,
   seedBlogPosts,
+  seedServiceGroups,
   seedServicePages,
   seedServices,
   seedTestimonials,
@@ -115,10 +116,44 @@ const getServiceRows = cache(async function getServiceRows(): Promise<ServiceSel
   );
 });
 
+type ServiceGroupSelect = {
+  name: string;
+  motoring: boolean;
+};
+
+/**
+ * The groups, in menu order. RLS shows visitors only groups with a published
+ * service, so a group being prepared never reaches the page.
+ */
+const getServiceGroupRows = cache(async function getServiceGroupRows(): Promise<
+  ServiceGroupSelect[]
+> {
+  return safely(
+    "Service groups",
+    async () => {
+      const { data, error } = await publicClient()
+        .from("service_groups")
+        .select("name, motoring")
+        .order("sort_order", { ascending: true })
+        .returns<ServiceGroupSelect[]>();
+
+      if (error) throw error;
+
+      return data ?? [];
+    },
+    () => seedServiceGroups,
+  );
+});
+
 /** The grouped catalogue behind the mega-menu and the services index. */
 export const getServiceGroups = cache(
   async function getServiceGroups(): Promise<ServiceGroup[]> {
-    return toServiceGroups(await getServiceRows());
+    const [rows, groups] = await Promise.all([
+      getServiceRows(),
+      getServiceGroupRows(),
+    ]);
+
+    return toServiceGroups(rows, groups);
   },
 );
 

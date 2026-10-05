@@ -64,6 +64,8 @@ const protectedReadModules = [
   {
     path: "lib/cms/admin-queries.ts",
     exports: [
+      "listServiceGroups",
+      "getServiceGroup",
       "listServices",
       "getService",
       "getServicePageFor",

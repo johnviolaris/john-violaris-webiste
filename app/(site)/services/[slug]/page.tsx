@@ -7,7 +7,6 @@ import { OnThisPage } from "@/components/ui/on-this-page";
 import { Icon } from "@/components/ui/icons";
 import { JsonLd } from "@/components/ui/json-ld";
 import { CtaBanner } from "@/components/layout/cta-banner";
-import { representationGroup } from "@/lib/content/services";
 import {
   getServiceDescriptions,
   getServiceGroups,
@@ -103,11 +102,12 @@ export default async function ServicePage({
         item.href !== service.href && item.href !== "/services/all-crime",
     ) ?? [];
   /*
-   * Every group but this one is a motoring offence, so the checklist below can
-   * ask for a driving record. On a representation page it cannot: the client
-   * may never have been accused of a motoring offence at all.
+   * Whether the group is motoring offences is set on the group, under
+   * Services. Only then can the checklist below ask for a driving record: on
+   * a representation page the client may never have been accused of a
+   * motoring offence at all.
    */
-  const isMotoringOffence = group?.heading !== representationGroup;
+  const isMotoringOffence = group?.motoring !== false;
   const intro =
     detail?.intro ??
     descriptions[service.href]?.intro ??

@@ -14,7 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { iconNames } from "@/components/ui/icons";
 import { cn } from "cn";
 import { useControlledAfterReset } from "@/hooks/use-controlled-after-reset";
-import { representationGroup } from "@/lib/content/services";
 import { seoTips } from "@/lib/cms/seo-tips";
 import { deleteService, saveService } from "@/lib/cms/services/actions";
 import {
@@ -29,8 +28,8 @@ import { slugify } from "@/lib/slug";
  * The service editor.
  *
  * Plain fields throughout, so the text inputs keep `defaultValue` from the
- * echoed state, as the fee editor does. The icon, the slug and the two
- * checkboxes are React state, because React resets a form after an action
+ * echoed state, as the fee editor does. The group, the icon, the slug and the
+ * two checkboxes are React state, because React resets a form after an action
  * settles and those would otherwise snap back on a rejected save.
  */
 
@@ -44,12 +43,17 @@ export type ServiceFormProps = {
     /** Where the service links to — its offence page, or its own page. */
     path: string;
   } | null;
-  /** Every group in use, offered as suggestions for the group field. */
+  /** Every group's name, in menu order. A service joins one of these. */
   groups: string[];
+  /** For a new service: the group to start in, when added from a group. */
+  defaultGroup?: string;
 };
 
-export function ServiceForm({ service, groups }: ServiceFormProps) {
-  const initialValues = service?.values ?? emptyServiceValues;
+export function ServiceForm({ service, groups, defaultGroup }: ServiceFormProps) {
+  const initialValues = service?.values ?? {
+    ...emptyServiceValues,
+    group: defaultGroup && groups.includes(defaultGroup) ? defaultGroup : "",
+  };
 
   const [state, formAction] = useActionState(saveService, {
     ...initialServiceFormState,
@@ -61,6 +65,7 @@ export function ServiceForm({ service, groups }: ServiceFormProps) {
   useControlledAfterReset(formRef);
   const alertRef = useRef<HTMLParagraphElement>(null);
 
+  const [group, setGroup] = useState(initialValues.group);
   const [icon, setIcon] = useState(initialValues.icon);
   const [published, setPublished] = useState(service?.published ?? false);
   const [featured, setFeatured] = useState(service?.featured ?? false);
@@ -176,17 +181,34 @@ export function ServiceForm({ service, groups }: ServiceFormProps) {
             <Field
               label="Group"
               labelFor={`${formId}-group`}
-              hint={`The menu column it sits in. Pick an existing one or type a new one. Services under “${representationGroup}” are treated as general crime rather than motoring on their pages.`}
+              hint="The menu column it sits in. A new group is added with “Add group” on the Services list; whether its pages read as motoring offences is set on the group."
               seo={seoTips.minor}
               error={state.fieldErrors.group}
               errorId={errorId("group")}
             >
-              <Input list={`${formId}-groups`} {...fieldProps("group")} />
-              <datalist id={`${formId}-groups`}>
-                {groups.map((group) => (
-                  <option key={group} value={group} />
+              <select
+                id={`${formId}-group`}
+                name="group"
+                value={group}
+                onChange={(event) => setGroup(event.target.value)}
+                aria-invalid={state.fieldErrors.group ? true : undefined}
+                aria-describedby={errorId("group")}
+                className="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
+              >
+                <option value="" disabled>
+                  Choose a group
+                </option>
+                {/* A group missing from the list — deleted in another tab, say
+                    — still shows as chosen rather than silently changing. */}
+                {group && !groups.includes(group) ? (
+                  <option value={group}>{group}</option>
+                ) : null}
+                {groups.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
                 ))}
-              </datalist>
+              </select>
             </Field>
 
             <Field

@@ -45,8 +45,9 @@ type StoredService = {
  * The `sort_order` that puts a service last in `group`.
  *
  * One past the group's highest member. A group nobody has used yet starts at
- * the next hundred after everything else, the banding the seed laid down, so
- * it lands at the end of the menu with room to grow.
+ * the next hundred after everything else, keeping the banding the seed laid
+ * down. Where a group sits in the menu is its own `service_groups.sort_order`
+ * now, so this orders services within their group and nothing more.
  *
  * Every service is read rather than filtered in the query: there are under
  * twenty, and the new-group case needs the overall maximum anyway.
@@ -132,6 +133,21 @@ export async function saveService(
 
   if (!isIconName(values.icon)) {
     return formError(values, { icon: "Choose an icon from the list." });
+  }
+
+  // A group is chosen from the list, never invented here: new groups are made
+  // under "Add group", where their name is checked and their motoring flag
+  // set. The database would create a missing one, but silently.
+  const { data: groupRow } = await supabase
+    .from("service_groups")
+    .select("name")
+    .eq("name", values.group)
+    .maybeSingle<{ name: string }>();
+
+  if (!groupRow) {
+    return formError(values, {
+      group: "Choose a group from the list. New groups are added from the Services list.",
+    });
   }
 
   const content: ServiceContent = {
@@ -247,9 +263,8 @@ export async function setServicePublished(id: string, published: boolean) {
  * Move a service up or down within its group.
  *
  * Within, not across: the neighbour is the nearest `sort_order` in the same
- * group. Swapping across a boundary would reorder the groups themselves, since
- * a group sits where its first member does. Otherwise the same two-update swap
- * as `moveFee`, and for the same reasons.
+ * group, and groups are moved by `moveServiceGroup`. Otherwise the same
+ * two-update swap as `moveFee`, and for the same reasons.
  */
 export async function moveService(id: string, direction: "up" | "down") {
   await requireAdmin();

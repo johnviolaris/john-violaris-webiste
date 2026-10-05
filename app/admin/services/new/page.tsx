@@ -1,15 +1,22 @@
 import type { Metadata } from "next";
 
 import { ServiceForm } from "@/components/admin/service-form";
-import { listServices } from "@/lib/cms/admin-queries";
+import { listServiceGroups } from "@/lib/cms/admin-queries";
 
 export const metadata: Metadata = {
   title: "Add service",
 };
 
-export default async function NewServicePage() {
-  const services = await listServices();
-  const groups = [...new Set(services.map((service) => service.content.group))];
+export default async function NewServicePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ group?: string }>;
+}) {
+  const [{ group }, serviceGroups] = await Promise.all([
+    searchParams,
+    listServiceGroups(),
+  ]);
+  const groups = serviceGroups.map((serviceGroup) => serviceGroup.name);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pt-14 pb-12 md:px-8 md:pt-10">
@@ -22,7 +29,7 @@ export default async function NewServicePage() {
         </p>
       </header>
 
-      <ServiceForm service={null} groups={groups} />
+      <ServiceForm service={null} groups={groups} defaultGroup={group} />
     </div>
   );
 }

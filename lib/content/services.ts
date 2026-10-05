@@ -26,23 +26,23 @@ export type Service = {
 
 export type ServiceGroup = {
   heading: string;
+  /**
+   * Whether its services are motoring offences. An offence page in a group
+   * that is not reads the reference line under the name as a descriptor
+   * ("Where most cases are heard") rather than a statute, and its checklist
+   * does not ask for a driving record. Set per group under Services.
+   */
+  motoring: boolean;
   services: Service[];
 };
 
-/**
- * The one group whose services are not motoring offences.
- *
- * An offence page treats its services differently: the reference line under
- * the name is a descriptor ("Where most cases are heard") rather than a
- * statute, so it is not read back as one, and the checklist does not ask for a
- * driving record. The heading is editable in the CMS, which is why it is named
- * here once and the service editor says what renaming it would change.
- */
+/** The one group the site shipped with that is not motoring offences. */
 export const representationGroup = "Representation";
 
 export const serviceGroups: ServiceGroup[] = [
   {
     heading: "Drugs & Alcohol",
+    motoring: true,
     services: [
       {
         name: "Drink Driving",
@@ -75,6 +75,7 @@ export const serviceGroups: ServiceGroup[] = [
   },
   {
     heading: "Licence & points",
+    motoring: true,
     services: [
       {
         name: "Totting Up · 12 Points",
@@ -101,6 +102,7 @@ export const serviceGroups: ServiceGroup[] = [
   },
   {
     heading: "Driving standards",
+    motoring: true,
     services: [
       {
         name: "Speeding",
@@ -134,6 +136,7 @@ export const serviceGroups: ServiceGroup[] = [
   },
   {
     heading: "Documents & procedure",
+    motoring: true,
     services: [
       {
         name: "Driving Without Insurance",
@@ -159,6 +162,7 @@ export const serviceGroups: ServiceGroup[] = [
   },
   {
     heading: representationGroup,
+    motoring: false,
     services: [
       {
         name: "Police Station",

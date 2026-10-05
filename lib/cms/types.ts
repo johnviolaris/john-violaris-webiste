@@ -34,9 +34,11 @@ export type Timestamps = {
 /**
  * `services.content`.
  *
- * `group` is jsonb rather than a foreign key: the groupings are editorial
- * headings on the mega-menu ("Alcohol & drugs"), not an entity anyone manages
- * separately, and a typo in one is a content fix rather than a migration.
+ * `group` is the name of a `service_groups` row rather than a foreign key to
+ * it. The public reads, the static fallback and the seed all work from the
+ * name, and database triggers keep it honest: a missing group is created, a
+ * renamed one is renamed on its services, and a group with services cannot be
+ * deleted. See `20261005120000_create_service_groups.sql`.
  */
 export type ServiceContent = {
   /** Mega-menu / catalogue heading this service sits under. */
@@ -54,6 +56,17 @@ export type ServiceContent = {
    * police station representation points at its own standalone page.
    */
   href?: string;
+};
+
+/**
+ * `service_groups` — a heading of the services menu, with its place in the
+ * menu and whether its services are motoring offences.
+ */
+export type ServiceGroupRow = Timestamps & {
+  id: string;
+  name: string;
+  sort_order: number;
+  motoring: boolean;
 };
 
 export type ServiceRow = Timestamps & {

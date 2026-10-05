@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ServiceForm } from "@/components/admin/service-form";
-import { getService, listServices } from "@/lib/cms/admin-queries";
+import { getService, listServiceGroups } from "@/lib/cms/admin-queries";
 import { servicePath, serviceValuesFrom } from "@/lib/cms/services/schema";
 import { formatUkShortDateTime } from "@/lib/format";
 
@@ -16,11 +16,14 @@ export default async function EditServicePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [service, services] = await Promise.all([getService(id), listServices()]);
+  const [service, serviceGroups] = await Promise.all([
+    getService(id),
+    listServiceGroups(),
+  ]);
 
   if (!service) notFound();
 
-  const groups = [...new Set(services.map((row) => row.content.group))];
+  const groups = serviceGroups.map((group) => group.name);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pt-14 pb-12 md:px-8 md:pt-10">

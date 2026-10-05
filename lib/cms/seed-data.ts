@@ -34,6 +34,12 @@ import type {
  * node.
  */
 
+/** What the menu needs of a group: its name and whether it is motoring. */
+export type SeedServiceGroup = {
+  name: string;
+  motoring: boolean;
+};
+
 export type SeedService = {
   slug: string;
   name: string;
@@ -77,6 +83,14 @@ export type SeedBlogPost = {
 function slugFromHref(href: string): string {
   return href.replace(/^\/(services\/)?/, "");
 }
+
+/**
+ * The groups, in menu order — what `service_groups` was filled with, and what
+ * orders the menu when Supabase cannot be read.
+ */
+export const seedServiceGroups: SeedServiceGroup[] = serviceGroups.map(
+  (group) => ({ name: group.heading, motoring: group.motoring }),
+);
 
 /**
  * Services, flattened from the grouped catalogue.

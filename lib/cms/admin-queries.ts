@@ -6,6 +6,7 @@ import type {
   BlogCategoryRow,
   BlogPostRow,
   SeoRow,
+  ServiceGroupRow,
   ServicePageRow,
   ServiceRow,
   SiteSettingRow,
@@ -67,6 +68,47 @@ export const listServices = cache(async function listServices(): Promise<
   }
 
   return data ?? [];
+});
+
+/** Every service group, empty ones included, in menu order. */
+export const listServiceGroups = cache(async function listServiceGroups(): Promise<
+  ServiceGroupRow[]
+> {
+  const supabase = await createAuthorizedAdminClient();
+
+  const { data, error } = await supabase
+    .from("service_groups")
+    .select("*")
+    .order("sort_order", { ascending: true })
+    .returns<ServiceGroupRow[]>();
+
+  if (error) {
+    logFailure("service groups", error);
+
+    return [];
+  }
+
+  return data ?? [];
+});
+
+export const getServiceGroup = cache(async function getServiceGroup(
+  id: string,
+): Promise<ServiceGroupRow | null> {
+  const supabase = await createAuthorizedAdminClient();
+
+  const { data, error } = await supabase
+    .from("service_groups")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle<ServiceGroupRow>();
+
+  if (error) {
+    logFailure(`service group ${id}`, error);
+
+    return null;
+  }
+
+  return data;
 });
 
 export const getService = cache(async function getService(

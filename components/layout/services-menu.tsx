@@ -12,6 +12,21 @@ import { useSiteConfig } from "@/components/layout/site-config-provider";
 const CLOSE_DELAY_MS = 140;
 
 /**
+ * The panel's columns on a wide screen, by how many groups there are.
+ *
+ * Groups are added under Services, so the count is not fixed. Five is the
+ * layout as designed and six still fit one row; seven or eight read better as
+ * two even rows of four than one cramped row, and past that rows of five
+ * again. Whole class names, so Tailwind finds them.
+ */
+function menuColumns(groupCount: number): string {
+  if (groupCount === 6) return "lg:grid-cols-6";
+  if (groupCount === 7 || groupCount === 8) return "lg:grid-cols-4";
+
+  return "lg:grid-cols-5";
+}
+
+/**
  * The services mega-menu that lives in the site header.
  *
  * Opens on hover for mice, on click or Enter for everyone else. The panel is
@@ -163,7 +178,9 @@ export function ServicesMenu() {
         <div className="overflow-hidden">
           <div className="max-h-[76vh] overflow-y-auto border-b border-gold/25 bg-navy-deep shadow-2xl shadow-black/50">
             <div className="mx-auto w-full max-w-7xl px-5 py-9 sm:px-8 lg:px-12 lg:py-10">
-              <div className="grid gap-x-8 gap-y-9 sm:grid-cols-2 lg:grid-cols-5">
+              <div
+                className={`grid gap-x-8 gap-y-9 sm:grid-cols-2 ${menuColumns(serviceGroups.length)}`}
+              >
                 {serviceGroups.map((group, groupIndex) => (
                   <div
                     key={group.heading}
