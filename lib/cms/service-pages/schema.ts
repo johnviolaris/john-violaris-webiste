@@ -73,6 +73,7 @@ export const penaltiesField: SectionField = {
   label: "At a glance",
   kind: "items",
   hint: "The cards beside the heading, up to three. When the outcomes table below is empty, these fill it instead.",
+  seo: "Short, exact consequences, such as “12-month minimum ban”, are what people search for after a charge. Keep each one accurate to current law: Google holds legal pages to a high standard, and so do readers.",
   item: {
     label: "Card",
     max: 3,
@@ -112,6 +113,7 @@ export const defenceIssuesField: SectionField = {
   label: "The points examined",
   kind: "items",
   hint: "The list under “Clarity first”. Each is a short title and a sentence or two on why it matters.",
+  seo: "Name the issues the way people search for them — “procedural errors”, “special reasons” — and explain each plainly. This detail is what lets the page appear for longer, more specific searches.",
   item: {
     label: "Point",
     max: 12,
@@ -149,6 +151,7 @@ export const outcomesField: SectionField = {
   label: "Sentencing and possible outcomes",
   kind: "items",
   hint: "Rows of the outcomes table. Leave it empty and the table lists the at-a-glance cards instead.",
+  seo: "Each row answers a question people search, such as “will I go to prison for…”. Keep it factual and current, and never promise an outcome.",
   item: { label: "Row", max: 24, fields: tableRowFields("Outcome") },
 };
 
@@ -157,6 +160,7 @@ export const ancillaryOrdersField: SectionField = {
   label: "Ancillary orders",
   kind: "items",
   hint: "Orders the court can make alongside the sentence. Leave it empty and the section is left off the page.",
+  seo: "Name each order as the court does, so the row matches what someone searches after hearing it, and explain it in plain words.",
   item: { label: "Row", max: 16, fields: tableRowFields("Order") },
 };
 

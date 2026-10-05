@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import { ExternalLink, Trash2 } from "lucide-react";
 
 import { DetachedActionForm } from "@/components/admin/detached-action-form";
+import { SeoTip } from "@/components/admin/seo-tip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,7 @@ import { iconNames } from "@/components/ui/icons";
 import { cn } from "cn";
 import { useControlledAfterReset } from "@/hooks/use-controlled-after-reset";
 import { representationGroup } from "@/lib/content/services";
+import { seoTips } from "@/lib/cms/seo-tips";
 import { deleteService, saveService } from "@/lib/cms/services/actions";
 import {
   emptyServiceValues,
@@ -121,6 +123,7 @@ export function ServiceForm({ service, groups }: ServiceFormProps) {
             label="Name"
             labelFor={`${formId}-name`}
             hint="As it reads in the menu and at the top of its page, e.g. “Drink Driving”."
+            seo="Google reads the name in the menu, on the service card and in the breadcrumb, each a link to the page. Use the everyday name people search for, such as “Drink Driving”, rather than the legal term."
             error={state.fieldErrors.name}
             errorId={errorId("name")}
           >
@@ -151,6 +154,7 @@ export function ServiceForm({ service, groups }: ServiceFormProps) {
                   ? `The page will move to /services/${slug || "…"}. Its previous address will redirect permanently.`
                   : `The page will live at /services/${slug || "…"}.`
               }
+              seo={seoTips.slug}
               error={state.fieldErrors.slug}
               errorId={errorId("slug")}
             >
@@ -173,6 +177,7 @@ export function ServiceForm({ service, groups }: ServiceFormProps) {
               label="Group"
               labelFor={`${formId}-group`}
               hint={`The menu column it sits in. Pick an existing one or type a new one. Services under “${representationGroup}” are treated as general crime rather than motoring on their pages.`}
+              seo={seoTips.minor}
               error={state.fieldErrors.group}
               errorId={errorId("group")}
             >
@@ -213,6 +218,7 @@ export function ServiceForm({ service, groups }: ServiceFormProps) {
             label="Reference line"
             labelFor={`${formId}-statute`}
             hint="The small line under the name in the menu. The statute for an offence, e.g. “s.5 RTA 1988”, or a short descriptor for representation work."
+            seo="Also printed on the offence page. Some people search the section number itself, so the exact citation is worth having."
             error={state.fieldErrors.statute}
             errorId={errorId("statute")}
             optional
@@ -224,6 +230,7 @@ export function ServiceForm({ service, groups }: ServiceFormProps) {
             label="Card summary"
             labelFor={`${formId}-intro`}
             hint="One or two sentences on the service card on the home and services pages. Also the search-engine description when the service has no page."
+            seo="Name the offence and the help on offer in plain words. Where it stands in as the Google description, only about 155 characters are shown."
             error={state.fieldErrors.intro}
             errorId={errorId("intro")}
             optional
@@ -255,11 +262,18 @@ export function ServiceForm({ service, groups }: ServiceFormProps) {
             </span>
           </label>
 
+          <SeoTip>
+            Each charge in the rail is a link from the home page, which helps
+            Google find its page. A short rail of the most searched charges
+            does more than a long one.
+          </SeoTip>
+
           {featured ? (
             <Field
               label="Short name"
               labelFor={`${formId}-short`}
               hint="Used in the rail when the full name is too long, e.g. “Totting Up”. Left blank, the rail uses the full name."
+              seo={seoTips.minor}
               error={state.fieldErrors.short}
               errorId={errorId("short")}
               optional
@@ -294,6 +308,8 @@ export function ServiceForm({ service, groups }: ServiceFormProps) {
               </span>
             </span>
           </label>
+
+          <SeoTip>{seoTips.published}</SeoTip>
         </section>
 
         {/* ------------------------------------------------------------------ */}
@@ -368,6 +384,7 @@ function Field({
   label,
   labelFor,
   hint,
+  seo,
   error,
   errorId,
   optional,
@@ -376,6 +393,8 @@ function Field({
   label: string;
   labelFor: string;
   hint?: string;
+  /** Search guidance, shown apart from the hint. */
+  seo?: string;
   error?: string;
   errorId?: string;
   optional?: boolean;
@@ -395,6 +414,7 @@ function Field({
       {hint && !error ? (
         <p className="text-xs text-muted-foreground">{hint}</p>
       ) : null}
+      {seo ? <SeoTip>{seo}</SeoTip> : null}
       {error ? (
         <p id={errorId} role="alert" className="text-sm text-destructive">
           {error}

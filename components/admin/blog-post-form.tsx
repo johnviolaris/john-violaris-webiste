@@ -13,6 +13,7 @@ import {
 
 import { DetachedActionForm } from "@/components/admin/detached-action-form";
 import { ImageField } from "@/components/admin/image-field";
+import { SeoTip } from "@/components/admin/seo-tip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +32,7 @@ import {
   type BlogPostValues,
   type SectionValues,
 } from "@/lib/cms/blog/schema";
+import { seoTips } from "@/lib/cms/seo-tips";
 import { slugify } from "@/lib/slug";
 
 /**
@@ -171,6 +173,7 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
           <Field
             label="Title"
             labelFor={`${formId}-title`}
+            seo="The article’s main heading and, unless SEO Metadata says otherwise, its title in Google. Lead with the question or topic people search for, such as “What happens at a drink driving hearing?”, and keep it under about 60 characters so Google shows it whole."
             error={state.fieldErrors.title}
             errorId={errorId("title")}
           >
@@ -186,6 +189,7 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
             labelFor={`${formId}-slug`}
             label="URL slug"
             hint={`The article will live at /blog/${slug || "…"}`}
+            seo={seoTips.slug}
             error={state.fieldErrors.slug}
             errorId={errorId("slug")}
           >
@@ -206,6 +210,7 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
             <Field
               labelFor={`${formId}-categoryId`}
               label="Category"
+              seo={seoTips.minor}
               error={state.fieldErrors.categoryId}
               errorId={errorId("categoryId")}
             >
@@ -250,6 +255,7 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
             labelFor={`${formId}-excerpt`}
             label="Excerpt"
             hint="The card summary, and the description search engines show. Aim for one or two sentences."
+            seo="Google’s description for the article unless SEO Metadata overrides it. Say what the reader will learn, in under about 155 characters so it is not cut off."
             error={state.fieldErrors.excerpt}
             errorId={errorId("excerpt")}
           >
@@ -260,6 +266,7 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
             labelFor={`${formId}-standfirst`}
             label="Standfirst"
             hint="The opening paragraph beneath the headline, before the first section."
+            seo="Answer the article’s main question in the first two sentences. Google often lifts a direct answer from the top of a page into its results."
             error={state.fieldErrors.standfirst}
             errorId={errorId("standfirst")}
           >
@@ -276,6 +283,15 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
                 One section per heading. Separate paragraphs with a blank line;
                 the list beneath is optional, one item per line.
               </p>
+              {/* Here once rather than in every section, where the same
+                  advice repeated would bury the fields. */}
+              <SeoTip variant="section" className="mt-3">
+                Each heading is a subheading to Google. Phrase headings as the
+                questions readers ask, such as “Can I keep my licence?”, and
+                answer each in the paragraphs beneath. {seoTips.prose} Use the
+                list for steps or options: Google sometimes lifts a list
+                straight into its results.
+              </SeoTip>
             </div>
             <span className="text-sm text-muted-foreground tabular-nums">
               {rows.length} {rows.length === 1 ? "section" : "sections"}
@@ -408,6 +424,7 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
           <Field
             label="Featured image"
             hint="Optional. Shown at the top of the article. JPEG, PNG, WebP or AVIF, up to 5 MB."
+            seo={`${seoTips.image} It is also the picture shown when the article is shared.`}
           >
             <ImageField
               name="featuredImage"
@@ -421,6 +438,7 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
               labelFor={`${formId}-featuredImageAlt`}
               label="Image description"
               hint="What the image shows, for anyone using a screen reader."
+              seo={seoTips.imageAlt}
               error={state.fieldErrors.featuredImageAlt}
               errorId={errorId("featuredImageAlt")}
             >
@@ -433,6 +451,7 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
               labelFor={`${formId}-relatedService`}
               label="Related service"
               hint="Where the article sends a reader who wants help."
+              seo="A link from the article to the matching service tells Google the two belong together, and sends a reader who needs help to the page that offers it. Pick the closest match."
               error={state.fieldErrors.relatedService}
               errorId={errorId("relatedService")}
             >
@@ -455,6 +474,7 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
               labelFor={`${formId}-readTime`}
               label="Read time"
               hint="Left blank, this is worked out from the word count."
+              seo={seoTips.minor}
               error={state.fieldErrors.readTime}
               errorId={errorId("readTime")}
             >
@@ -484,10 +504,13 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
             </span>
           </label>
 
+          <SeoTip>{seoTips.published}</SeoTip>
+
           <Field
             labelFor={`${formId}-publishedAt`}
             label="Publication date"
             hint="Left blank, publishing sets it to today. It orders the index."
+            seo="When the law changes, update the article rather than writing a new one on the same subject: two similar articles compete with each other in Google, and the page shows when it was last updated."
             error={state.fieldErrors.publishedAt}
             errorId={errorId("publishedAt")}
           >
@@ -570,6 +593,7 @@ function Field({
   label,
   labelFor,
   hint,
+  seo,
   error,
   errorId,
   children,
@@ -577,6 +601,8 @@ function Field({
   label: string;
   labelFor?: string;
   hint?: string;
+  /** Search guidance, shown apart from the hint. */
+  seo?: string;
   error?: string;
   errorId?: string;
   children: React.ReactNode;
@@ -599,6 +625,7 @@ function Field({
       {hint && !error ? (
         <p className="text-xs text-muted-foreground">{hint}</p>
       ) : null}
+      {seo ? <SeoTip>{seo}</SeoTip> : null}
       {error ? (
         <p id={errorId} role="alert" className="text-sm text-destructive">
           {error}

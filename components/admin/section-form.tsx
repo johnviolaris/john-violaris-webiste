@@ -6,6 +6,7 @@ import { RotateCcw } from "lucide-react";
 
 import { ImageField } from "@/components/admin/image-field";
 import { ItemsField, useItemRows } from "@/components/admin/items-field";
+import { SeoTip } from "@/components/admin/seo-tip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -242,6 +243,7 @@ function ScalarField({
       label={field.label}
       labelFor={id}
       hint={field.hint}
+      seo={field.seo}
       error={error}
       errorId={errorId}
       required={field.required}
@@ -286,6 +288,7 @@ function ImageScalarField({
       {field.hint && !error ? (
         <p className="text-xs text-muted-foreground">{field.hint}</p>
       ) : null}
+      {field.seo ? <SeoTip>{field.seo}</SeoTip> : null}
       {error ? (
         <p id={errorId} role="alert" className="text-sm text-destructive">
           {error}
@@ -295,11 +298,15 @@ function ImageScalarField({
   );
 }
 
-/** A labelled control with its hint and error. Mirrors the article editor's. */
+/**
+ * A labelled control with its hint, SEO tip and error. Mirrors the article
+ * editor's.
+ */
 function Field({
   label,
   labelFor,
   hint,
+  seo,
   error,
   errorId,
   required,
@@ -308,6 +315,7 @@ function Field({
   label: string;
   labelFor: string;
   hint?: string;
+  seo?: string;
   error?: string;
   errorId?: string;
   required?: boolean;
@@ -327,6 +335,7 @@ function Field({
       {hint && !error ? (
         <p className="text-xs text-muted-foreground">{hint}</p>
       ) : null}
+      {seo ? <SeoTip>{seo}</SeoTip> : null}
       {error ? (
         <p id={errorId} role="alert" className="text-sm text-destructive">
           {error}

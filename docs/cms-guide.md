@@ -153,6 +153,37 @@ description, so you only need this to improve one.
 Never promise an outcome in a title or description. "Speak to a drink driving
 solicitor before you plead" is fine; "Keep your licence" is not.
 
+## Writing for Google: the SEO tips
+
+Every editor shows **SEO tips** in a gold box with a magnifying glass, separate
+from the grey notes that say what a field is. Each page under Website Content
+opens with the searches that page should win, each section with what it does
+for search, and each field with how to write it. The tips that matter most:
+
+- **One main heading per page.** The page opening's **Heading** and its
+  emphasised part (on the home page, the Hero heading) are the strongest clue
+  Google has to what the page is about. Name the subject in the words people
+  search for, not only in a slogan.
+- **Subheadings name topics.** Section headings and card titles are
+  subheadings to Google. "Fixed fees agreed before you start" does more than
+  "Clarity". Questions clients actually ask make the best ones.
+- **The opening paragraph counts.** Say plainly what the page covers and who
+  it helps, using the main search phrase once.
+- **Eyebrows are decoration.** The small capitals above a heading carry no
+  weight, so put the important words in the heading.
+- **Links say where they go.** "See how fees work" rather than "Click here".
+- **Describe every image** in a plain sentence, not a list of keywords.
+- **Keep web addresses stable.** Change a URL slug only to fix a mistake, and
+  unpublish only what should come off the site.
+- **Be exact.** Google holds legal sites to a higher standard of trust than
+  most. True, checkable facts (years, courts, credentials, current law) help;
+  inflated claims and promised outcomes hurt.
+- **Same details everywhere.** Your name, telephone and email in Site Settings
+  should match the SRA register, ReviewSolicitors and the Law Society exactly.
+
+Fields marked "Little weight in search" are for the reader only: write them
+however reads best.
+
 ## Site Settings: your details
 
 **Site Settings** holds the details used across the whole site: the masthead,

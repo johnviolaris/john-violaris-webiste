@@ -1,4 +1,5 @@
 import { initialCmsFormState, type CmsFormState } from "@/lib/cms/form";
+import { seoTips } from "@/lib/cms/seo-tips";
 import {
   aboutBackgroundDefaults,
   careerBandDefaults,
@@ -91,6 +92,12 @@ export type SectionField = {
   label: string;
   kind: FieldKind;
   hint?: string;
+  /**
+   * How to write the field for search, shown apart from the hint. For an
+   * `items` field it covers the rows as a whole, so it is shown once rather
+   * than repeated in every row.
+   */
+  seo?: string;
   /** An empty required field is rejected; an empty optional one is stored empty. */
   required?: boolean;
   /**
@@ -114,6 +121,8 @@ export type SectionDefinition = {
   key: string;
   label: string;
   description: string;
+  /** What the section does for search, as a whole. */
+  seo?: string;
   /**
    * Public routes this section renders on. Drives revalidation after a save,
    * and tells the editor where a change will show up.
@@ -131,6 +140,8 @@ export type PageGroup = {
   key: string;
   label: string;
   description: string;
+  /** The searches the page should win, and what matters most for them. */
+  seo?: string;
   sections: SectionDefinition[];
 };
 
@@ -146,6 +157,7 @@ const eyebrow: SectionField = {
   label: "Eyebrow",
   kind: "text",
   hint: "The small capitals above the heading.",
+  seo: seoTips.eyebrow,
   required: true,
   maxLength: 80,
 };
@@ -155,6 +167,7 @@ const headline: SectionField = {
   label: "Heading",
   kind: "lines",
   hint: "One line per line on the page.",
+  seo: seoTips.sectionHeading,
   required: true,
   maxLength: 120,
   rows: 2,
@@ -165,6 +178,7 @@ const headlineEmphasis: SectionField = {
   label: "Heading, emphasised part",
   kind: "lines",
   hint: "Rendered in italic beneath the heading. One line per line on the page.",
+  seo: seoTips.sectionHeadingEmphasis,
   required: true,
   maxLength: 120,
   rows: 2,
@@ -175,6 +189,7 @@ const intro: SectionField = {
   label: "Standfirst",
   kind: "lines",
   hint: "The short line set beside the heading. Leave blank for none.",
+  seo: seoTips.sectionIntro,
   maxLength: 200,
   rows: 3,
 };
@@ -212,6 +227,7 @@ function introSection(page: keyof typeof pageIntroDefaults): SectionDefinition {
     key: "intro",
     label: "Page opening",
     description: "The breadcrumb label, heading and standfirst at the top of the page.",
+    seo: "The first thing Google reads on the page. The heading here is the page’s main heading, so it carries more weight than any other text on it.",
     appearsOn: [`/${page}`],
     fields: [
       {
@@ -219,6 +235,7 @@ function introSection(page: keyof typeof pageIntroDefaults): SectionDefinition {
         label: "Eyebrow",
         kind: "text",
         hint: "Also used as the breadcrumb after “Home /”.",
+        seo: seoTips.breadcrumb,
         required: true,
         maxLength: 80,
       },
@@ -226,6 +243,7 @@ function introSection(page: keyof typeof pageIntroDefaults): SectionDefinition {
         key: "title",
         label: "Heading",
         kind: "text",
+        seo: seoTips.mainHeading,
         required: true,
         maxLength: 120,
       },
@@ -234,6 +252,7 @@ function introSection(page: keyof typeof pageIntroDefaults): SectionDefinition {
         label: "Heading, emphasised part",
         kind: "text",
         hint: "Rendered in italic on the second line.",
+        seo: seoTips.mainHeadingEmphasis,
         required: true,
         maxLength: 120,
       },
@@ -242,6 +261,7 @@ function introSection(page: keyof typeof pageIntroDefaults): SectionDefinition {
         label: "Standfirst",
         kind: "text",
         hint: "One or two sentences beneath the heading.",
+        seo: seoTips.standfirst,
         required: true,
         maxLength: 400,
         rows: 3,
@@ -260,34 +280,39 @@ export const pageGroups: PageGroup[] = [
     key: "home",
     label: "Home page",
     description: "The hero and the bands beneath it.",
+    seo: "The page most searches land on, and the one that should win the broad ones: “motoring solicitor”, “driving offence solicitor”, “criminal defence solicitor”. The hero heading is the most important text on the whole site.",
     sections: [
       {
         key: "hero",
         label: "Hero",
         description:
           "The opening screen: heading, introduction, the personal commitment card and the experience figures.",
+        seo: "The home page’s main heading is here. Say what John does and where — a motoring and criminal defence solicitor across England and Wales — in words a client would search, not only in a slogan.",
         appearsOn: ["/"],
         fields: [
           {
             key: "toplineLeft",
             label: "Top line, left",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 60,
           },
           {
             key: "toplineRight",
             label: "Top line, right",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 60,
           },
           { ...eyebrow, hint: "The small capitals above the heading." },
-          headline,
-          headlineEmphasis,
+          { ...headline, seo: seoTips.mainHeading },
+          { ...headlineEmphasis, seo: seoTips.mainHeadingEmphasis },
           {
             key: "description",
             label: "Introduction",
             kind: "lines",
             hint: "One line per line on the page, on wider screens.",
+            seo: seoTips.standfirst,
             required: true,
             maxLength: 200,
             rows: 3,
@@ -296,6 +321,7 @@ export const pageGroups: PageGroup[] = [
             key: "ctaLabel",
             label: "Button",
             kind: "text",
+            seo: seoTips.linkText,
             required: true,
             maxLength: 60,
           },
@@ -303,12 +329,14 @@ export const pageGroups: PageGroup[] = [
             key: "reassuranceLeft",
             label: "Below the button, left",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 60,
           },
           {
             key: "reassuranceRight",
             label: "Below the button, right",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 60,
           },
           {
@@ -316,6 +344,7 @@ export const pageGroups: PageGroup[] = [
             label: "Portrait",
             kind: "image",
             hint: "The photograph beside the heading. A portrait-shaped image works best — it is shown taller than it is wide. JPEG, PNG, WebP or AVIF, up to 5 MB.",
+            seo: seoTips.image,
             required: true,
             maxLength: 500,
           },
@@ -324,6 +353,7 @@ export const pageGroups: PageGroup[] = [
             label: "Portrait description",
             kind: "text",
             hint: "What the photograph shows, for anyone using a screen reader.",
+            seo: seoTips.imageAlt,
             required: true,
             maxLength: 200,
           },
@@ -332,14 +362,22 @@ export const pageGroups: PageGroup[] = [
             label: "Card label",
             kind: "text",
             hint: "Top-left of the card that slides in over the portrait.",
+            seo: seoTips.minor,
             maxLength: 60,
           },
-          { key: "cardEyebrow", label: "Card eyebrow", kind: "text", maxLength: 80 },
+          {
+            key: "cardEyebrow",
+            label: "Card eyebrow",
+            kind: "text",
+            seo: seoTips.minor,
+            maxLength: 80,
+          },
           {
             key: "cardBody",
             label: "Card text",
             kind: "lines",
             hint: "One line per line on the card.",
+            seo: seoTips.minor,
             maxLength: 120,
             rows: 3,
           },
@@ -348,20 +386,35 @@ export const pageGroups: PageGroup[] = [
             label: "Card text, emphasised ending",
             kind: "text",
             hint: "Italic, on the end of the last line.",
+            seo: seoTips.minor,
             maxLength: 60,
           },
           {
             key: "cardRole",
             label: "Card role line",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 80,
           },
-          { key: "cardFooterLabel", label: "Card link", kind: "text", maxLength: 60 },
-          { key: "exploreLabel", label: "Scroll link", kind: "text", maxLength: 60 },
+          {
+            key: "cardFooterLabel",
+            label: "Card link",
+            kind: "text",
+            seo: seoTips.linkText,
+            maxLength: 60,
+          },
+          {
+            key: "exploreLabel",
+            label: "Scroll link",
+            kind: "text",
+            seo: seoTips.minor,
+            maxLength: 60,
+          },
           {
             key: "bottomTagline",
             label: "Bottom line",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 80,
           },
           {
@@ -369,6 +422,7 @@ export const pageGroups: PageGroup[] = [
             label: "Experience figures",
             kind: "items",
             hint: "The dark band under the hero. Four fit the row comfortably.",
+            seo: seoTips.figures,
             item: {
               label: "Figure",
               fields: [
@@ -393,6 +447,7 @@ export const pageGroups: PageGroup[] = [
         label: "Common charges rail",
         description:
           "The slim rail closing the hero. The charges themselves come from the service catalogue.",
+        seo: "Each charge in the rail is a link to its own page, which helps Google find those pages from the home page. Which charges appear is set under Services.",
         appearsOn: ["/"],
         fields: [{ ...eyebrow, required: true }],
         defaults: { ...offenceStripDefaults },
@@ -401,6 +456,7 @@ export const pageGroups: PageGroup[] = [
         key: "why-instruct",
         label: "Why instruct me",
         description: "The four reasons to instruct a one-solicitor practice.",
+        seo: "A subheading and a set of cards Google reads as smaller headings. Name reasons a client would actually weigh up; specific beats clever.",
         appearsOn: ["/"],
         fields: [
           ...headingFields,
@@ -408,6 +464,7 @@ export const pageGroups: PageGroup[] = [
             key: "cards",
             label: "Reasons",
             kind: "items",
+            seo: seoTips.cards,
             item: iconCardItem,
           },
         ],
@@ -418,14 +475,22 @@ export const pageGroups: PageGroup[] = [
         label: "Reviews band heading",
         description:
           "The copy framing the reviews. The reviews themselves are collected by ReviewSolicitors and are not editable here.",
+        seo: "The reviews are trusted because clients wrote them and nobody here can change them. The heading around them is an ordinary subheading.",
         appearsOn: ["/"],
         fields: [
           ...headingFields,
-          { key: "linkLabel", label: "Button", kind: "text", maxLength: 60 },
+          {
+            key: "linkLabel",
+            label: "Button",
+            kind: "text",
+            seo: seoTips.linkText,
+            maxLength: 60,
+          },
           {
             key: "note",
             label: "Note beneath the button",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 160,
           },
         ],
@@ -438,6 +503,7 @@ export const pageGroups: PageGroup[] = [
     key: "about",
     label: "About",
     description: "John's introduction, background and route to practice.",
+    seo: "Searches for John by name, and the trust Google looks for behind any legal advice: who he is, when he qualified, where he practises. Specific, checkable facts here support every other page.",
     sections: [
       introSection("about"),
       {
@@ -445,6 +511,7 @@ export const pageGroups: PageGroup[] = [
         label: "Meet John",
         description:
           "The personal introduction. Rendered on the home page and the about page, so an edit changes both.",
+        seo: "Google looks for the person behind legal advice. Real experience — when John qualified, the courts he works in, the cases he takes — is what it looks for, and what a client wants to read.",
         appearsOn: ["/", "/about"],
         fields: [
           eyebrow,
@@ -455,15 +522,23 @@ export const pageGroups: PageGroup[] = [
             label: "Aside",
             kind: "lines",
             hint: "The short line under the heading. One line per line.",
+            seo: seoTips.sectionIntro,
             maxLength: 120,
             rows: 2,
           },
-          { key: "signoff", label: "Signature", kind: "text", maxLength: 60 },
+          {
+            key: "signoff",
+            label: "Signature",
+            kind: "text",
+            seo: seoTips.minor,
+            maxLength: 60,
+          },
           {
             key: "aboutLinkLabel",
             label: "Link to the about page",
             kind: "text",
             hint: "Shown on the home page only.",
+            seo: seoTips.linkText,
             maxLength: 60,
           },
           {
@@ -471,6 +546,7 @@ export const pageGroups: PageGroup[] = [
             label: "Opening line",
             kind: "lines",
             hint: "Set larger than the rest. One line per line.",
+            seo: seoTips.sectionIntro,
             maxLength: 120,
             rows: 2,
           },
@@ -479,6 +555,7 @@ export const pageGroups: PageGroup[] = [
             label: "Story",
             kind: "prose",
             hint: "Separate paragraphs with a blank line.",
+            seo: seoTips.prose,
             required: true,
             maxLength: 1200,
             rows: 10,
@@ -488,6 +565,7 @@ export const pageGroups: PageGroup[] = [
             label: "Promises",
             kind: "items",
             hint: "The three small cards closing the section.",
+            seo: seoTips.cards,
             item: iconCardItem,
           },
         ],
@@ -497,6 +575,7 @@ export const pageGroups: PageGroup[] = [
         key: "background",
         label: "Background and approach",
         description: "Education, practice, and the principles behind the work.",
+        seo: "The kind of experience a reader can check on the SRA register, and that Google looks for on legal sites. Be specific: years, courts, kinds of case.",
         appearsOn: ["/about"],
         fields: [
           ...headingFields,
@@ -505,6 +584,7 @@ export const pageGroups: PageGroup[] = [
             label: "Entries",
             kind: "items",
             hint: "Numbered in the order below.",
+            seo: seoTips.cards,
             item: {
               label: "Entry",
               fields: [
@@ -528,6 +608,7 @@ export const pageGroups: PageGroup[] = [
         key: "career",
         label: "Career band",
         description: "The dark band tracing the route to practice.",
+        seo: "A short timeline. Exact years and roles make the rest of the page easier to trust.",
         appearsOn: ["/about"],
         fields: [
           { ...eyebrow, required: true },
@@ -535,6 +616,7 @@ export const pageGroups: PageGroup[] = [
             key: "milestones",
             label: "Milestones",
             kind: "items",
+            seo: seoTips.figures,
             item: {
               label: "Milestone",
               fields: [
@@ -555,6 +637,7 @@ export const pageGroups: PageGroup[] = [
     label: "Services",
     description:
       "The services index page, and the explorer heading it shares with the home page.",
+    seo: "The broad searches — “driving offence solicitor”, “motoring offences” — and the route into every offence page. Each offence ranks on its own page, edited under Service Pages.",
     sections: [
       introSection("services"),
       {
@@ -562,6 +645,7 @@ export const pageGroups: PageGroup[] = [
         label: "Service explorer heading",
         description:
           "The heading above the service explorer, and the note beneath it. The services themselves come from the catalogue.",
+        seo: "The services listed under this heading are links to each offence page, one of the main ways Google finds them. The services themselves are edited under Services.",
         appearsOn: ["/", "/services"],
         fields: [
           ...headingFields,
@@ -569,18 +653,21 @@ export const pageGroups: PageGroup[] = [
             key: "allServicesLabel",
             label: "“All services” link",
             kind: "text",
+            seo: seoTips.linkText,
             maxLength: 60,
           },
           {
             key: "noteQuestion",
             label: "Closing question",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 120,
           },
           {
             key: "noteLinkLabel",
             label: "Closing link",
             kind: "text",
+            seo: seoTips.linkText,
             maxLength: 120,
           },
         ],
@@ -593,6 +680,7 @@ export const pageGroups: PageGroup[] = [
     key: "police-station",
     label: "Police station",
     description: "Representation before, during and after a police interview.",
+    seo: "“Police station solicitor”, “police interview solicitor”, “voluntary interview”. Say those things plainly in the headings and the first paragraphs.",
     sections: [
       introSection("police-station"),
       {
@@ -600,6 +688,7 @@ export const pageGroups: PageGroup[] = [
         label: "Interview under caution",
         description:
           "The dark band making the case for representation. Rendered on the home page and the police station page.",
+        seo: "Shown on two pages, so Google reads it on both. Keep it about police interviews — the searches the police station page should win.",
         appearsOn: ["/", "/police-station"],
         fields: [
           { ...eyebrow, hint: "Preceded by the pulsing dot." },
@@ -609,26 +698,59 @@ export const pageGroups: PageGroup[] = [
             key: "body",
             label: "Text",
             kind: "prose",
+            seo: seoTips.prose,
             required: true,
             maxLength: 1600,
             rows: 8,
           },
-          { key: "ctaLabel", label: "Button", kind: "text", maxLength: 60 },
-          { key: "urgentLabel", label: "Urgent link", kind: "text", maxLength: 80 },
+          {
+            key: "ctaLabel",
+            label: "Button",
+            kind: "text",
+            seo: seoTips.linkText,
+            maxLength: 60,
+          },
+          {
+            key: "urgentLabel",
+            label: "Urgent link",
+            kind: "text",
+            seo: seoTips.linkText,
+            maxLength: 80,
+          },
           {
             key: "railEyebrow",
             label: "Panel eyebrow",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 60,
           },
-          { key: "railValue", label: "Panel figure", kind: "text", maxLength: 24 },
-          { key: "railSuffix", label: "Panel figure suffix", kind: "text", maxLength: 4 },
-          { key: "railLabel", label: "Panel figure label", kind: "text", maxLength: 80 },
+          {
+            key: "railValue",
+            label: "Panel figure",
+            kind: "text",
+            seo: seoTips.figures,
+            maxLength: 24,
+          },
+          {
+            key: "railSuffix",
+            label: "Panel figure suffix",
+            kind: "text",
+            seo: seoTips.minor,
+            maxLength: 4,
+          },
+          {
+            key: "railLabel",
+            label: "Panel figure label",
+            kind: "text",
+            seo: seoTips.figures,
+            maxLength: 80,
+          },
           {
             key: "railLines",
             label: "Panel text",
             kind: "lines",
             hint: "One line per line on the panel.",
+            seo: seoTips.minor,
             maxLength: 120,
             rows: 3,
           },
@@ -636,12 +758,14 @@ export const pageGroups: PageGroup[] = [
             key: "railLinesEmphasis",
             label: "Panel text, emphasised last line",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 120,
           },
           {
             key: "railLocation",
             label: "Panel footer",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 120,
           },
         ],
@@ -652,25 +776,40 @@ export const pageGroups: PageGroup[] = [
         label: "Interview guidance",
         description:
           "What the police station stage involves, what John does there, and the two panels beside it.",
+        seo: "The page’s main content, and the words most likely to match a search. Each heading here is a subheading to Google; the questions clients actually ask make the best ones.",
         appearsOn: ["/police-station"],
         fields: [
           eyebrow,
           headline,
           headlineEmphasis,
-          { key: "whyHeading", label: "First heading", kind: "text", maxLength: 120 },
+          {
+            key: "whyHeading",
+            label: "First heading",
+            kind: "text",
+            seo: seoTips.subheading,
+            maxLength: 120,
+          },
           {
             key: "whyBody",
             label: "First section",
             kind: "prose",
+            seo: seoTips.prose,
             maxLength: 1600,
             rows: 6,
           },
-          { key: "supportHeading", label: "Second heading", kind: "text", maxLength: 120 },
+          {
+            key: "supportHeading",
+            label: "Second heading",
+            kind: "text",
+            seo: seoTips.subheading,
+            maxLength: 120,
+          },
           {
             key: "support",
             label: "What John does",
             kind: "list",
             hint: "One bullet per line.",
+            seo: seoTips.list,
             maxLength: 300,
             rows: 6,
           },
@@ -678,12 +817,14 @@ export const pageGroups: PageGroup[] = [
             key: "continuityHeading",
             label: "Third heading",
             kind: "text",
+            seo: seoTips.subheading,
             maxLength: 120,
           },
           {
             key: "continuityBody",
             label: "Third section",
             kind: "prose",
+            seo: seoTips.prose,
             maxLength: 1200,
             rows: 4,
           },
@@ -691,18 +832,21 @@ export const pageGroups: PageGroup[] = [
             key: "legalAidEyebrow",
             label: "Legal aid panel eyebrow",
             kind: "text",
+            seo: seoTips.eyebrow,
             maxLength: 80,
           },
           {
             key: "legalAidHeading",
             label: "Legal aid panel heading",
             kind: "text",
+            seo: seoTips.subheading,
             maxLength: 120,
           },
           {
             key: "legalAidBody",
             label: "Legal aid panel text",
             kind: "prose",
+            seo: seoTips.prose,
             maxLength: 800,
             rows: 4,
           },
@@ -710,18 +854,21 @@ export const pageGroups: PageGroup[] = [
             key: "urgentEyebrow",
             label: "Urgent panel eyebrow",
             kind: "text",
+            seo: seoTips.eyebrow,
             maxLength: 80,
           },
           {
             key: "urgentHeading",
             label: "Urgent panel heading",
             kind: "text",
+            seo: seoTips.subheading,
             maxLength: 120,
           },
           {
             key: "urgentBody",
             label: "Urgent panel text",
             kind: "prose",
+            seo: seoTips.prose,
             maxLength: 800,
             rows: 4,
           },
@@ -730,16 +877,30 @@ export const pageGroups: PageGroup[] = [
             label: "Call button",
             kind: "text",
             hint: "Shown when a telephone number is configured.",
+            seo: seoTips.linkText,
             maxLength: 60,
           },
           {
             key: "urgentCallFallbackLabel",
             label: "Call button, no number configured",
             kind: "text",
+            seo: seoTips.linkText,
             maxLength: 60,
           },
-          { key: "urgentEmailLabel", label: "Email link", kind: "text", maxLength: 60 },
-          { key: "prepLabel", label: "Preparation link", kind: "text", maxLength: 60 },
+          {
+            key: "urgentEmailLabel",
+            label: "Email link",
+            kind: "text",
+            seo: seoTips.linkText,
+            maxLength: 60,
+          },
+          {
+            key: "prepLabel",
+            label: "Preparation link",
+            kind: "text",
+            seo: seoTips.linkText,
+            maxLength: 60,
+          },
         ],
         defaults: { ...policeStationDetailDefaults },
       },
@@ -747,12 +908,14 @@ export const pageGroups: PageGroup[] = [
         key: "stages",
         label: "Before, during, after",
         description: "The three cards closing the police station page.",
+        seo: "Google reads each card title as a subheading. Before, during and after an interview are exactly the stages people search about.",
         appearsOn: ["/police-station"],
         fields: [
           {
             key: "cards",
             label: "Cards",
             kind: "items",
+            seo: seoTips.cards,
             item: titleBodyItem,
           },
         ],
@@ -766,12 +929,14 @@ export const pageGroups: PageGroup[] = [
     label: "Fees",
     description:
       "The fees page, and the questions it shares with the home page. The site publishes no fee figures.",
+    seo: "“Solicitor fees”, “free consultation”, and the questions people ask about cost. The questions on this page are given to Google as an FAQ.",
     sections: [
       introSection("fees"),
       {
         key: "body",
         label: "How fees work",
         description: "The text beneath the numbered cards on the fees page.",
+        seo: "People often search how much a solicitor costs before they call one. A plain explanation of how fees are agreed is what answers that search.",
         appearsOn: ["/fees"],
         fields: [
           { ...eyebrow, hint: "The small capitals above the first paragraph." },
@@ -780,6 +945,7 @@ export const pageGroups: PageGroup[] = [
             label: "Text",
             kind: "prose",
             hint: "The first paragraph is set large on the left, the last is highlighted as a closing note, and any in between are ordinary text.",
+            seo: seoTips.prose,
             required: true,
             maxLength: 800,
             rows: 12,
@@ -791,12 +957,14 @@ export const pageGroups: PageGroup[] = [
         key: "stages",
         label: "How fees are agreed",
         description: "The three numbered cards opening the fees page.",
+        seo: "Google reads each card title as a subheading. Titles that say what happens — “A free first conversation” — do more than labels.",
         appearsOn: ["/fees"],
         fields: [
           {
             key: "cards",
             label: "Cards",
             kind: "items",
+            seo: seoTips.cards,
             item: {
               label: "Card",
               fields: [
@@ -815,6 +983,7 @@ export const pageGroups: PageGroup[] = [
         label: "Honesty and questions",
         description:
           "The free-consultation note and the frequently asked questions. Rendered on the home page and the fees page.",
+        seo: "The questions here are given to Google as an FAQ on the fees page. Adding the questions clients really ask, answered plainly, is one of the best ways to appear for longer searches.",
         appearsOn: ["/", "/fees"],
         fields: [
           eyebrow,
@@ -824,12 +993,14 @@ export const pageGroups: PageGroup[] = [
             label: "Heading, second line start",
             kind: "text",
             hint: "Plain text before the italic ending, e.g. “with”.",
+            seo: seoTips.sectionHeadingEmphasis,
             maxLength: 60,
           },
           {
             key: "headlineEmphasis",
             label: "Heading, emphasised ending",
             kind: "text",
+            seo: seoTips.sectionHeadingEmphasis,
             required: true,
             maxLength: 60,
           },
@@ -837,15 +1008,23 @@ export const pageGroups: PageGroup[] = [
             key: "body",
             label: "Text",
             kind: "prose",
+            seo: seoTips.prose,
             maxLength: 800,
             rows: 4,
           },
-          { key: "linkLabel", label: "Link to fees", kind: "text", maxLength: 60 },
+          {
+            key: "linkLabel",
+            label: "Link to fees",
+            kind: "text",
+            seo: seoTips.linkText,
+            maxLength: 60,
+          },
           {
             key: "questions",
             label: "Questions",
             kind: "items",
             hint: "Shown as an expandable list.",
+            seo: seoTips.questions,
             item: {
               label: "Question",
               fields: [
@@ -865,6 +1044,7 @@ export const pageGroups: PageGroup[] = [
     key: "reviews",
     label: "Reviews",
     description: "The reviews page opening. The reviews are supplied by ReviewSolicitors.",
+    seo: "Searches for John’s name with “reviews”. The reviews are the content; the opening only needs to introduce them.",
     sections: [introSection("reviews")],
   },
 
@@ -873,6 +1053,7 @@ export const pageGroups: PageGroup[] = [
     label: "Cookie policy",
     description:
       "The cookie policy's opening. The list of cookies below it follows what the site actually stores, so it is kept in the code rather than edited here.",
+    seo: "Not a page people search for. Accurate and plain is all it needs.",
     sections: [introSection("cookies")],
   },
 
@@ -881,6 +1062,7 @@ export const pageGroups: PageGroup[] = [
     label: "Privacy notice",
     description:
       "The privacy notice's opening. The notice below it describes what the site actually does with an enquiry, so it is kept in the code rather than edited here.",
+    seo: "Not a page people search for. Accurate and plain is all it needs.",
     sections: [introSection("privacy")],
   },
 
@@ -888,6 +1070,7 @@ export const pageGroups: PageGroup[] = [
     key: "contact",
     label: "Contact",
     description: "The contact page, beside the enquiry form.",
+    seo: "Searches for John by name from people ready to get in touch. The telephone and email Google reads come from Site Settings.",
     sections: [
       introSection("contact"),
       {
@@ -895,24 +1078,39 @@ export const pageGroups: PageGroup[] = [
         label: "Ways to get in touch",
         description:
           "The labels on the email, telephone and WhatsApp rows, and the note about what enquiring does not create.",
+        seo: "The contact details themselves come from Site Settings, which is where Google reads them. The labels here are for the reader.",
         appearsOn: ["/contact"],
         fields: [
           { ...eyebrow, hint: "Above the heading." },
           headline,
           headlineEmphasis,
-          { key: "emailLabel", label: "Email row label", kind: "text", maxLength: 60 },
-          { key: "callLabel", label: "Telephone row label", kind: "text", maxLength: 60 },
+          {
+            key: "emailLabel",
+            label: "Email row label",
+            kind: "text",
+            seo: seoTips.minor,
+            maxLength: 60,
+          },
+          {
+            key: "callLabel",
+            label: "Telephone row label",
+            kind: "text",
+            seo: seoTips.minor,
+            maxLength: 60,
+          },
           {
             key: "whatsappLabel",
             label: "WhatsApp row label",
             kind: "text",
             hint: "Only shown when a WhatsApp number is configured.",
+            seo: seoTips.minor,
             maxLength: 60,
           },
           {
             key: "whatsappValue",
             label: "WhatsApp row value",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 60,
           },
           {
@@ -920,6 +1118,7 @@ export const pageGroups: PageGroup[] = [
             label: "Note",
             kind: "prose",
             hint: "Check any change here with John — it states what getting in touch does not create.",
+            seo: seoTips.minor,
             required: true,
             maxLength: 1200,
             rows: 5,
@@ -931,17 +1130,25 @@ export const pageGroups: PageGroup[] = [
         key: "prepare",
         label: "What to have ready",
         description: "The panel beside the contact details.",
+        seo: "Practical, specific guidance is what Google rewards. A clear list of what to have ready helps the reader and the page alike.",
         appearsOn: ["/contact"],
         fields: [
           eyebrow,
           headline,
           headlineEmphasis,
-          { key: "listIntro", label: "Above the list", kind: "text", maxLength: 120 },
+          {
+            key: "listIntro",
+            label: "Above the list",
+            kind: "text",
+            seo: seoTips.minor,
+            maxLength: 120,
+          },
           {
             key: "list",
             label: "List",
             kind: "list",
             hint: "One item per line.",
+            seo: seoTips.list,
             maxLength: 200,
             rows: 5,
           },
@@ -949,20 +1156,29 @@ export const pageGroups: PageGroup[] = [
             key: "listNote",
             label: "Below the list",
             kind: "prose",
+            seo: seoTips.prose,
             maxLength: 400,
             rows: 3,
           },
-          { key: "ctaLabel", label: "Button", kind: "text", maxLength: 60 },
+          {
+            key: "ctaLabel",
+            label: "Button",
+            kind: "text",
+            seo: seoTips.linkText,
+            maxLength: 60,
+          },
           {
             key: "urgentHeading",
             label: "Urgent heading",
             kind: "text",
+            seo: seoTips.minor,
             maxLength: 120,
           },
           {
             key: "urgentBody",
             label: "Urgent text",
             kind: "prose",
+            seo: seoTips.prose,
             maxLength: 600,
             rows: 3,
           },
@@ -976,12 +1192,14 @@ export const pageGroups: PageGroup[] = [
     key: "shared",
     label: "Shared sections",
     description: "Copy that appears on more than one page.",
+    seo: "Repeated on several pages, so Google gives it little weight on any one of them. Words specific to one page belong on that page instead.",
     sections: [
       {
         key: "process",
         label: "What happens next",
         description:
           "The four steps of working with John. Rendered on the home page and the about page.",
+        seo: "Shown on two pages. Clear, concrete steps reassure readers and tell Google what working with John involves.",
         appearsOn: ["/", "/about"],
         fields: [
           ...headingFields,
@@ -990,6 +1208,7 @@ export const pageGroups: PageGroup[] = [
             label: "Steps",
             kind: "items",
             hint: "Numbered in the order below.",
+            seo: seoTips.cards,
             item: titleBodyItem,
           },
         ],
@@ -1000,10 +1219,17 @@ export const pageGroups: PageGroup[] = [
         label: "Closing call to action",
         description:
           "The band that closes every page except contact, which ends with the enquiry form instead.",
+        seo: "On every page, so Google sees it many times and weighs it lightly on each. Keep it short and about getting in touch.",
         appearsOn: ["*"],
         fields: [
           eyebrow,
-          { key: "badge", label: "Badge", kind: "text", maxLength: 60 },
+          {
+            key: "badge",
+            label: "Badge",
+            kind: "text",
+            seo: seoTips.minor,
+            maxLength: 60,
+          },
           headline,
           headlineEmphasis,
           {
@@ -1011,12 +1237,31 @@ export const pageGroups: PageGroup[] = [
             label: "Text",
             kind: "lines",
             hint: "One line per line on the page.",
+            seo: seoTips.sectionIntro,
             maxLength: 160,
             rows: 3,
           },
-          { key: "ctaLabel", label: "Button", kind: "text", maxLength: 60 },
-          { key: "footerLeft", label: "Footer, left", kind: "text", maxLength: 120 },
-          { key: "footerRight", label: "Footer, right", kind: "text", maxLength: 80 },
+          {
+            key: "ctaLabel",
+            label: "Button",
+            kind: "text",
+            seo: seoTips.linkText,
+            maxLength: 60,
+          },
+          {
+            key: "footerLeft",
+            label: "Footer, left",
+            kind: "text",
+            seo: seoTips.minor,
+            maxLength: 120,
+          },
+          {
+            key: "footerRight",
+            label: "Footer, right",
+            kind: "text",
+            seo: seoTips.minor,
+            maxLength: 80,
+          },
         ],
         defaults: { ...ctaDefaults },
       },

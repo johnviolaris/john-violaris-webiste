@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 
 import { SectionForm } from "@/components/admin/section-form";
+import { SeoTip } from "@/components/admin/seo-tip";
 import { getPageSections } from "@/lib/cms/admin-queries";
 import { findGroup, pageGroups } from "@/lib/cms/sections/schema";
+import { seoTips } from "@/lib/cms/seo-tips";
 
 export function generateStaticParams() {
   return pageGroups.map((group) => ({ page: group.key }));
@@ -49,6 +51,17 @@ export default async function AdminPageContentPage({
           {group.description} Each section saves on its own, and the site
           updates as soon as it does.
         </p>
+        {group.seo ? (
+          <SeoTip variant="section" className="mt-4">
+            {group.seo} {seoTips.searchListing}{" "}
+            <Link
+              href="/admin/seo-metadata"
+              className="font-medium underline underline-offset-4"
+            >
+              Open SEO Metadata
+            </Link>
+          </SeoTip>
+        ) : null}
       </header>
 
       <div className="space-y-4">
@@ -105,6 +118,12 @@ export default async function AdminPageContentPage({
                     ))
                   )}
                 </p>
+
+                {section.seo ? (
+                  <SeoTip variant="section" className="mb-5">
+                    {section.seo}
+                  </SeoTip>
+                ) : null}
 
                 <SectionForm
                   page={page}

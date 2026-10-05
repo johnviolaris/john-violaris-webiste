@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 
+import { SeoTip } from "@/components/admin/seo-tip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -125,10 +126,12 @@ export function ItemsField({
       </legend>
 
       {field.hint ? (
-        <p className="mt-1 mb-3 text-xs text-muted-foreground">{field.hint}</p>
-      ) : (
-        <div className="mb-3" />
-      )}
+        <p className="mt-1 text-xs text-muted-foreground">{field.hint}</p>
+      ) : null}
+      {/* Once for the whole group rather than in every row, where a dozen
+          copies of the same advice would bury the fields. */}
+      {field.seo ? <SeoTip className="mt-1.5">{field.seo}</SeoTip> : null}
+      <div className="mb-3" />
 
       <input type="hidden" name={itemCountName(field.key)} value={rows.length} />
 

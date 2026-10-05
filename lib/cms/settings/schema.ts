@@ -1,4 +1,5 @@
 import { initialCmsFormState, type CmsFormState } from "@/lib/cms/form";
+import { seoTips } from "@/lib/cms/seo-tips";
 import {
   siteSettingKeys,
   siteSettingsDefaults,
@@ -25,6 +26,8 @@ export type SettingSpec = {
   key: SettingField;
   label: string;
   hint?: string;
+  /** What the setting does for search, shown apart from the hint. */
+  seo?: string;
   required?: boolean;
   maxLength: number;
   /** `tel` gets the matching mobile keyboard and browser validation. */
@@ -59,6 +62,7 @@ export const settingGroups: SettingGroup[] = [
         required: true,
         maxLength: 80,
         hint: "Shown in the masthead and used in every page title.",
+        seo: "Google reads it in every page title and in the details about John it is given behind the scenes. Write it exactly as it appears on the SRA register, ReviewSolicitors and the Law Society: matching details across sites help Google tie them to one solicitor.",
       },
       {
         key: "role",
@@ -66,24 +70,28 @@ export const settingGroups: SettingGroup[] = [
         required: true,
         maxLength: 80,
         hint: "The line under the name, e.g. “Criminal Defence Solicitor”.",
+        seo: "Given to Google as John’s job title, and printed on the default share picture. A role that names the work, such as “Criminal Defence Solicitor”, reinforces what the site is about.",
       },
       {
         key: "roleLong",
         label: "Role, in full",
         maxLength: 120,
         hint: "Used in the small print at the foot of the enquiry emails.",
+        seo: seoTips.noSearchEffect,
       },
       {
         key: "initials",
         label: "Monogram",
         maxLength: 4,
         hint: "The letters on the card in the hero.",
+        seo: seoTips.minor,
       },
       {
         key: "jurisdiction",
         label: "Jurisdiction",
         maxLength: 80,
         hint: "Where John practises, e.g. “England & Wales”.",
+        seo: "Given to Google as the area John serves, which matters for searches that name a place. Keep it to where he genuinely takes cases.",
       },
     ],
   },
@@ -99,6 +107,7 @@ export const settingGroups: SettingGroup[] = [
         required: true,
         maxLength: 160,
         hint: "Used for every “Email John” link, and as the fallback address for enquiry notifications.",
+        seo: "Given to Google as the practice’s email. Use the same address everywhere the practice is listed.",
       },
       {
         key: "phoneE164",
@@ -107,6 +116,7 @@ export const settingGroups: SettingGroup[] = [
         maxLength: 24,
         placeholder: "+447427260293",
         hint: "International format, no spaces. This is what a “Call” link dials. Leave blank and every call link points at the contact page instead.",
+        seo: "Given to Google as the practice’s telephone. Use the same number as on ReviewSolicitors, the Law Society and any Google Business Profile: consistent contact details across sites are a signal for local search.",
       },
       {
         key: "phoneDisplay",
@@ -114,6 +124,7 @@ export const settingGroups: SettingGroup[] = [
         maxLength: 40,
         placeholder: "07427 260293",
         hint: "How the number is printed on the page.",
+        seo: "Keep it the same number as above, written the way people expect to see it.",
       },
       {
         key: "whatsappNumber",
@@ -122,12 +133,14 @@ export const settingGroups: SettingGroup[] = [
         maxLength: 24,
         placeholder: "+44 7427 260293",
         hint: "Any usual shape works. Leave blank and no WhatsApp link is shown anywhere.",
+        seo: seoTips.noSearchEffect,
       },
       {
         key: "responseTime",
         label: "Response promise",
         maxLength: 80,
         hint: "Shown in the contact rail and the footer, e.g. “Response within 24 hours”.",
+        seo: seoTips.minor,
       },
     ],
   },
@@ -141,12 +154,14 @@ export const settingGroups: SettingGroup[] = [
         label: "SRA number",
         maxLength: 40,
         hint: "Printed in the footer once set. Left blank, no number is shown — none is ever invented.",
+        seo: "Given to Google as John’s regulatory identifier. A verifiable credential is one of the strongest trust signals a legal site can have, so set it as soon as it is confirmed.",
       },
       {
         key: "qualifiedYear",
         label: "Year qualified",
         maxLength: 4,
         hint: "Printed in the footer as “Qualified since …”. Left blank, the line is left out.",
+        seo: "Given to Google as part of John’s credentials. Experience a reader can verify is what Google looks for on legal sites.",
       },
       {
         key: "reviewSolicitorsUrl",
@@ -155,6 +170,7 @@ export const settingGroups: SettingGroup[] = [
         host: "reviewsolicitors.co.uk",
         maxLength: 300,
         hint: "The practice’s page on ReviewSolicitors.",
+        seo: "Tells Google that the reviews there are about this practice.",
       },
       {
         key: "lawSocietyUrl",
@@ -164,6 +180,7 @@ export const settingGroups: SettingGroup[] = [
         maxLength: 300,
         placeholder: "Not set",
         hint: "John’s entry on the Law Society’s Find a Solicitor. Left blank until the address is confirmed.",
+        seo: "Tells Google that this profile and the site are the same solicitor, which strengthens both.",
       },
       {
         key: "linkedinUrl",
@@ -173,6 +190,7 @@ export const settingGroups: SettingGroup[] = [
         maxLength: 300,
         placeholder: "Not set",
         hint: "John’s own LinkedIn page. Left blank until the address is confirmed.",
+        seo: "Tells Google that this profile and the site are the same solicitor, which strengthens both.",
       },
     ],
   },

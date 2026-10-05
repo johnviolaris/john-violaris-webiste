@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import { ExternalLink } from "lucide-react";
 
 import { ItemsField, useItemRows } from "@/components/admin/items-field";
+import { SeoTip } from "@/components/admin/seo-tip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +26,7 @@ import {
   type ServicePageField,
 } from "@/lib/cms/service-pages/schema";
 import { itemRowsFrom } from "@/lib/cms/sections/values";
+import { seoTips } from "@/lib/cms/seo-tips";
 import type { SectionField } from "@/lib/cms/sections/schema";
 import type { ServicePageContent } from "@/lib/cms/types";
 
@@ -142,11 +144,17 @@ export function ServicePageForm({ service, page }: ServicePageFormProps) {
           </p>
         </div>
 
+        <SeoTip variant="section">
+          What Google reads first, and what decides whether the page matches a
+          search for this offence. {seoTips.searchListing}
+        </SeoTip>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
             label="Heading"
             labelFor={`${formId}-headline`}
             hint="e.g. “Driving with excess alcohol.”"
+            seo={seoTips.mainHeading}
             error={state.fieldErrors.headline}
             errorId={errorId("headline")}
           >
@@ -157,6 +165,7 @@ export function ServicePageForm({ service, page }: ServicePageFormProps) {
             label="Heading, emphasised part"
             labelFor={`${formId}-emphasis`}
             hint="Set in italic after the heading, e.g. “Specialist defence.”"
+            seo={seoTips.mainHeadingEmphasis}
             error={state.fieldErrors.emphasis}
             errorId={errorId("emphasis")}
           >
@@ -167,7 +176,8 @@ export function ServicePageForm({ service, page }: ServicePageFormProps) {
         <Field
           label="Standfirst"
           labelFor={`${formId}-intro`}
-          hint="The paragraph beneath the heading. It is also the description search engines show for the page."
+          hint="The paragraph beneath the heading."
+          seo="The first sentences Google reads, and the summary of the service it is given behind the scenes. Name the offence the way people search for it and say how John helps. For a new service with no description of its own under SEO Metadata, this is also the snippet under the Google result."
           error={state.fieldErrors.intro}
           errorId={errorId("intro")}
         >
@@ -190,10 +200,17 @@ export function ServicePageForm({ service, page }: ServicePageFormProps) {
           </p>
         </div>
 
+        <SeoTip variant="section">
+          The heading is the same on every offence page, so the words here are
+          what set this page apart. They are where it can match the detailed
+          searches.
+        </SeoTip>
+
         <Field
           label="Eyebrow"
           labelFor={`${formId}-issuesHeading`}
           hint="The small capitals above the heading, e.g. “The issues I examine”."
+          seo={seoTips.eyebrow}
           error={state.fieldErrors.issuesHeading}
           errorId={errorId("issuesHeading")}
         >
@@ -203,6 +220,7 @@ export function ServicePageForm({ service, page }: ServicePageFormProps) {
         <Field
           label="Introduction"
           labelFor={`${formId}-issuesIntro`}
+          seo={seoTips.prose}
           error={state.fieldErrors.issuesIntro}
           errorId={errorId("issuesIntro")}
         >
@@ -222,6 +240,11 @@ export function ServicePageForm({ service, page }: ServicePageFormProps) {
             Both tables are optional.
           </p>
         </div>
+
+        <SeoTip variant="section">
+          “What could happen to me?” is one of the first things people search
+          after a charge. Clear, accurate tables answer it directly.
+        </SeoTip>
 
         {items(outcomesField)}
         {items(ancillaryOrdersField)}
@@ -250,6 +273,8 @@ export function ServicePageForm({ service, page }: ServicePageFormProps) {
             </span>
           </span>
         </label>
+
+        <SeoTip>{seoTips.published}</SeoTip>
       </section>
 
       {/* ------------------------------------------------------------------ */}
@@ -298,6 +323,7 @@ function Field({
   label,
   labelFor,
   hint,
+  seo,
   error,
   errorId,
   children,
@@ -305,6 +331,8 @@ function Field({
   label: string;
   labelFor: string;
   hint?: string;
+  /** Search guidance, shown apart from the hint. */
+  seo?: string;
   error?: string;
   errorId?: string;
   children: React.ReactNode;
@@ -316,6 +344,7 @@ function Field({
       {hint && !error ? (
         <p className="text-xs text-muted-foreground">{hint}</p>
       ) : null}
+      {seo ? <SeoTip>{seo}</SeoTip> : null}
       {error ? (
         <p id={errorId} role="alert" className="text-sm text-destructive">
           {error}

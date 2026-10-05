@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useId, useRef } from "react";
 import { useFormStatus } from "react-dom";
 
+import { SeoTip } from "@/components/admin/seo-tip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -108,6 +109,7 @@ export function SiteSettingsForm({ values }: { values: SettingValues }) {
                 {spec.hint && !error ? (
                   <p className="text-xs text-muted-foreground">{spec.hint}</p>
                 ) : null}
+                {spec.seo ? <SeoTip>{spec.seo}</SeoTip> : null}
                 {error ? (
                   <p
                     id={errorId(spec.key)}
