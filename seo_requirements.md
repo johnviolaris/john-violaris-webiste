@@ -35,14 +35,142 @@ These were settled before this document was written. They are assumptions baked 
 | **Consultations**    | No TidyCal or other booking calendar. Consultation CTAs lead to the contact journey: form, phone, email, or WhatsApp.       | §6, §10 |
 | **Fees**             | No public fee figures and no fee-schedule admin. `/fees` explains how scope and fees are discussed privately.              | §8, §9, §12 |
 
-### Current implementation state (as of 2026-10-03)
+### Local implementation update (2026-10-05, not deployed)
+
+The current working tree adds editable Open Graph type, X/Twitter overrides, validated custom
+JSON-LD, duplicate metadata warnings and the SEO health dashboard. Production
+build checks now enforce rendered heading/metadata quality and initial asset
+budgets. The portrait uses WebP. Service-page body copy, headings and search wording remain
+unchanged pending John's review; other project work is authorised. The user approved restoring the six
+earlier shortened article SEO titles; those are restored while article bodies
+and visible headlines remain unchanged. The added drink-driving service synonym
+paragraph and Special Reasons wording corrections remain withdrawn; the portrait
+migration changes the image asset only.
+Its filename is `20261005131025_optimize_portrait.sql`; it contains no legal-copy
+correction.
+The restored article search titles are 51–59 characters including the site
+suffix. Earlier title-only verification passed: a 71-route production build,
+all 33 rendered public pages with zero failures/advisories, exact title checks
+in Chrome, unchanged article headlines and unchanged Special Reasons wording.
+The health dashboard can flag outcome wording, but REQ-064 remains not met until
+John approves and makes any required legal-copy corrections.
+
+Admin controls now manage redirects and refresh public pages. Published article
+and ordinary service URL changes require explicit confirmation naming both
+addresses, validated server-side. The resolver supports arbitrary missing paths
+through cached server rendering rather than a database lookup in every proxy
+request. Optional internal notes now use a separate administrator-only table;
+rules and notes save atomically, without exposing notes in public routing rows.
+The literal proxy-wide lookup remains outside the implementation.
+
+Saved article/service-page drafts and historical versions have authenticated
+previews. Append-only revision history supports restoring either as a draft.
+Article scheduling uses Europe/London time with start/expiry enforcement in RLS,
+public queries and sitemap selection, plus 60-second ISR. Expired URLs return
+404; whole-CMS scheduling and 410 tombstones remain partial. Append-only history
+now captures eleven content/configuration sources with field comparisons and
+validated restores. Draft-capable entities restore as drafts; settings/static
+sections restore live after confirmation. Reviews retain read-only history.
+The reusable media library supports filename choice at upload, decoded image
+checks, editable alt/decorative metadata and titles/captions applied to public
+hero/article images. URLs stay immutable. Captions default to plain text; an
+explicit rich-text mode supports bold, italic and safe links without raw HTML.
+Existing captions stay plain. Authenticated article previews now apply current
+library metadata just like public renders. Uploads use a 4 MiB cap for Vercel's request limit.
+
+Saved indexable entities expose collapsed SEO panels with separate metadata
+saves. CMS crawl rules are editable with private-route protections, noindex
+conflict checks and explicit acknowledgment for public blocks. The `seo_editor`
+role can manage metadata, crawl rules and their history without enquiries,
+private draft bodies or content editing. A broader delegated content-editor role
+and a separate per-entity SEO payload remain partial. Schema validation uses an
+offline official vocabulary snapshot plus visible publication advisories.
+An administrator-only allowlisted script registry now enables/disables existing
+GA4 and ReviewSolicitors without a deploy. URLs and loading strategies are fixed;
+invalid configuration fails closed and GA consent remains independently enforced.
+
+Optional practice name, identifier, address, coordinates and hours default empty.
+A recorded confirmation and shared validation guard both Contact rendering and
+LegalService schema. An individual's SRA number is separate from a practice ID;
+no unknown business facts were filled in. Consent withdrawal now disables an
+already-loaded analytics tag across tabs and every event rechecks consent.
+`generate_lead` fires only after an accepted enquiry and is registered as a GA4
+key event without a monetary value; its website code is still local. This GA4
+configuration is the only external write in this pass. No enquiry was sent.
+
+Optional article/service FAQs now share validated rich answers, public/draft
+rendering and one connected FAQPage section, with no defaults or invented
+answers. Invalid stored data requires explicit repair/clear acknowledgment.
+Private redirect notes use an admin-only relation and atomic invoker save;
+public routing rows stay unchanged. The additional migration is local.
+Consent-gated numeric LCP/INP/CLS collection is prepared for the existing GA4
+property; every callback checks current consent and integration state. No
+entries, selectors, URLs or enquiry fields are added to these event parameters,
+although GA4 retains its existing consented page context. Cookie-policy claims
+now follow the integration switch as well as configuration. This prepares field
+measurement after release; field Core Web Vitals remain unverified.
+
+The latest FAQ/notes/CSS/collector source
+`5e7cdd3bf980bd55f339e8a375cb69162da14eb9921a7b3492c07ed6e0981383`
+passes a 74-route build, lint, TypeScript, 113 tests, CMS/30 SEO checks,
+145 isolated SQL checks and all 33 public page/schema/asset/runtime checks.
+Public CSS falls 22.5% to 19,431 gzip bytes, with original styles/fonts preserved;
+admin receives an additional 13,039-byte cascade-preserving utility sheet.
+The collector adds 887 initial gzip JavaScript bytes over that CSS stage, for
+a current maximum of 174,608 bytes. All 33 public main-text hashes remain
+unchanged. Seven real-browser measurement fixture cases pass without Google
+requests. No service wording, seed answers, hosted settings or deployment changed.
+Seven final-source Lighthouse reports (two mobile per page, one desktop home)
+give mobile performance 90/92/96.5 and LCP 3.587/3.304/2.652 seconds, with
+desktop home 100 and LCP 0.738 seconds. All seven automated Accessibility/Best
+Practices scores are 100 and CLS is 0. Home/Service miss 95, all mobile LCP
+medians miss 2.5 seconds and field INP is unverified. The limited lab sample
+cannot establish a field or complete accessibility pass.
+
+The earlier rich-caption/integration and sitemap stage generated 74 routes. All 33 rendered
+public pages and schema graphs pass with zero rendered failures/advisories.
+95 unit tests, lint, TypeScript, 30 SEO cases, CMS seed parity and 109 actual
+isolated PostgreSQL checks passed. That stage's maximum initial JavaScript was 173,728
+gzip bytes, about 15.5% below the prior 205,581-byte maximum; budgets are unchanged.
+Chrome checks eight representative views, preserved text and sixteen hero
+transforms. Exported article, service and Fees/FAQ graphs pass Schema.org with
+zero errors/warnings; Google detects four, three and three valid items respectively,
+with optional image/business advisories. These code fixtures match the final build.
+Mobile LCP/performance targets, field INP and full authenticated platform/browser
+acceptance remain open. Earlier candidate lab and complete axe scans are historical.
+Nine later Lighthouse reports measured the preserved-copy caption/integration
+snapshot before the server-only sitemap follow-up: mobile performance medians
+89/91/93.5 with LCP 3.611/3.460/3.096 seconds, and desktop home 100 with LCP
+0.768 seconds. All nine accessibility/best-practices scores are 100 and CLS is 0;
+these lab results do not establish field INP or complete WCAG acceptance.
+
+Future location pages have an empty-table architecture at `/locations/[slug]`,
+admin editing, publication quality/review gates, private drafts and sitemap
+integration. No city pages or office claims have been published. The seven new
+migrations are local and must be reviewed/applied before the corresponding app
+is deployed. See README and the production launch checklist for operational gaps
+and current tests. Hosted signup is verified disabled; custom Auth SMTP,
+Search Console, Resend delivery, GA acceptance and John's regulatory information
+remain outstanding. Pre-copy-revert Lighthouse CI median mobile LCP was 3.742
+seconds home, 3.295 seconds service and 3.077 seconds article. Those measurements
+and the earlier complete Chrome scans predate the withdrawal of public wording
+edits. Post-revert build, runtime, rendered-page, schema and asset gates passed
+for all 33 public pages. The subsequent approved article-title restoration has
+also passed a fresh production build and all 33 rendered-page checks with zero
+failures and zero editorial advisories. Focused Chrome confirms the six exact
+shorter titles, preserved original H1s and service wording, no invented captions
+and no page errors. Earlier post-revert table-of-contents, keyboard-table and
+mobile checks remain recorded. Field Core Web Vitals and complete
+browser/screen-reader acceptance are not established.
+
+### Historical implementation snapshot (2026-10-03, before the local update)
 
 An honest snapshot, so nobody re-specifies work that exists or assumes work that doesn't.
 
 **Already in place**
 
 - The site is live at `https://johnviolaris.com` (since 2026-10-03). `www.johnviolaris.com`, `drivingjustice.co.uk` and `www.drivingjustice.co.uk` permanently redirect to the apex path-for-path in Vercel's domain settings, with the same rule in `proxy.ts` behind them, and HTTP redirects to HTTPS.
-- Core title, description, canonical, Open Graph and robots overrides are implemented through the route-keyed SEO editor, and every route has search-oriented default titles and descriptions within the editor's 60/155-character guide. The complete §1 target field model and embedded per-entity panels remain partial.
+- Core title, description, canonical, Open Graph and robots overrides were implemented through the route-keyed SEO editor. Embedded panels were partial at this historical snapshot; the 2026-10-05 local update now provides panels on saved indexable entities. A separate per-entity override payload remains partial.
 - `app/sitemap.ts` and `app/robots.ts` generate the public sitemap and crawl rules.
 - Shared JSON-LD covers `LegalService`, `Person`, `Service`, `FAQPage`, `BreadcrumbList` and `BlogPosting` without inventing prices or unavailable business details. Review/AggregateRating markup remains deliberately omitted while reviews come from the third-party widget.
 - Preview and staging hosts, plus admin routes, are marked `noindex` by response header; uppercase paths redirect to lowercase; custom 404 handling returns the correct status.
@@ -57,7 +185,7 @@ An honest snapshot, so nobody re-specifies work that exists or assumes work that
 **Built, but not active in production (external configuration)**
 
 - Search Console (under John's or a business Google account, not a personal one) and, optionally, Bing Webmaster Tools.
-- Public sign-ups are still enabled in the hosted Supabase Auth settings, although the site offers no sign-up form.
+- Hosted public signup settings require dashboard verification; the site offers no sign-up form.
 
 **Major work still outstanding**
 
@@ -70,7 +198,7 @@ An honest snapshot, so nobody re-specifies work that exists or assumes work that
 
 TidyCal and public fee figures are **not** outstanding work. They were intentionally removed from scope; the consultation journey and explanatory Fees page are the finished product behavior.
 
-> **Note on Next.js 16.** This project runs Next 16.3.4, where `middleware.ts` has been renamed to **`proxy.ts`** (the file already exists and exports `proxy()`). Sitemaps and robots use the `app/sitemap.ts` / `app/robots.ts` file conventions returning `MetadataRoute.Sitemap` / `MetadataRoute.Robots`. Verify API details in `node_modules/next/dist/docs/` before writing code — per `AGENTS.md`, this version differs from older App Router material.
+> **Note on Next.js 16.** The local project is patched to Next 16.3.8; the earlier snapshot used 16.3.4. `middleware.ts` has been renamed to **`proxy.ts`** (the file already exists and exports `proxy()`). Sitemaps and robots use the `app/sitemap.ts` / `app/robots.ts` file conventions returning `MetadataRoute.Sitemap` / `MetadataRoute.Robots`. Verify API details in `node_modules/next/dist/docs/` before writing code — per `AGENTS.md`, this version differs from older App Router material.
 
 ---
 
@@ -246,7 +374,7 @@ Structured data is what lets Google and AI search surfaces understand that this 
 
 All schema is emitted as JSON-LD in `<script type="application/ld+json">`. No microdata, no RDFa.
 
-> **Set expectations honestly.** Two things older SEO playbooks get wrong. FAQ rich results were restricted in August 2023 to well-known government and health sites, so FAQ markup will not put dropdowns in your search result. And review stars for a business on its own website are "self-serving" under Google's guidelines and are not eligible for rich results. Both markups remain worth emitting — for entity understanding and AI-search citation — just not for the stars.
+> **Set expectations honestly.** Google removed FAQ rich results beginning in May 2026 ([Search documentation updates](https://developers.google.com/search/updates)); FAQ markup remains a way to describe visible questions and answers, without a promise of Google dropdowns. Review stars for a business on its own website are "self-serving" under Google's guidelines and are not eligible for rich results. Keep structured data factual and consistent with visible content.
 
 ### REQ-010 — Site-wide LegalService schema, CMS-driven
 
@@ -591,7 +719,7 @@ John should be able to retire or rename a page without a developer.
 - Lookup is cached, so the table does not add a database round-trip to every request.
 - A new redirect takes effect within 60 seconds without a deploy.
 
-**Current status (2026-10-03): partial.** The table (migration `20260927215019`, applied to production 2026-10-03) stores redirects with a `permanent` boolean, `source_kind` and entity id, rejects loops and flattens chains. Supported top-level, blog and service dynamic routes consult it immediately before returning a 404. There is no redirect-management UI, notes field, generic proxy-wide lookup or demonstrated cross-request cache, so REQ-029 is not complete. Host and lowercase redirects do run in `proxy.ts` before session refresh; its matcher continues to exclude Next assets and image files.
+**Local status (2026-10-05): partial.** The table (migration `20260927215019`, applied to production 2026-10-03) stores redirects with a `permanent` boolean, `source_kind` and entity id, rejects loops and flattens chains. The new admin UI manages manual and generated rules. A generic missing-path server route uses 60-second ISR; saves invalidate dependent aliases. Working routes cannot be overridden. A notes field and the specified proxy-wide lookup remain absent. Host and lowercase redirects run in `proxy.ts` before session refresh; its matcher excludes Next assets and image files.
 
 ### REQ-030 — Slug changes auto-create redirects
 
@@ -603,7 +731,7 @@ John should be able to retire or rename a page without a developer.
 - The auto-created entry is flagged in the CMS as system-generated, and is editable.
 - The operator sees a confirmation naming both URLs before the change is applied.
 
-**Current status (2026-10-03): partial.** Published blog and ordinary service slug changes are captured transactionally and marked by `source_kind`; service renames also update related article links. Draft destinations do not receive an active redirect. The editor does not yet expose or confirm the generated entry.
+**Local status (2026-10-05): implemented for editable published blog and ordinary service URLs.** Renames are captured transactionally and marked by `source_kind`; service renames also update related article links. Generated rules are editable in Redirects. Confirmation names both URLs and is checked server-side against the stored slug. The pending scheduling migration also excludes never-live future and expired articles from automatic slug redirects.
 
 ### REQ-031 — 404 handling with correct status code
 
@@ -627,7 +755,7 @@ A custom 404 already exists at `app/not-found.tsx`. The requirement is that it b
 
 **P0**
 
-No sitemap exists today. Build `app/sitemap.ts` returning `MetadataRoute.Sitemap`, generated from the CMS rather than a hardcoded list.
+`app/sitemap.ts` returns `MetadataRoute.Sitemap` from the public CMS route registry rather than a hardcoded list.
 
 **Acceptance criteria**
 
@@ -638,6 +766,8 @@ No sitemap exists today. Build `app/sitemap.ts` returning `MetadataRoute.Sitemap
 - Admin, auth and API routes never appear.
 - Publishing content updates the sitemap within 60 seconds, via on-demand revalidation from the save action.
 - `changeFrequency` and `priority` are optional and low-value — include them only if you have a real reason. Google largely ignores both.
+
+**Local follow-up (2026-10-05):** fixed-page dates now use recorded timestamps for the CMS sections, shared public settings, route metadata and image descriptions which those pages render. Published collection changes also date their indexes. Save/restore paths explicitly refresh the sitemap. This does not change an article's printed Updated date, introduce another URL or use build time as an edit. A page without a genuine recorded source date still omits `lastModified`; resets/deletions cannot manufacture a missing timestamp. The literal every-entry criterion therefore remains partial.
 
 ### REQ-033 — Sitemap index
 
@@ -709,8 +839,8 @@ Targets are measured on **mobile**, Lighthouse simulated 4G, mid-tier device.
 **Acceptance criteria**
 
 - The hero portrait is the LCP element on the home page; it is served through `next/image` with `loading="eager"`, `fetchPriority="high"` and responsive sizes.
-- Source images are optimised before upload. The current referenced `public/Profile 7.png` is about 2.0 MB and still needs source compression/renaming (REQ-021).
-- The hero uses `LazyMotion`/`motion/react-m` for scroll-driven scale, and the testimonial marquee uses `motion/react-mini`. Rerun mobile Lighthouse on the release preview and confirm reduced-motion behavior before claiming a budget improvement.
+- Source images are optimised before upload. The local portrait is now `public/john-violaris-portrait.webp` at 137,298 bytes; the old 2,013,504-byte PNG URL redirects, and saved legacy references use the compressed source (REQ-021).
+- The hero and testimonial marquee preserve their original transforms and timings using native browser animations. Review animation work pauses offscreen, on hover/focus and for reduced motion. Rerun mobile Lighthouse on the release preview before claiming the LCP target is met.
 - Fonts are preloaded. `next/font` already handles this for the three faces in `app/layout.tsx`.
 - Lighthouse mobile shows LCP under 2.5s on home, a service page, and an article.
 
@@ -734,7 +864,7 @@ Targets are measured on **mobile**, Lighthouse simulated 4G, mid-tier device.
 - Third-party scripts load with `strategy="afterInteractive"` or `"lazyOnload"`.
 - The mega menu, mobile nav and service explorer respond within 200ms of interaction.
 - No main-thread task exceeds 50ms during normal interaction.
-- `motion` animations use compositor-friendly properties (transform, opacity) and respect `prefers-reduced-motion`.
+- Animations use compositor-friendly properties (transform, opacity) and respect `prefers-reduced-motion`.
 
 ### REQ-041 — Third-party script management
 
@@ -911,7 +1041,7 @@ Cheap to build, and it catches the errors that otherwise accumulate silently ove
 
 The migrations deliberately keep most fields in a `content` jsonb column so the field list can evolve without a migration per field. The lists below describe the broader target model. The implemented model is narrower and must not be mistaken for completed fields.
 
-Today, `seo_metadata.content` is the standalone, path-keyed override source. It supports `title`, `description`, `canonical`, Open Graph title/description/image/alt, `noIndex` and `noFollow`. Visible H1 content is edited in the relevant content form. There is no embedded per-entity `seo` payload, custom JSON-LD field, Twitter-specific field set, CMS robots/script registry, analytics token setting, or article reviewed-by/related-post workflow yet.
+Today, `seo_metadata.content` is the standalone, path-keyed override source. It supports title, description, canonical, Open Graph title/description/image/alt/type, independent X/Twitter fields, noIndex/noFollow and validated custom JSON-LD. Saved indexable entities embed a collapsed panel that saves to this same route-keyed source. CMS robots rules have a protected editor. Visible H1 content is edited in the relevant content form, subject to the service-copy freeze. There is no separate embedded per-entity `seo` payload, analytics token setting, or article reviewed-by/related-post workflow yet. The administrator-only script registry controls the two existing providers' enabled flags; arbitrary script insertion is unsupported.
 
 ### Shared SEO payload (`seo_metadata.content`, keyed by `path`)
 
@@ -1147,6 +1277,14 @@ Legal advice is "Your Money or Your Life" content in Google's terms, held to the
 - Articles state clearly that they are general information, not advice on the reader's specific matter.
 
 ### REQ-064 — No guaranteed outcomes
+
+**Local status (2026-10-05): not met; copy correction awaits John's approval.**
+The original public Special Reasons wording remains in place. Proposed default,
+render-time and migration corrections were withdrawn because existing public
+wording must stay unchanged until John reviews it. The SEO health dashboard
+flags possible outcome promises; warnings do not satisfy this requirement. Keep
+REQ-064 in the scored denominator at zero credit until approved wording is
+implemented and verified.
 
 **P0**
 

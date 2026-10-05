@@ -1,6 +1,7 @@
 "use client";
 
-import { useOptimistic, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
+import type { PublicationMutationResult } from "@/lib/cms/seo/publication-result";
 
 import { cn } from "cn";
 
@@ -30,23 +31,35 @@ export function PublishToggle({
   /** Names the row in the button's accessible description, e.g. the title. */
   label: string;
   published: boolean;
-  action: (id: string, published: boolean) => Promise<void>;
+  action: (id: string, published: boolean) => Promise<void | PublicationMutationResult>;
 }) {
   const [optimistic, setOptimistic] = useOptimistic(published);
-  const [, startTransition] = useTransition();
+  const [pending, startTransition] = useTransition();
+  const [result, setResult] = useState<PublicationMutationResult | null>(null);
 
   function toggle() {
     startTransition(async () => {
       setOptimistic(!optimistic);
-      await action(id, !optimistic);
+      setResult(null);
+      try {
+        const response = await action(id, !optimistic);
+        if (response) {
+          setResult(response);
+          if (!response.ok) setOptimistic(published);
+        }
+      } catch {
+        setOptimistic(published);
+        setResult({ ok: false, error: "Publication could not be changed. Reload and try again." });
+      }
     });
   }
 
   return (
-    <button
+    <div className="space-y-2"><button
       type="button"
       onClick={toggle}
       aria-pressed={optimistic}
+      disabled={pending}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors",
         optimistic
@@ -68,5 +81,8 @@ export function PublishToggle({
         {optimistic ? ` — unpublish ${label}` : ` — publish ${label}`}
       </span>
     </button>
+      {result?.error ? <p role="alert" className="max-w-sm text-xs text-destructive">{result.error}</p> : null}
+      {result?.warnings?.length ? <div role="status" className="max-w-sm text-xs text-amber-800 dark:text-amber-300"><p className="font-medium">Saved with SEO suggestions</p><ul className="mt-1 list-disc space-y-1 pl-4">{result.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></div> : null}
+    </div>
   );
 }

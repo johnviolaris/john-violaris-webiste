@@ -1,0 +1,23 @@
+{
+  "description": "Regression limits for actual first-party assets referenced by every public sitemap page in a production build. Deterministic gzip level 9 sizes; legacy noModule JavaScript is measured separately. This is not a Core Web Vitals pass or a loading-time guarantee.",
+  "baseline": {
+    "date": "2026-10-05",
+    "nextVersion": "16.3.8",
+    "pagesMeasured": 33,
+    "maxInitialJsGzipBytes": 205581,
+    "maxLegacyJsGzipBytes": 39520,
+    "maxInitialCssGzipBytes": 24667,
+    "portraitBytes": 137298
+  },
+  "headroom": {
+    "bundles": "20% above the measured baseline, rounded up to the next KiB. This allows small maintenance changes while requiring review for material growth or framework upgrades.",
+    "portrait": "10% above the compressed source baseline, rounded up to the next KiB. Replacing the portrait requires keeping source compression comparable.",
+    "scope": "Initial first-party scripts and styles only. Runtime lazy chunks, fonts, third-party widgets and browser execution time need separate browser/Lighthouse and field measurements. Limits must be reviewed deliberately, never automatically raised by CI."
+  },
+  "limits": {
+    "maxInitialJsGzipBytes": 246784,
+    "maxLegacyJsGzipBytes": 48128,
+    "maxInitialCssGzipBytes": 29696,
+    "portraitBytes": 151552
+  }
+}

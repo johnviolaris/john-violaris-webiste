@@ -1,0 +1,70 @@
+begin;
+select plan(26);
+
+insert into auth.users(id,email,raw_app_meta_data) values
+  ('00000000-0000-4000-8000-000000007701','media-admin@example.test','{}'),
+  ('00000000-0000-4000-8000-000000007702','media-seo@example.test','{}');
+update public.profiles set role='admin' where id='00000000-0000-4000-8000-000000007701';
+update public.profiles set role='seo_editor' where id='00000000-0000-4000-8000-000000007702';
+insert into public.page_sections(page,section,content) values('audit-fixture','intro','{"title":"Original"}');
+insert into public.site_settings(key,value) values('audit-fixture','"Original"');
+insert into public.seo_metadata(path,content) values('/audit-fixture','{"description":"Original"}');
+insert into public.media_assets(id,url,filename,mime_type,width,height,alt_text) values
+  ('00000000-0000-4000-8000-000000007703','/audit-fixture.png','audit-fixture.png','image/png',12,9,'A test image');
+
+select is((select count(*)::int from public.content_revisions where entity_table='page_sections' and entity_key='audit-fixture/intro'),1,'static section save creates a stable-key version');
+update public.page_sections set content=content where page='audit-fixture';
+select is((select count(*)::int from public.content_revisions where entity_table='page_sections' and entity_key='audit-fixture/intro'),2,'an unchanged saved update still appends a version');
+delete from public.site_settings where key='audit-fixture';
+insert into public.site_settings(key,value) values('audit-fixture','"Recovered"');
+select is((select count(*)::int from public.content_revisions where entity_table='site_settings' and entity_key='audit-fixture'),3,'a deleted and recreated setting keeps its versions');
+select is((select snapshot->>'value' from public.content_revisions where entity_table='site_settings' and entity_key='audit-fixture' order by revision_number limit 1),'Original','old snapshots survive later changes');
+
+set local role anon;
+select is((select count(*)::int from public.media_assets where id='00000000-0000-4000-8000-000000007703'),0,'unreferenced draft image descriptions are private');
+select throws_ok('select * from public.content_revisions','42501',null,'anonymous draft and audit history is private');
+reset role;
+insert into public.blog_posts(slug,title,published,content) values('media-audit-fixture','Fixture article',true,'{"featuredImage":"/audit-fixture.png"}');
+set local role anon;
+select is((select count(*)::int from public.media_assets where id='00000000-0000-4000-8000-000000007703'),1,'published image descriptions are visible');
+reset role;
+update public.blog_posts set published_at=now()+interval '1 hour' where slug='media-audit-fixture';
+set local role anon;
+select is((select count(*)::int from public.media_assets where id='00000000-0000-4000-8000-000000007703'),0,'scheduled article image descriptions remain private');
+reset role;
+update public.blog_posts set published_at=now()-interval '2 hours',unpublish_at=now()-interval '1 hour' where slug='media-audit-fixture';
+set local role anon;
+select is((select count(*)::int from public.media_assets where id='00000000-0000-4000-8000-000000007703'),0,'expired article image descriptions remain private');
+reset role;
+update public.blog_posts set published=false where slug='media-audit-fixture';
+set local role anon;
+select is((select count(*)::int from public.media_assets where id='00000000-0000-4000-8000-000000007703'),0,'withdrawing content also hides its image captions');
+reset role;
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000007702',true);
+set local role authenticated;
+select is((select count(*)::int from public.content_revisions where entity_table not in ('seo_metadata') and not(entity_table='site_settings' and entity_key='robots')),0,'SEO editors cannot inspect unrelated body/settings/image snapshots');
+update public.seo_metadata set content='{"description":"SEO revision"}' where path='/audit-fixture';
+select is((select actor_id::text from public.content_revisions where snapshot->'content'->>'description'='SEO revision'),'00000000-0000-4000-8000-000000007702','SEO revision records its authenticated editor');
+select is((with changed as(update public.media_assets set caption='Blocked' returning id) select count(*)::int from changed),0,'SEO editors cannot alter image descriptions');
+select is((with changed as(update public.page_sections set content='{}' returning id) select count(*)::int from changed),0,'SEO editors cannot alter static content');
+select throws_ok('delete from public.content_revisions','42501',null,'SEO editors cannot erase history');
+select throws_ok($$insert into public.content_revisions(entity_table,entity_key,operation,snapshot) values('seo_metadata','/fake','create','{}')$$,'42501',null,'SEO editors cannot forge versions');
+reset role;
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000007701',true);
+set local role authenticated;
+select is((select count(*)::int from public.media_assets where id='00000000-0000-4000-8000-000000007703'),1,'admin library reads include private draft images');
+select is((select count(*)::int from public.content_revisions where entity_table='page_sections' and entity_key='audit-fixture/intro'),2,'admin reads include private static history');
+select throws_ok($$insert into public.media_assets(url,filename,mime_type,width,height) values('/empty.png','empty.png','image/png',1,1)$$,'23514',null,'alt text is required unless explicitly decorative');
+select throws_ok($$update public.media_assets set url='/broken.png' where id='00000000-0000-4000-8000-000000007703'$$,'P0001','Upload a new image instead of changing an existing served URL','an image metadata edit cannot break a published reference');
+update public.media_assets set title='Image title',caption='Image credit',is_decorative=true,alt_text='' where id='00000000-0000-4000-8000-000000007703';
+select is((select count(*)::int from public.content_revisions where entity_table='media_assets' and entity_id='00000000-0000-4000-8000-000000007703'),2,'image descriptions have complete history');
+select is((select alt_text from public.media_assets where id='00000000-0000-4000-8000-000000007703'),'','decorative images keep an empty description');
+select throws_ok('delete from public.media_assets','42501',null,'media controls do not delete referenced objects');
+select throws_ok('delete from public.content_revisions','42501',null,'administrators cannot erase append-only history');
+insert into public.service_groups(name) values('Audit fixture group');
+select is((select count(*)::int from public.content_revisions where entity_table='service_groups' and snapshot->>'name'='Audit fixture group'),1,'service groups are audited');
+insert into public.blog_categories(slug,name) values('audit-fixture-category','Audit fixture category');
+select is((select count(*)::int from public.content_revisions where entity_table='blog_categories' and snapshot->>'slug'='audit-fixture-category'),1,'blog categories are audited');
+reset role;
+select * from finish();
+rollback;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ClickableRow } from "@/components/admin/clickable-row";
-import { listSeoMetadata } from "@/lib/cms/admin-queries";
+import { listSeoMetadataForEditor as listSeoMetadata } from "@/lib/cms/seo/admin-queries";
 import { getSiteConfig } from "@/lib/cms/queries";
 import { titleSuffix } from "@/lib/cms/seo/resolve";
 import {
@@ -20,6 +20,7 @@ const groups: { key: SeoRouteGroup; description: string }[] = [
   { key: "Pages", description: "The fixed pages of the site." },
   { key: "Services", description: "One for each published service." },
   { key: "Articles", description: "One for each published article." },
+  { key: "Locations", description: "Bespoke, reviewed location pages only. Drafts are private." },
 ];
 
 /** The link to a route's editor. Paths contain slashes, so they ride the query. */
@@ -51,6 +52,8 @@ export default async function AdminSeoPage() {
             ? "No page has been customised yet."
             : `${customised} of ${routes.length} ${customised === 1 ? "page has" : "pages have"} been customised.`}
         </p>
+        <Link href="/admin/seo-metadata/health" className="mt-3 inline-block text-sm font-medium underline underline-offset-4">Review SEO health</Link>
+        <Link href="/admin/seo-metadata/robots" className="mt-3 ml-5 inline-block text-sm font-medium underline underline-offset-4">Crawl rules</Link>
       </header>
 
       <div className="space-y-8">

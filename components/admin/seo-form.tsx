@@ -16,11 +16,13 @@ import { saveSeo } from "@/lib/cms/seo/actions";
 import {
   descriptionWarnAt,
   initialSeoFormState,
+  seoRules,
   titleWarnAt,
   type SeoField,
   type SeoValues,
 } from "@/lib/cms/seo/schema";
 import type { RouteDefaults } from "@/lib/cms/seo/resolve";
+import { normaliseSeoText } from "@/lib/cms/seo/health";
 
 /**
  * The SEO editor for one page.
@@ -50,6 +52,9 @@ export type SeoFormProps = {
   suffix: string;
   /** The site's default card, shown when neither the page nor John sets one. */
   fallbackImage: string;
+  comparisonPages: { path: string; title: string; description: string }[];
+  draft?: boolean;
+  canManageMedia?: boolean;
 };
 
 export function SeoForm({
@@ -63,6 +68,9 @@ export function SeoForm({
   customised,
   suffix,
   fallbackImage,
+  comparisonPages,
+  draft = false,
+  canManageMedia = true,
 }: SeoFormProps) {
   const [state, formAction] = useActionState(saveSeo, {
     ...initialSeoFormState,
@@ -79,6 +87,10 @@ export function SeoForm({
   const [ogTitle, setOgTitle] = useState(values.ogTitle);
   const [ogDescription, setOgDescription] = useState(values.ogDescription);
   const [ogImage, setOgImage] = useState(values.ogImage);
+  const [ogType, setOgType] = useState(values.ogType);
+  const [twitterTitle, setTwitterTitle] = useState(values.twitterTitle);
+  const [twitterDescription, setTwitterDescription] = useState(values.twitterDescription);
+  const [twitterImage, setTwitterImage] = useState(values.twitterImage);
   const [noIndex, setNoIndex] = useState(initialNoIndex);
   const [noFollow, setNoFollow] = useState(initialNoFollow);
 
@@ -100,6 +112,10 @@ export function SeoForm({
       setOgTitle("");
       setOgDescription("");
       setOgImage("");
+      setOgType("");
+      setTwitterTitle("");
+      setTwitterDescription("");
+      setTwitterImage("");
       setNoIndex(false);
       setNoFollow(false);
     }
@@ -126,7 +142,7 @@ export function SeoForm({
   const shownTitle = (title.trim() || defaults.title) + suffix;
   const shownDescription = description.trim() || defaults.description || "";
   const defaultShareTitle =
-    defaults.ogType === "article"
+    (ogType || defaults.ogType) === "article"
       ? title.trim() || defaults.title
       : shownTitle;
   const shownShareTitle = ogTitle.trim() || defaultShareTitle;
@@ -134,6 +150,8 @@ export function SeoForm({
   const shownShareImage = ogImage || defaults.image?.url || fallbackImage;
 
   const imageSize = useImageSize(ogImage);
+  const duplicateTitles = comparisonPages.filter((page) => normaliseSeoText(page.title) === normaliseSeoText(shownTitle));
+  const duplicateDescriptions = shownDescription ? comparisonPages.filter((page) => normaliseSeoText(page.description) === normaliseSeoText(shownDescription)) : [];
 
   return (
     <form ref={formRef} action={formAction} className="space-y-8">
@@ -154,6 +172,8 @@ export function SeoForm({
           {state.message}
         </p>
       ) : null}
+
+      {state.warnings?.length ? <div className="rounded-xl border border-amber-600/30 p-4 text-sm text-amber-800 dark:text-amber-300" role="status"><p className="font-medium">Saved with suggestions</p><ul className="mt-2 list-disc space-y-1 pl-5">{state.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></div> : null}
 
       {/* ---------------------------------------------------------------- */}
       <section className="space-y-4 rounded-xl border p-4 md:p-5">
@@ -182,6 +202,7 @@ export function SeoForm({
           <Input
             id={`${formId}-title`}
             name="title"
+            maxLength={seoRules.title.maxLength}
             value={title}
             placeholder={defaults.title}
             onChange={(event) => setTitle(event.target.value)}
@@ -206,6 +227,7 @@ export function SeoForm({
           <Textarea
             id={`${formId}-description`}
             name="description"
+            maxLength={seoRules.description.maxLength}
             rows={3}
             value={description}
             placeholder={defaults.description ?? ""}
@@ -214,6 +236,8 @@ export function SeoForm({
             aria-describedby={errorId("description")}
           />
         </Field>
+        <DuplicateNotice pages={duplicateTitles} field="title" />
+        <DuplicateNotice pages={duplicateDescriptions} field="description" />
       </section>
 
       {/* ---------------------------------------------------------------- */}
@@ -245,6 +269,7 @@ export function SeoForm({
           <Input
             id={`${formId}-ogTitle`}
             name="ogTitle"
+            maxLength={seoRules.ogTitle.maxLength}
             value={ogTitle}
             placeholder={defaultShareTitle}
             onChange={(event) => setOgTitle(event.target.value)}
@@ -262,6 +287,7 @@ export function SeoForm({
           <Textarea
             id={`${formId}-ogDescription`}
             name="ogDescription"
+            maxLength={seoRules.ogDescription.maxLength}
             rows={2}
             value={ogDescription}
             placeholder={shownDescription}
@@ -269,6 +295,14 @@ export function SeoForm({
             aria-invalid={invalid("ogDescription")}
             aria-describedby={errorId("ogDescription")}
           />
+        </Field>
+
+        <Field label="Open Graph type" labelFor={`${formId}-ogType`} hint="Usually article for a guide and website for other pages. Leave the default selected to follow the page type." error={state.fieldErrors.ogType} errorId={errorId("ogType")}>
+          <select id={`${formId}-ogType`} name="ogType" value={ogType} onChange={(event) => setOgType(event.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" aria-invalid={invalid("ogType")} aria-describedby={errorId("ogType")}>
+            <option value="">Page default — {defaults.ogType ?? "website"}</option>
+            <option value="website">Website</option>
+            <option value="article">Article</option>
+          </select>
         </Field>
 
         <Field
@@ -286,6 +320,7 @@ export function SeoForm({
             value={ogImage}
             onChange={setOgImage}
             folder="share"
+            canManageMedia={canManageMedia}
           />
           {imageSize && (imageSize.width < 1200 || imageSize.height < 630) ? (
             <p className="text-xs text-destructive">
@@ -307,6 +342,7 @@ export function SeoForm({
             <Input
               id={`${formId}-ogImageAlt`}
               name="ogImageAlt"
+              maxLength={seoRules.ogImageAlt.maxLength}
               defaultValue={state.values.ogImageAlt}
               aria-invalid={invalid("ogImageAlt")}
               aria-describedby={errorId("ogImageAlt")}
@@ -316,6 +352,36 @@ export function SeoForm({
       </section>
 
       {/* ---------------------------------------------------------------- */}
+      <details className="rounded-xl border p-4 md:p-5" open={Boolean(values.twitterTitle || values.twitterDescription || values.twitterImage || values.twitterCard || state.fieldErrors.twitterImage || state.fieldErrors.twitterImageAlt || state.fieldErrors.twitterCard)}>
+        <summary className="cursor-pointer font-display text-lg font-semibold">X / Twitter</summary>
+        <div className="mt-4 space-y-4">
+          <p className="text-sm text-muted-foreground">Optional settings for X. Empty fields use the shared link settings above.</p>
+          <SharePreview url={url} title={twitterTitle.trim() || shownShareTitle} description={twitterDescription.trim() || shownShareDescription} image={twitterImage || shownShareImage} />
+          <Field label="X title" labelFor={`${formId}-twitterTitle`} error={state.fieldErrors.twitterTitle} errorId={errorId("twitterTitle")}>
+            <Input id={`${formId}-twitterTitle`} name="twitterTitle" value={twitterTitle} onChange={(event) => setTwitterTitle(event.target.value)} placeholder={shownShareTitle} maxLength={seoRules.twitterTitle.maxLength} aria-invalid={invalid("twitterTitle")} aria-describedby={errorId("twitterTitle")} />
+          </Field>
+          <Field label="X description" labelFor={`${formId}-twitterDescription`} error={state.fieldErrors.twitterDescription} errorId={errorId("twitterDescription")}>
+            <Textarea id={`${formId}-twitterDescription`} name="twitterDescription" value={twitterDescription} onChange={(event) => setTwitterDescription(event.target.value)} placeholder={shownShareDescription} maxLength={seoRules.twitterDescription.maxLength} rows={2} aria-invalid={invalid("twitterDescription")} aria-describedby={errorId("twitterDescription")} />
+          </Field>
+          <Field label="X image" hint="Leave empty to use the shared link image. Prefer 1200 × 630 pixels." error={state.fieldErrors.twitterImage} errorId={errorId("twitterImage")}>
+            <ImageField name="twitterImage" value={twitterImage} onChange={setTwitterImage} folder="share" canManageMedia={canManageMedia} />
+          </Field>
+          {twitterImage ? (
+            <Field label="X image description" labelFor={`${formId}-twitterImageAlt`} error={state.fieldErrors.twitterImageAlt} errorId={errorId("twitterImageAlt")}>
+              <Input id={`${formId}-twitterImageAlt`} name="twitterImageAlt" defaultValue={state.values.twitterImageAlt} maxLength={seoRules.twitterImageAlt.maxLength} aria-invalid={invalid("twitterImageAlt")} aria-describedby={errorId("twitterImageAlt")} />
+            </Field>
+          ) : null}
+          <Field label="X card format" labelFor={`${formId}-twitterCard`} error={state.fieldErrors.twitterCard} errorId={errorId("twitterCard")}>
+            <select id={`${formId}-twitterCard`} name="twitterCard" defaultValue={state.values.twitterCard} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" aria-invalid={invalid("twitterCard")} aria-describedby={errorId("twitterCard")}>
+              <option value="">Default — large image</option>
+              <option value="summary_large_image">Large image</option>
+              <option value="summary">Compact summary</option>
+            </select>
+          </Field>
+        </div>
+      </details>
+
+      {/* ---------------------------------------------------------------- */}
       <details
         className="group rounded-xl border p-4 md:p-5"
         // Open when something in here is set or wrong, so it is never hidden.
@@ -323,7 +389,9 @@ export function SeoForm({
           initialNoIndex ||
           initialNoFollow ||
           Boolean(values.canonical) ||
-          Boolean(state.fieldErrors.canonical)
+          Boolean(state.fieldErrors.canonical) ||
+          Boolean(values.customJsonLd) ||
+          Boolean(state.fieldErrors.customJsonLd)
         }
       >
         <summary className="cursor-pointer font-display text-lg font-semibold">
@@ -378,11 +446,15 @@ export function SeoForm({
             <Input
               id={`${formId}-canonical`}
               name="canonical"
+              maxLength={seoRules.canonical.maxLength}
               defaultValue={state.values.canonical}
               placeholder={url}
               aria-invalid={invalid("canonical")}
               aria-describedby={errorId("canonical")}
             />
+          </Field>
+          <Field label="Additional structured data (JSON-LD)" labelFor={`${formId}-customJsonLd`} hint="For an administrator familiar with Schema.org. Add only facts visible on this page. The site already creates the practice, person, page, service/article and breadcrumb nodes. Do not repeat them, add invented ratings or promise case outcomes. Validation checks structure and safety; it does not confirm Google's eligibility rules." error={state.fieldErrors.customJsonLd} errorId={errorId("customJsonLd")}>
+            <Textarea id={`${formId}-customJsonLd`} name="customJsonLd" defaultValue={state.values.customJsonLd} rows={10} maxLength={seoRules.customJsonLd.maxLength} spellCheck={false} className="font-mono text-xs" placeholder={'{"@type":"CreativeWork","name":"A fact shown on this page"}'} aria-invalid={invalid("customJsonLd")} aria-describedby={errorId("customJsonLd")} />
           </Field>
         </div>
       </details>
@@ -397,7 +469,7 @@ export function SeoForm({
           >
             Back to all pages
           </Link>
-          <a
+          {!draft ? <a
             href={path}
             target="_blank"
             rel="noopener"
@@ -405,7 +477,7 @@ export function SeoForm({
           >
             View {label}
             <ExternalLink className="size-3.5" aria-hidden="true" />
-          </a>
+          </a> : <span className="text-xs text-muted-foreground">Draft metadata is private until its page becomes public.</span>}
         </div>
 
         {/* A second submit button of this same form, told apart by its
@@ -431,6 +503,16 @@ export function SeoForm({
         ) : null}
       </div>
     </form>
+  );
+}
+
+function DuplicateNotice({ pages, field }: { pages: { path: string }[]; field: string }) {
+  if (pages.length === 0) return null;
+  return (
+    <p className="text-sm text-amber-800 dark:text-amber-300" role="status">
+      This search {field} is also used by {pages.length === 1 ? "another page" : `${pages.length} other pages`}:{" "}
+      {pages.map((page, index) => <span key={page.path}>{index > 0 ? ", " : ""}<Link href={`/admin/seo-metadata/edit?path=${encodeURIComponent(page.path)}`} className="underline underline-offset-4">{page.path}</Link></span>)}. Give each page a distinct {field} where possible.
+    </p>
   );
 }
 

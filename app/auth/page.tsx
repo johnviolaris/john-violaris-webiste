@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { AuthForm } from "@/app/auth/auth-form";
-import { getAdminSession } from "@/lib/auth";
+import { getCmsSession } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Admin sign in",
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AuthPage() {
-  const admin = await getAdminSession();
+  const admin = await getCmsSession();
 
   if (admin) redirect("/admin");
 

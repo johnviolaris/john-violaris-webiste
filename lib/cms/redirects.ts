@@ -4,6 +4,9 @@ import { cache } from "react";
 import { permanentRedirect, redirect } from "next/navigation";
 
 import { publicClient } from "@/utils/supabase/public";
+import { isPublicRedirectPath, isSameSitePath } from "@/lib/cms/redirect-rules";
+
+export { isSameSitePath } from "@/lib/cms/redirect-rules";
 
 export type CmsRedirect = {
   destinationPath: string;
@@ -17,17 +20,6 @@ export type CmsRedirect = {
  * means malformed legacy data can never become an open redirect if it was
  * inserted outside the application.
  */
-export function isSameSitePath(value: string): boolean {
-  return (
-    value.startsWith("/") &&
-    !value.startsWith("//") &&
-    !value.includes("\\") &&
-    !value.includes("?") &&
-    !value.includes("#") &&
-    value.length <= 512
-  );
-}
-
 /** One active redirect, or null when the requested path is still canonical. */
 export const getCmsRedirect = cache(async function getCmsRedirect(
   sourcePath: string,
@@ -46,7 +38,7 @@ export const getCmsRedirect = cache(async function getCmsRedirect(
     if (
       !data ||
       data.destination_path === sourcePath ||
-      !isSameSitePath(data.destination_path)
+      !isPublicRedirectPath(data.destination_path)
     ) {
       return null;
     }

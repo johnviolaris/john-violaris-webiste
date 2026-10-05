@@ -43,6 +43,12 @@ Then confirm:
       figures and no fee-management admin.
 - [ ] Final contact, regulatory, privacy and complaints content has been approved
       by the appropriate owner.
+- [ ] Service-page wording, headings and search wording are preserved unless John
+      approves the exact proposed changes. The user-approved restoration of six
+      earlier shortened article SEO titles is the current exception; article
+      bodies and visible headlines are unchanged. Special Reasons corrections
+      and the added drink-driving service synonym paragraph remain withdrawn.
+      REQ-064 remains not met; do not count a dashboard warning as corrected copy.
 - [ ] The previous known-good deployment still opens and is eligible for a
       Vercel rollback.
 - [ ] The current DNS time-to-live is understood. If it is being reduced, do so
@@ -73,10 +79,67 @@ npm run start
 
 ```powershell
 npm run runtime:verify -- http://127.0.0.1:3000
+npm run pages:verify -- http://127.0.0.1:3000
+npm run assets:verify -- http://127.0.0.1:3000
 npm run schema:verify -- http://127.0.0.1:3000
+npm run lighthouse:ci
 ```
 
 - [ ] Every command passes on the release commit.
+- [ ] Review `performance-budgets.json` if a dependency upgrade or deliberate
+      design change materially increases initial JavaScript, CSS or portrait
+      size. Passing asset budgets does not establish field Core Web Vitals.
+- [ ] Review Lighthouse CI's two runs each of home, service and article. Its
+      performance/LCP/CLS/TBT assertions are warnings; record unresolved target
+      failures. Field INP needs separate measurement.
+- [ ] Review and apply the seven pending publishing/history, portrait-only,
+      location, SEO-role, media/history, rich-caption and private-redirect-note
+      migrations in a non-production database first.
+      The 2026-10-05 implementation has not applied them to production.
+      `20261005131025_optimize_portrait.sql` changes only the legacy portrait
+      URL and must leave existing legal wording unchanged.
+- [x] Final FAQ/notes/CSS/field-collector source
+      `5e7cdd3bf980bd55f339e8a375cb69162da14eb9921a7b3492c07ed6e0981383`
+      passes with 74 application routes;
+      all 33 rendered public pages and schema graphs pass, with zero rendered
+      failures/advisories. 113 unit tests, lint, TypeScript, CMS seed checks,
+      30 SEO checks, 89 workflow SQL, 20 SEO-role SQL and 36 private-note SQL
+      checks pass. Public CSS is 19,431 gzip bytes (22.5% smaller), with current
+      initial JavaScript 174,608 bytes and unchanged budgets. All 33 main-text
+      hashes are unchanged; seven real-browser consent/privacy fixture cases
+      make no Google request. These do not verify production metric receipt.
+      Focused Chrome
+      confirms preserved page text, original H1s and unchanged service wording.
+      Earlier complete Chrome/axe runs predate the copy withdrawal. Nine later
+      Lighthouse reports historically measured the preserved-copy caption/integration snapshot
+      before the server-only sitemap date follow-up: mobile performance medians
+      89/91/93.5, LCP 3.611/3.460/3.096 seconds; desktop home 100 and 0.768 seconds.
+      All nine automated accessibility/best-practices scores are 100 and CLS 0.
+      Mobile targets and field INP remain open. Release acceptance must retain
+      these source/build boundaries. The portrait migration contains no legal
+      wording changes. The sitemap follow-up uses actual CMS dates and refreshes
+      after saves/restores; missing/reset/deleted source timestamps stay omitted.
+      Seven final-source Lighthouse reports (two mobile runs per page and one
+      desktop-home run) give mobile performance 90/92/96.5 and LCP
+      3.587/3.304/2.652 seconds; desktop home 100 and 0.738 seconds. All seven
+      automated Accessibility/Best Practices scores are 100 and CLS is 0.
+      Home/Service performance, all mobile LCP targets and field INP stay open.
+- [ ] Verify authenticated saved-draft previews and revision restore against the
+      migrated database. Verify future/expired articles are absent from public
+      pages and sitemap, including after the ISR refresh boundary.
+- [ ] Against that database, verify reusable media metadata, a 4 MiB upload,
+      version comparison/restoration and the SEO-editor role. Confirm draft-image
+      descriptions for unpublished-only images are private; uploaded website image
+      files remain public by URL. Verify formatted caption preview/render/restore
+      and administrator-only GA/review switches, including invalid config denial.
+- [ ] Verify optional article/service FAQs in that migrated environment: add,
+      reorder, save, preview, publish and restore. Visible answers and the single
+      FAQ schema must match; an empty list must leave existing page text intact.
+      Invalid saved FAQ data needs an explicit repair/clear acknowledgment.
+- [ ] Verify private redirect notes as an administrator, then confirm anonymous,
+      ordinary and SEO-editor users cannot read or write them. Reject an invalid
+      note and confirm neither the rule nor its dependent chain changed. Check
+      that editing an automatic redirect preserves its origin and created time.
 - [ ] The dependency lockfile is committed and unchanged by `npm ci`.
 - [ ] All required migration files are committed under `supabase/migrations/`.
 - [ ] Production and Preview each contain the intended variables. Check presence
@@ -91,10 +154,25 @@ npm run schema:verify -- http://127.0.0.1:3000
   - `NEXT_PUBLIC_GA_MEASUREMENT_ID`, Production only when analytics is approved
 
 - [ ] No secret or privileged Supabase key uses a `NEXT_PUBLIC_` name.
-- [ ] Public signup is disabled in the hosted Supabase Auth settings; the local
-      `supabase/config.toml` setting does not change an already hosted project.
+- [x] Public signup is verified disabled in the correct hosted Supabase project:
+      the 2026-10-05 Auth settings API returned `disable_signup: true`.
+      Recheck this at release; local `supabase/config.toml` alone does not configure
+      a hosted project.
 - [ ] Preview is not silently connected to production write paths unless that is
       an explicit, reviewed decision and no test submission will be made.
+
+Read-only hosting verification on 2026-10-05 found the correct project in the
+`john-violaris` Chrome dashboard and an existing Ready production deployment.
+Required variable names are present with their values masked. GA4 and the IP
+salt are Production only. Supabase, Resend and enquiry sender/recipient rows
+apply to both Production and Preview. Before a write test, give Preview a
+separate database, intended test recipient and its own random IP salt, and
+verify that isolation. The dashboard also flags `SUPABASE_SECRET_KEY` and
+`RESEND_API_KEY` stored as Configuration; review Secret storage and rotation
+with the release owner. Presence/scope checks do not establish correct values
+or inbox delivery. No hosting setting was changed during this verification.
+Speed Insights has no collected LCP/INP/CLS data; its displayed zero score is
+a setup placeholder and must not be reported as a measured score.
 
 ## 3. Supabase backup and migration
 
@@ -204,9 +282,27 @@ enquiry. Do not use a real client's details.
       collection and removes the applicable GA cookies.
 - [ ] Page views across client-side navigation and the form/contact events are
       visible in GA4 DebugView.
+- [x] `generate_lead` is registered as a key event in the existing John Violaris
+      GA4 property without a default monetary value (2026-10-05). Its accepted-form
+      trigger is local/unreleased; this is configuration evidence only.
+- [ ] After release, verify one accepted enquiry produces `generate_lead` once,
+      rejected forms produce none, and consent withdrawal suppresses events
+      across tabs. No test enquiry was sent during local implementation.
 - [ ] No name, email address, telephone number, case description or matter type
       reaches analytics.
 - [ ] Preview and localhost traffic do not report to the production property.
+- [ ] With GA4 enabled/configured and consent granted, released `LCP`, `INP`
+      and `CLS` events contain only the intended numeric measurement parameters.
+      Confirm no measurement-library load before consent and no metric events
+      after cross-tab withdrawal or integration disable. The library is
+      registered once per document; regrant must not duplicate observers.
+      Local data-layer/fixture checks do not prove receipt by GA4.
+- [ ] The cookie policy's analytics/storage claims follow the current GA4
+      configuration and integration switch. Turning the integration off must
+      remove active-analytics claims and controls.
+- [ ] Collect sufficient real-user data and assess LCP/INP/CLS separately from
+      Lighthouse. The local numeric collector is preparation, not evidence of
+      a field pass; Vercel Speed Insights remains unconfigured.
 - [ ] Google Search Console ownership is verified for the primary and secondary
       domains after DNS permits it.
 - [ ] Bing Webmaster Tools ownership is verified if retained in launch scope.

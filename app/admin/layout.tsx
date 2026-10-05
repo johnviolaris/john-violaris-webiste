@@ -1,3 +1,5 @@
+import "./admin.css";
+
 import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
 
@@ -9,7 +11,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { requireAdmin } from "@/lib/auth";
+import { requireCmsSession } from "@/lib/auth";
 import { countNewEnquiries } from "@/lib/enquiries/queries";
 
 export const metadata: Metadata = {
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  await requireAdmin();
+  const session = await requireCmsSession();
 
   return (
     <TooltipProvider>
@@ -27,10 +29,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             layout waits for delays the page nested inside it, and a number on a
             sidebar link is not worth holding an enquiry back for. */}
         <AdminSidebar
+          role={session.role}
           enquiryBadge={
-            <Suspense fallback={null}>
+            session.role === "admin" ? <Suspense fallback={null}>
               <NewEnquiryBadge />
-            </Suspense>
+            </Suspense> : null
           }
         />
         {/* `min-w-0` because the inset is a flex item beside the sidebar, and

@@ -1,5 +1,7 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { requireAdmin } from "@/lib/auth";
 import {
   formError,
@@ -25,6 +27,10 @@ import type { ServiceContent, ServicePageContent } from "@/lib/cms/types";
 import type { PenaltyCard, TableRow } from "@/lib/content/service-detail";
 import { cmsWrite } from "@/lib/cms/write";
 import { createClient } from "@/utils/supabase/server";
+import { getPublicationSeoWarnings } from "@/lib/cms/seo/publication-check";
+import { serviceSeoDefaults } from "@/lib/cms/seo/routes";
+import type { PublicationMutationResult } from "@/lib/cms/seo/publication-result";
+import { readFaqItems, validateFaqItems } from "@/lib/cms/faq";
 
 /**
  * Offence-page mutations.
@@ -39,7 +45,7 @@ import { createClient } from "@/utils/supabase/server";
  * services index `revalidate.ts` already lists, so each write passes it.
  */
 
-type Owner = { slug: string; content: Pick<ServiceContent, "href"> };
+type Owner = { slug: string; name: string; content: Pick<ServiceContent, "href"> };
 
 function pagePath(slug: string): string {
   return `/services/${slug}`;
@@ -56,6 +62,8 @@ function missingToPublish(
   content: Partial<ServicePageContent>,
 ): Partial<Record<ServicePageField, string>> | null {
   const missing: Partial<Record<ServicePageField, string>> = {};
+  const faqs = validateFaqItems(content.faqItems);
+  if (!faqs.ok) missing.faqItems = faqs.error;
 
   for (const field of requiredToPublish) {
     if (!content[field]) {
@@ -95,7 +103,7 @@ export async function saveServicePage(
 
   const { data: service } = await supabase
     .from("services")
-    .select("slug, content")
+    .select("slug, name, content")
     .eq("id", serviceId)
     .maybeSingle<Owner>();
 
@@ -142,11 +150,14 @@ export async function saveServicePage(
 
   // `process` is stored but not edited here — see the schema — so the save
   // carries over whatever the page already holds.
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from("service_pages")
     .select("content")
     .eq("service_id", serviceId)
     .maybeSingle<{ content: Partial<ServicePageContent> }>();
+  if (existingError) return formFailure(values, "The current page could not be loaded. Reload before saving.");
+  const faqs = readFaqItems(formData, existing?.content.faqItems);
+  if (!faqs.ok) return formError(values, { faqItems: faqs.error });
 
   const content: ServicePageContent = {
     headline: values.headline,
@@ -157,6 +168,7 @@ export async function saveServicePage(
     issuesIntro: values.issuesIntro,
     defenceIssues: items.defenceIssues as ServicePageContent["defenceIssues"],
     process: existing?.content.process ?? [],
+    ...(faqs.items.length ? { faqItems: faqs.items } : {}),
     // Absent rather than empty, as the seeded pages have them: the page reads
     // an absent table as "fall back" or "leave the section out".
     ...(items.outcomes.length > 0
@@ -179,7 +191,7 @@ export async function saveServicePage(
     );
   }
 
-  return cmsWrite({
+  const state = await cmsWrite({
     entity: "service-pages",
     values,
     successMessage: published ? "Page saved and published." : "Draft saved.",
@@ -194,6 +206,15 @@ export async function saveServicePage(
         .select("id")
         .maybeSingle(),
   });
+  const warnings = state.status === "success" && published
+    ? await getPublicationSeoWarnings(pagePath(service.slug), serviceSeoDefaults(pagePath(service.slug), service.name, content.intro), content)
+    : [];
+  return {
+    status: state.status,
+    message: warnings.length ? `${state.message} SEO suggestions: ${warnings.join(" ")}` : state.message,
+    fieldErrors: state.fieldErrors,
+    values: state.values,
+  };
 }
 
 /**
@@ -203,25 +224,25 @@ export async function saveServicePage(
  * refuses an incomplete one. The list's button then settles back to Draft,
  * and the editor is where the reason is shown.
  */
-export async function setServicePagePublished(id: string, published: boolean) {
+export async function setServicePagePublished(id: string, published: boolean): Promise<PublicationMutationResult> {
   await requireAdmin();
 
-  if (typeof id !== "string" || typeof published !== "boolean") return;
+  if (typeof id !== "string" || typeof published !== "boolean") return { ok: false, error: "This page could not be identified. Reload before changing publication." };
 
   const supabase = await createClient();
 
   const { data: page } = await supabase
     .from("service_pages")
-    .select("content, services!inner(slug)")
+    .select("content, services!inner(slug,name)")
     .eq("id", id)
     .maybeSingle<{
       content: Partial<ServicePageContent>;
-      services: { slug: string };
+      services: { slug: string; name: string };
     }>();
 
-  if (!page) return;
+  if (!page) return { ok: false, error: "The saved page could not be loaded. Reload before publishing." };
 
-  if (published && missingToPublish(page.content)) return;
+  if (published && missingToPublish(page.content)) return { ok: false, error: "This page needs more content before publication. Open its editor to see what is missing." };
 
   const { error } = await supabase
     .from("service_pages")
@@ -231,8 +252,48 @@ export async function setServicePagePublished(id: string, published: boolean) {
   if (error) {
     console.error(`[cms] Failed to change publish state of service page ${id}`, error);
 
-    return;
+    return { ok: false, error: "The page publication state could not be saved." };
   }
 
   revalidateFor("service-pages", [pagePath(page.services.slug)]);
+  const warnings = published ? await getPublicationSeoWarnings(pagePath(page.services.slug), serviceSeoDefaults(pagePath(page.services.slug), page.services.name, page.content.intro), page.content) : [];
+  return { ok: true, warnings };
+}
+
+/**
+ * Delete an offence page, keeping its service.
+ *
+ * Addressed by the service, as everything here is. The service stays in the
+ * menu and at its address, which goes back to the general copy about how John
+ * can help — the same as a service whose page was never written. Its SEO
+ * override stays too, because the address it belongs to is still there.
+ */
+export async function deleteServicePage(formData: FormData) {
+  await requireAdmin();
+
+  const id = formData.get("serviceId");
+
+  if (typeof id !== "string") return;
+
+  const supabase = await createClient();
+
+  const { data: service } = await supabase
+    .from("services")
+    .select("slug")
+    .eq("id", id)
+    .maybeSingle<{ slug: string }>();
+
+  const { error } = await supabase
+    .from("service_pages")
+    .delete()
+    .eq("service_id", id);
+
+  if (error) {
+    console.error(`[cms] Failed to delete the page of service ${id}`, error);
+
+    return;
+  }
+
+  revalidateFor("service-pages", service ? [pagePath(service.slug)] : []);
+  redirect("/admin/service-pages");
 }

@@ -9,6 +9,9 @@ import {
   getSiteConfig,
 } from "@/lib/cms/queries";
 import { siteNodes, type PageFacts } from "@/lib/cms/seo/json-ld";
+import { validateCustomJsonLd } from "@/lib/cms/seo/custom-json-ld";
+import { automaticSchemaIds, validateSchemaNodes } from "@/lib/cms/seo/schema-validation";
+import { deployment } from "@/lib/site-config";
 import {
   defaultShareImage,
   resolveMetadata,
@@ -82,6 +85,11 @@ export async function structuredDataFor(
     practiceAreas: services.map((service) => service.name),
     portrait: resolveSection(heroDefaults, home.hero).portrait,
   });
+
+  // Revalidate stored content too: a manual or legacy database edit must not
+  // bypass the authenticated editor's structural safeguards.
+  const custom = validateCustomJsonLd(override?.customJsonLd, path, deployment.url);
+  if (custom.ok && validateSchemaNodes(custom.nodes, automaticSchemaIds(path, deployment.url)).length === 0) site.push(...custom.nodes);
 
   if (!route) {
     return { site, page: { path, title: fallbackTitle, canonical: path } };

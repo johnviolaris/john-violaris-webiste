@@ -1,19 +1,9 @@
 "use client";
 
-import { useAnimate } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { Stars } from "@/components/ui/stars";
 import type { Testimonial } from "@/lib/content/home";
-
-/** Just enough of the playback handle for pause/resume and the staggered start. */
-type Playback = {
-  pause: () => void;
-  play: () => void;
-  stop: () => void;
-  /** Elapsed time in seconds. Set once, to start the column mid-pass. */
-  time: number;
-};
 
 /**
  * Cards in one copy of the track, at minimum.
@@ -45,12 +35,10 @@ function fillCopy(testimonials: Testimonial[]): Testimonial[] {
  * invisible. The duplicate is `aria-hidden`, so assistive technology reads each
  * review once.
  *
- * Driven through `useAnimate` rather than the declarative `animate` prop
- * because that hands back playback controls — auto-scrolling text has to be
- * stoppable to be readable, so it pauses on hover and on focus. The same handle
- * is what `start` seeks with. It must be the full `motion/react` build: the
- * `motion/react-mini` one animates through the Web Animations API, which has no
- * `y` property, so the columns stood still.
+ * Native transform keyframes run on the compositor without an animation
+ * library in the initial bundle. The playback handle keeps the same pause on
+ * hover/focus and staggered start as before. Use `transform`, not Motion's `y`
+ * shorthand: the Web Animations API animates CSS properties directly.
  *
  * Speed and starting point are both given per card, not per pass. How many
  * cards make up a pass depends on how many reviews there are and how often a
@@ -59,7 +47,7 @@ function fillCopy(testimonials: Testimonial[]): Testimonial[] {
  *
  * The scroll runs regardless of `prefers-reduced-motion`, by request. Pausing
  * on hover and focus is what keeps the reviews readable; if the motion ever
- * needs to honour that setting again, gate this effect on `useReducedMotion`
+ * needs to honour that setting again, gate this effect on its media query
  * and restore the matching block in `globals.css`.
  */
 export function TestimonialColumn({
@@ -79,40 +67,59 @@ export function TestimonialColumn({
   start?: number;
   className?: string;
 }) {
-  const [scope, animate] = useAnimate<HTMLDivElement>();
-  const playback = useRef<Playback | null>(null);
+  const scope = useRef<HTMLDivElement>(null);
+  const column = useRef<HTMLDivElement>(null);
+  const playback = useRef<Animation | null>(null);
+  const visible = useRef(false);
+  const hovered = useRef(false);
+  const focused = useRef(false);
   const copy = fillCopy(testimonials);
   const cards = copy.length;
+  const synchronizePlayback = useCallback(() => {
+    if (visible.current && !hovered.current && !focused.current) playback.current?.play();
+    else playback.current?.pause();
+  }, []);
 
   useEffect(() => {
-    if (!scope.current || cards === 0) return;
+    if (!scope.current || cards === 0 || typeof scope.current.animate !== "function") return;
 
-    const duration = secondsPerCard * cards;
-    const controls = animate(
-      scope.current,
-      { y: "-50%" },
-      { duration, ease: "linear", repeat: Infinity, repeatType: "loop" },
-    ) as unknown as Playback;
-
-    // Seeking, not delaying: the column is already part-way through its pass on
-    // the first frame rather than waiting to join in.
-    controls.time = secondsPerCard * (start % cards);
-
-    playback.current = controls;
+    const track = scope.current;
+    // Creating transform animations also resolves layout. Do that only when
+    // this column approaches the viewport, not during first-screen hydration.
+    const observer = new IntersectionObserver(([entry]) => {
+      visible.current = entry.isIntersecting;
+      if (visible.current && !playback.current) {
+        const controls = track.animate(
+          [{ transform: "translateY(0%)" }, { transform: "translateY(-50%)" }],
+          { duration: secondsPerCard * cards * 1000, easing: "linear", iterations: Infinity },
+        );
+        // Seek to the original staggered opening position rather than delay.
+        controls.currentTime = secondsPerCard * (start % cards) * 1000;
+        playback.current = controls;
+      }
+      synchronizePlayback();
+    }, { rootMargin: "100px" });
+    if (column.current) observer.observe(column.current);
     return () => {
-      controls.stop();
+      observer.disconnect();
+      playback.current?.cancel();
       playback.current = null;
     };
-  }, [animate, cards, scope, secondsPerCard, start]);
+  }, [cards, secondsPerCard, start, synchronizePlayback]);
 
   return (
     <div
+      ref={column}
       className={`voices-column ${className}`}
-      onMouseEnter={() => playback.current?.pause()}
-      onMouseLeave={() => playback.current?.play()}
+      onMouseEnter={() => { hovered.current = true; synchronizePlayback(); }}
+      onMouseLeave={() => { hovered.current = false; synchronizePlayback(); }}
       /* Capture, so focus landing on a card inside also pauses the column. */
-      onFocusCapture={() => playback.current?.pause()}
-      onBlurCapture={() => playback.current?.play()}
+      onFocusCapture={() => { focused.current = true; synchronizePlayback(); }}
+      onBlurCapture={(event) => {
+        if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+        focused.current = false;
+        synchronizePlayback();
+      }}
     >
       <div ref={scope} className="voices-track">
         {[0, 1].map((pass) =>

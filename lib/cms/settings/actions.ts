@@ -9,6 +9,7 @@ import {
 } from "@/lib/cms/settings/schema";
 import { cmsWrite } from "@/lib/cms/write";
 import { siteSettingKeys } from "@/lib/site-config";
+import { practiceFactsErrors } from "@/lib/cms/settings/practice-facts";
 
 /**
  * Saving the site settings.
@@ -57,11 +58,10 @@ export async function saveSiteSettings(
   const fieldErrors: Partial<Record<SettingField, string>> = {};
 
   for (const spec of settingSpecs) {
-    let value = values[spec.key];
+    const value = values[spec.key];
 
     if (value.length > spec.maxLength) {
-      value = value.slice(0, spec.maxLength);
-      values[spec.key] = value;
+      fieldErrors[spec.key] = `${spec.label} must be ${spec.maxLength} characters or fewer.`;
     }
 
     if (!value) {
@@ -96,6 +96,7 @@ export async function saveSiteSettings(
     }
   }
 
+  Object.assign(fieldErrors, practiceFactsErrors(values));
   if (Object.keys(fieldErrors).length > 0) {
     return formError(values, fieldErrors);
   }

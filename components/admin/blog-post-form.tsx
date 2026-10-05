@@ -12,7 +12,9 @@ import {
 } from "lucide-react";
 
 import { DetachedActionForm } from "@/components/admin/detached-action-form";
+import { SlugChangeConfirmation } from "@/components/admin/slug-change-confirmation";
 import { ImageField } from "@/components/admin/image-field";
+import { FaqFields } from "@/components/admin/faq-fields";
 import { SeoTip } from "@/components/admin/seo-tip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +58,7 @@ export type BlogPostFormProps = {
     id: string;
     values: BlogPostValues;
     sections: SectionValues[];
+    faqItems?: unknown;
     published: boolean;
   } | null;
   categories: { id: string; name: string }[];
@@ -146,9 +149,8 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
     <>
       <form ref={formRef} action={formAction} className="space-y-8">
         {post ? <input type="hidden" name="id" value={post.id} /> : null}
-        {post ? (
-          <input type="hidden" name="previousSlug" value={post.values.slug} />
-        ) : null}
+        {post && <SlugChangeConfirmation previous={post.values.slug} next={slug}
+          wasPublished={post.published} prefix="/blog/" />}
 
         {state.message ? (
           <p
@@ -423,7 +425,7 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
 
           <Field
             label="Featured image"
-            hint="Optional. Shown at the top of the article. JPEG, PNG, WebP or AVIF, up to 5 MB."
+            hint="Optional. Shown at the top of the article. JPEG, PNG, WebP or AVIF, up to 4 MB."
             seo={`${seoTips.image} It is also the picture shown when the article is shared.`}
           >
             <ImageField
@@ -434,16 +436,28 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
           </Field>
 
           {featuredImage ? (
+            <>
             <Field
               labelFor={`${formId}-featuredImageAlt`}
               label="Image description"
-              hint="What the image shows, for anyone using a screen reader."
+              hint="What the image shows, for anyone using a screen reader. Registered library images use their central descriptions; edit those under Manage images."
               seo={seoTips.imageAlt}
               error={state.fieldErrors.featuredImageAlt}
               errorId={errorId("featuredImageAlt")}
             >
               <Input {...fieldProps("featuredImageAlt")} />
             </Field>
+            <Field labelFor={`${formId}-featuredImageTitle`} label="Image title"
+              hint="Optional short title. The description above remains the text for screen readers."
+              error={state.fieldErrors.featuredImageTitle} errorId={errorId("featuredImageTitle")}>
+              <Input {...fieldProps("featuredImageTitle")} />
+            </Field>
+            <Field labelFor={`${formId}-featuredImageCaption`} label="Image caption"
+              hint="Optional text shown below the picture, including an image credit when needed."
+              error={state.fieldErrors.featuredImageCaption} errorId={errorId("featuredImageCaption")}>
+              <Textarea rows={2} {...fieldProps("featuredImageCaption")} />
+            </Field>
+            </>
           ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -484,6 +498,8 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
         </section>
 
         {/* ------------------------------------------------------------------ */}
+        <FaqFields initialItems={post?.faqItems} error={state.faqError} />
+
         <section className="space-y-4 rounded-xl border p-4 md:p-5">
           <h2 className="font-display text-lg font-semibold">Publication</h2>
 
@@ -496,10 +512,10 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
               className="mt-0.5 size-4 rounded border-input accent-primary"
             />
             <span className="text-sm">
-              <span className="font-medium">Published</span>
+              <span className="font-medium">Publication enabled</span>
               <span className="mt-0.5 block text-muted-foreground">
-                A published article is visible to everyone at its URL and listed
-                under Resources.
+                Enable publication now or at the scheduled UK time below.
+                Keep this unchecked to save a private draft.
               </span>
             </span>
           </label>
@@ -508,13 +524,22 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
 
           <Field
             labelFor={`${formId}-publishedAt`}
-            label="Publication date"
-            hint="Left blank, publishing sets it to today. It orders the index."
+            label="Publish at (Europe/London)"
+            hint="Leave blank to publish immediately. A future date schedules publication. All times use UK local time, including daylight saving."
             seo="When the law changes, update the article rather than writing a new one on the same subject: two similar articles compete with each other in Google, and the page shows when it was last updated."
             error={state.fieldErrors.publishedAt}
             errorId={errorId("publishedAt")}
           >
-            <Input type="date" className="w-auto" {...fieldProps("publishedAt")} />
+            <Input type="datetime-local" className="w-auto" {...fieldProps("publishedAt")} />
+          </Field>
+          <Field
+            labelFor={`${formId}-unpublishAt`}
+            label="Unpublish at (Europe/London)"
+            hint="Optional. The article leaves Resources, its URL and the sitemap after this time. Scheduled changes refresh on the next request after the one-minute cache interval."
+            error={state.fieldErrors.unpublishAt}
+            errorId={errorId("unpublishAt")}
+          >
+            <Input type="datetime-local" className="w-auto" {...fieldProps("unpublishAt")} />
           </Field>
         </section>
 
@@ -537,6 +562,12 @@ export function BlogPostForm({ post, categories, services }: BlogPostFormProps) 
               >
                 View on the site
                 <ExternalLink className="size-3.5" aria-hidden="true" />
+              </a>
+            ) : null}
+            {post ? (
+              <a href={`/preview/blog/${post.id}`} target="_blank" rel="noopener"
+                className="inline-flex items-center gap-1.5 text-sm underline underline-offset-4">
+                Preview saved article <ExternalLink className="size-3.5" aria-hidden="true" />
               </a>
             ) : null}
           </div>

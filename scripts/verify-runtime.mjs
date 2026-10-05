@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import http from "node:http";
 import { request as httpRequest } from "node:http";
 import { request as httpsRequest } from "node:https";
+import sharp from "sharp";
 
 const baseUrl = new URL(process.argv[2] ?? "http://127.0.0.1:3000");
 
@@ -118,6 +119,17 @@ const missingPath = `/runtime-smoke-not-found-${Date.now()}`;
 const { response: missing } = await request(missingPath);
 assert.equal(missing.status, 404, "an unknown route must return 404");
 
+// Exercise the multi-segment CMS redirect resolver, including its cached miss.
+// A missing saved redirect must remain a 404 when served again through ISR.
+for (let attempt = 0; attempt < 2; attempt++) {
+  const { response } = await request(`${missingPath}/nested`);
+  assert.equal(response.status, 404, "a missing catch-all route must remain a 404");
+  await response.text();
+  if (attempt === 1 && response.headers.get("x-nextjs-cache")) {
+    assert.match(header(response, "x-nextjs-cache"), /^(HIT|STALE)$/, "catch-all misses must use ISR caching");
+  }
+}
+
 const { response: uppercase } = await request("/ABOUT?source=smoke", {
   redirect: "manual",
 });
@@ -125,6 +137,21 @@ assert.equal(uppercase.status, 308, "uppercase paths must redirect permanently")
 const uppercaseLocation = new URL(header(uppercase, "location"), baseUrl);
 assert.equal(uppercaseLocation.pathname, "/about");
 assert.equal(uppercaseLocation.search, "?source=smoke");
+
+const { response: oldPortrait } = await request("/Profile%207.png", { redirect: "manual" });
+assert.equal(oldPortrait.status, 308, "saved CMS portrait URLs must keep working through a permanent redirect");
+assert.equal(new URL(header(oldPortrait, "location"), baseUrl).pathname, "/john-violaris-portrait.webp");
+const { response: portrait } = await request("/john-violaris-portrait.webp");
+assert.equal(portrait.status, 200, "compressed portrait must be served");
+assert.match(header(portrait, "content-type"), /^image\/webp/);
+
+const { response: shareImage } = await request("/share-image");
+assert.equal(shareImage.status, 200, "default share card must render");
+assert.match(header(shareImage, "content-type"), /^image\/jpeg/);
+const shareMetadata = await sharp(Buffer.from(await shareImage.arrayBuffer())).metadata();
+assert.equal(shareMetadata.format, "jpeg");
+assert.equal(shareMetadata.width, 1200);
+assert.equal(shareMetadata.height, 630);
 
 const secondaryPath = "/services/speeding?source=secondary&campaign=smoke";
 const secondary = await requestWithHost(secondaryPath, "drivingjustice.co.uk");
@@ -169,6 +196,26 @@ assert.match(header(admin, "x-robots-tag"), /\bnoindex\b/);
 const { response: auth } = await request("/auth");
 assert.equal(auth.status, 200, "sign-in page must render");
 assert.match(header(auth, "x-robots-tag"), /\bnoindex\b/);
+
+// Private draft URLs must send the same protection on the indexable host too.
+const draft = await requestWithHost("/preview/blog/00000000-0000-0000-0000-000000000000", "johnviolaris.com");
+assert.match(header(draft, "x-robots-tag"), /\bnoindex\b/);
+assert.match(header(draft, "cache-control"), /\bprivate\b/);
+assert.match(header(draft, "cache-control"), /\bno-store\b/);
+assert.ok([303, 307, 308].includes(draft.status), "unauthenticated visitors must not view a draft");
+
+// Encoded private segment names must keep private headers even if routing
+// rejects the alias. In particular they must not become indexable cached pages.
+for (const path of [
+  "/%61dmin",
+  "/pr%65view/blog/00000000-0000-0000-0000-000000000000",
+]) {
+  const response = await requestWithHost(path, "johnviolaris.com");
+  assert.match(header(response, "x-robots-tag"), /\bnoindex\b/, path);
+  assert.match(header(response, "cache-control"), /\bprivate\b/, path);
+  assert.match(header(response, "cache-control"), /\bno-store\b/, path);
+  assert.ok([303, 307, 308, 404].includes(response.status), `${path} must not serve unauthenticated private content`);
+}
 
 const authHtml = await auth.text();
 assert.match(authHtml, /Admin sign in/);

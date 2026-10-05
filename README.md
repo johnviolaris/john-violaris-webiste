@@ -1,6 +1,7 @@
 # John Violaris — Criminal Defence Solicitor
 
 Next.js 16 App Router, React 19, TypeScript and Tailwind CSS v4.
+Use Node.js 24 and `npm ci` for the locked development/build dependencies.
 
 ```bash
 npm run dev
@@ -136,8 +137,10 @@ cookies, because a page that reads `cookies()` cannot be statically rendered and
 every public page here is static. RLS is what limits those reads to published
 rows, rather than a `.eq("published", true)` a later refactor could drop.
 
-A read falls back to the static seed when Supabase **errors**, and never when it
-simply returns no rows. An empty answer is the truthful one — nothing is
+A read generally falls back to the static seed when Supabase **errors**, and never when it
+simply returns no rows. Configured blog reads and the SEO route index fail closed;
+they must not resurrect withdrawn or scheduled seed articles. Location reads
+also fail closed and have no seed fallback. An empty answer is the truthful one — nothing is
 published — and treating it as a failure would make it impossible for John to
 unpublish the last testimonial. Fallbacks log loudly.
 
@@ -202,8 +205,9 @@ page already renders and the shape its "on this page" rail is built from, so the
 CMS stores structure and the page keeps its own typography. Sections can be
 added, reordered and removed in the editor.
 
-Drafts are invisible to visitors: the `blog_posts` read policy is
-`using (published)`, so an unpublished article is not merely hidden by the UI —
+Drafts are invisible to visitors: the existing `blog_posts` read policy requires
+`published`. The pending scheduling migration also enforces the publication
+start and expiry window. An unpublished article is not merely hidden by the UI —
 it is not readable with the publishable key at all. Publishing an article for
 the first time dates it; unpublishing keeps that date, so republishing later
 does not present an old article as new. Deleting a category leaves its articles
@@ -298,8 +302,9 @@ which stays with those sections rather than here.
 `image` is a field kind like the others: the article picker, uploading to the
 `site/` folder of the image bucket as soon as a file is chosen, and stored as
 the image's address. The hero portrait is the first, with a required
-`portraitAlt` beside it; the default is still `/Profile 7.png`, so a section
-nobody has touched renders exactly as before. The default share card
+`portraitAlt` beside it; the default is `/john-violaris-portrait.webp` (137,298
+bytes, down from 2,013,504). Saved legacy portrait URLs are mapped to the new
+asset, and the original public image URL redirects. The default share card
 (`/share-image`) keeps the bundled portrait whatever the hero shows.
 
 ### Reverting
@@ -686,10 +691,27 @@ history events". That is what counts page views after client-side navigation.
   `police_station`, `utility_bar`); plus `form_submit` and `form_error`
   (`error_type`). One capture-phase listener classifies links by where they
   go, so a contact link added later is counted without being instrumented.
-  Mark these events as key events in GA4.
+  A read-only GA4 dashboard check on 2026-10-05 confirmed the John Violaris
+  stream is receiving traffic and `phone_click`, `email_click` and
+  `whatsapp_click` are already key events. `booking_click` has arrived but is
+  not marked as a key event. Successful `form_submit` acceptance and DebugView
+  verification remain outstanding. No analytics setting was changed in this check.
 - **No personal data or case details.** `matter_type` is deliberately absent
   from `form_submit`: which offence someone is accused of is criminal-offence
   data, and it has no business reaching Google.
+- **Field performance measurements.** After consent, the existing GA4 property
+  can receive `LCP`, `INP` and `CLS` events. The standard `web-vitals@6.2.3`
+  library loads on demand and observers register once per document. Each
+  callback rechecks consent, the CMS integration switch and the tag-disable
+  flag; denied callbacks are discarded. Added parameters contain only numeric
+  `metric_value`, `metric_delta` and an ephemeral `metric_id`; LCP/INP use
+  milliseconds and CLS is unitless. No entries, selectors, URLs or enquiry
+  fields are copied into this payload. GA4 still attaches its existing
+  consented page context. There is no new recipient, persistent identifier,
+  key-event registration or monetary value. The cookie policy follows both
+  configuration and the integration switch. Field reporting is local/unreleased;
+  it does not establish a Core Web Vitals pass or populate Vercel Speed Insights.
+  See the [official measurement library](https://github.com/GoogleChrome/web-vitals).
 - **Local testing.** Put the ID in `.env.development.local`. On `localhost`
   everything runs except the request to Google, so the banner, the consent
   calls and the events can be checked in `window.dataLayer` without reporting
@@ -716,23 +738,44 @@ and rollback sequence on later releases.
 [`docs/cms-guide.md`](docs/cms-guide.md) is the plain-English guide to the
 admin for John.
 
-Outside the repository, as of 2026-10-03:
+Outside the repository (launch record from 2026-10-03, checked where possible
+on 2026-10-05):
 
 - **Vercel (`john-violaris` team).** The project was recreated when it moved
-  teams. `NEXT_PUBLIC_GA_MEASUREMENT_ID` was re-added on 2026-10-04 and
-  analytics is live; check that `SUPABASE_SECRET_KEY`, `RESEND_API_KEY`,
-  `ENQUIRY_FROM_EMAIL`, `ENQUIRY_NOTIFICATION_EMAIL` and `ENQUIRY_IP_SALT` came
-  across too, then send one test enquiry.
+  teams. A read-only Chrome dashboard check on 2026-10-05 confirmed the correct
+  project is accessible and its existing production deployment is Ready. The
+  Supabase, Resend, enquiry sender/recipient, contact and IP-salt variable names
+  are present; values stayed masked and were not independently validated.
+  `NEXT_PUBLIC_GA_MEASUREMENT_ID` and `ENQUIRY_IP_SALT` are Production only.
+  Preview shares the Production Supabase/Resend variable rows and lacks its own
+  IP salt, so it is not an isolated backend for CMS or enquiry write tests.
+  Set up a separate test backend and recipient before those checks. The
+  dashboard flags the privileged Supabase and Resend keys as Configuration
+  rather than Secret; review their storage/rotation with the release owner.
+  No environment, deployment or credential setting was changed. Speed Insights
+  shows its setup screen and no collected field performance data.
 - **Resend.** Send from John's domain rather than the developer's.
-  `alert.johnviolaris.com` has Resend's DNS records, but in a different Resend
-  account from the development key, whose only domain is `mail.codsmith.online`;
-  the From address must belong to the same account as `RESEND_API_KEY`.
-- **Supabase.** Turn off public sign-ups and turn on leaked-password protection
-  under Authentication. The sign-up form is gone, but the Auth API still
-  accepts a sign-up made with the public key. Password reset needs the URL
+  The historical launch record places `alert.johnviolaris.com` in a different
+  account from the development key. A read-only sign-in check on 2026-10-05
+  showed only a developer domain, `codsmith.com`, in the available account.
+  A separate read-only API check of the local key listed `mail.codsmith.online`
+  as its verified domain. That key may differ from production. Production enquiry
+  aggregates show two saved enquiries, both notification and confirmation API
+  acceptance flags set, and zero recorded email errors; inbox receipt is still
+  unverified. The production key/account was not independently matched. The From address
+  must belong to the same Resend account as `RESEND_API_KEY`; verify the intended
+  John-owned domain/account and complete one approved enquiry-delivery test.
+- **Supabase.** Public sign-ups are verified disabled: the correct project's
+  Auth settings API returned `disable_signup: true` on 2026-10-05. No hosted
+  settings were changed. The application also has no public sign-up flow.
+  Leaked-password protection is unavailable on the current Free plan without
+  upgrading. The Emails dashboard confirmed custom SMTP is still required.
+  Password reset needs the URL
   configuration, email template and custom SMTP set out under
   [Admin accounts and passwords](#admin-accounts-and-passwords).
-- **Google Search Console.** Not set up. Add a Domain property for
+- **Google Search Console.** Recorded as not set up. The 2026-10-05 browser check
+  reached the welcome screen in the signed-in personal account, and no John or
+  business Google account was available. Add/verify a Domain property for
   `johnviolaris.com` while signed in to John's (or a business) Google account,
   never a personal one: verify with the TXT record it gives you at GoDaddy, then
   submit `https://johnviolaris.com/sitemap.xml`. Optional: a property for
@@ -740,16 +783,132 @@ Outside the repository, as of 2026-10-03:
   Console property).
 - **From John.** The SRA number and regulatory status, the complaints and Legal
   Ombudsman wording, and what the privacy notice should add: an ICO number, a
-  retention period, or the firm's name if the firm is the data controller. The
-  Special Reasons page (Service Pages in the CMS) says "No ban if accepted" and
-  "Disqualification avoided entirely", but the court keeps a discretion even
-  when special reasons are found; that wording is his to correct.
+  retention period, or the firm's name if the firm is the data controller.
+  Service-page body copy, headings and search wording remain frozen pending John's
+  review. Other project work is now authorised. The user authorised restoration of the six earlier
+  shortened article SEO titles. Those titles are restored; article bodies and
+  visible headlines are unchanged. Proposed Special Reasons corrections and
+  the added drink-driving service synonym paragraph remain withdrawn.
+  The existing Special Reasons outcome wording still needs John's approval
+  and any approved correction; REQ-064 is not met. The image migration changes
+  the portrait asset only and does not rewrite legal text.
 
-In the code, redirect management is partial (REQ-029): the table and automatic
-slug history exist, but there is no redirect admin UI or lookup for arbitrary
-paths. Also open are the custom JSON-LD field and publication warnings (REQ-018
-and the CMS half of REQ-019), the optional per-page generated share cards
-(REQ-024), and the SEO health checks and draft preview (REQ-048, REQ-052).
+Local changes on 2026-10-05 add redirect management at `/admin/redirects`,
+safe same-site targets and a cached missing-route resolver. It handles former
+URLs without a database lookup on every working page; it deliberately cannot
+override a still-published route. The resolver uses ISR and admin saves clear
+the affected source path. Existing transactional slug history remains in use.
+Published article and ordinary service URL changes require confirmation naming
+the old and new addresses, checked again by the server. The pending scheduling
+migration prevents future or expired article renames from exposing private slugs
+through automatic redirects.
+
+SEO Metadata now supports Open Graph type, independent X/Twitter overrides, validated additive
+custom JSON-LD and an SEO health report. The report checks effective titles and
+descriptions, duplicate metadata, content links, image descriptions and outcome
+wording. JSON-LD structural validation does not certify legal accuracy or rich
+result eligibility. Saved indexable content editors have collapsed SEO panels,
+with separate metadata saves and the same path-keyed source. Publishing controls
+show advisory warnings and report rejected saves. `/admin/seo-metadata/robots`
+edits crawl rules with private-path guards, noindex conflict checks and explicit
+public-block acknowledgment. `/admin/rebuild` refreshes one registered public page or the
+whole public website and sitemap.
+
+Article and service editors have authenticated previews of saved drafts using
+the public rendering components. Previews are private, uncacheable and excluded
+from indexing. Articles can have UK-time publication and expiry dates. Scheduled
+visibility is enforced in the database and lists/articles/sitemap use 60-second
+ISR; expired URLs return 404. Saved article/service-page versions can be restored
+as drafts. Restoring an article or service page takes its current long-form
+content out of publication until reviewed and republished.
+
+The seven new publishing/history, portrait-only, location, SEO-role, media/history,
+rich-caption and private-redirect-note SQL files are **local pending
+migrations**, not production changes. Apply reviewed migrations before deploying
+the corresponding application version. The `seo_editor` role edits metadata and
+crawl rules without access to enquiries, draft bodies or general content editing.
+No existing user has been promoted. General content-editor delegation, optional per-page share cards, external social-preview
+acceptance and measured field Core Web Vitals remain separate work.
+The portrait-only file is
+`supabase/migrations/20261005131025_optimize_portrait.sql`; it changes the exact
+legacy portrait URL and leaves all existing legal wording unchanged.
+
+The media library at `/admin/media` supports descriptive upload filenames,
+decoded image/dimension checks, editable alt/decorative descriptions and optional
+titles/captions. Captions default to plain text; an explicit formatted mode
+supports bold, italic and safe links without raw HTML. Existing captions remain
+plain. Existing URLs are immutable. Public image descriptions apply to
+hero/article renders. RLS hides metadata for images used only in drafts or
+scheduled/expired articles; descriptions reused by live content are public.
+Image bytes in the public Storage bucket remain readable by URL, so uploads are
+for public website imagery. The file limit is 4 MiB to fit Vercel's 4.5 MB request
+ceiling with form overhead; a larger Next action limit does not override that
+hosting limit.
+
+Append-only history now captures eleven content/configuration sources, including
+SEO, page sections, media, catalogue and location changes. Field comparisons and
+confirmed restores are available. Draft-capable entities restore as drafts;
+settings/static sections/categories/groups restore live. Review history is
+read-only. Restores apply current validation and crawl-block/practice-fact
+confirmation rather than bypassing the editors' guards. Authenticated acceptance
+against the migrated Supabase stack is still a release check.
+
+The administrator-only Integrations editor at `/admin/seo-metadata/integrations`
+stores an allowlisted registry for existing GA4 and ReviewSolicitors enabled
+flags. Providers, URLs and loading strategies are fixed; unknown/malformed
+configuration fails closed. Analytics remains consent-gated and disabling it
+blocks events from an already-loaded tag. The anonymous public configuration
+contains no credentials. History restores use the same validation.
+
+Optional practice identity, address, geo and hours fields default empty and
+require recorded confirmation. Their Contact rendering and LegalService graph
+share one validation helper; an individual solicitor SRA number is separate from
+the practice identifier. No business facts were populated by this work.
+
+Analytics now rechecks consent on every event and disables a loaded tag when
+consent is withdrawn, including from another tab. Google signals and advertising
+personalization are explicitly disabled. A separate `generate_lead` event follows
+an accepted enquiry response, avoiding automatic form-interaction counts. On
+2026-10-05 it was registered as a GA4 key event with no monetary value; no enquiry
+was sent. That is the only external configuration change in this completion pass.
+Its code is local and needs release before production can send the event. DebugView
+acceptance remains outstanding. `form_submit` remains for historical compatibility.
+
+Future location content uses `/locations/[slug]`, managed under **Location
+Pages**. The new table starts empty. Drafts have no public URL or sitemap entry;
+publishing requires substantial body copy, bespoke local context, links to live
+services and a recorded legal/factual review. The CMS cannot establish that
+local facts are true or detect every template substitution, so editorial review
+remains required. Pages make no invented office/address claim. Location renames
+use the same transactional redirect history. Its architecture migration is also
+local and pending; no city page has been published.
+
+`npm run pages:verify -- <production-server-url>` checks every sitemap page's
+rendered headings, metadata, IDs, image descriptions and internal resources.
+`npm run assets:verify -- <production-server-url>` measures initial first-party
+JavaScript/CSS from actual build files and checks `performance-budgets.json`.
+The baseline and 20% bundle / 10% portrait headroom require deliberate review
+when changed. CI runs both after its production build. These are regression
+checks; lazy chunks, external widgets and field LCP/INP still need measurement.
+
+`npm run lighthouse:ci` audits home, a service page and an article twice against
+the running production server (default port 3000; set `LHCI_BASE_URL` for another
+local port). CI runs this on pull requests and retains report artifacts for 14
+days. Performance below 90, LCP above 2.5 seconds, CLS above 0.1 and lab TBT above
+200 ms produce warnings; the separate asset budget gate fails on size regressions.
+TBT is a lab responsiveness proxy and does not establish field INP. Reports are
+written to `.lighthouseci/` without contacting an external LHCI storage service.
+CI uses Node 24, which also supports the pinned Lighthouse dependency.
+
+The 2026-10-05 dependency review patched Next.js and `eslint-config-next` to
+16.3.8 for the [published next/og advisory](https://github.com/vercel/next.js/security/advisories/GHSA-vcvr-r3jv-pc5j).
+LHCI 0.15.1 uses tested pins for Lighthouse 13.5.0, tmp 0.2.7, uuid 11.1.1 and
+get-uri's basic-ftp 6.2.2, avoiding vulnerable older transitive versions.
+`shadcn` remains at 4.21.0 but is correctly classified as build/component tooling;
+install development dependencies before building its CSS import. The production
+dependency audit (`npm audit --omit=dev`) reports zero vulnerabilities. The full
+audit still reports eight high-severity entries in the braces/fast-glob/ESLint/
+shadcn/ts-morph tooling chains; this task does not claim an entirely clean audit.
 
 TidyCal and public fee figures are not outstanding work: both were
 intentionally removed from scope, and the Fees page intentionally has no
@@ -769,7 +928,145 @@ sticky service contact panels return to normal flow.
 
 ### Performance
 
-Lighthouse, mobile, against a production build (`next build`, then the
+The latest local FAQ/redirect-note/CSS/field-collector source is
+`5e7cdd3bf980bd55f339e8a375cb69162da14eb9921a7b3492c07ed6e0981383`.
+Its 74-route build, lint, TypeScript, 113 tests, CMS seed parity, 30 SEO cases,
+runtime and all 33 public page/schema/asset checks pass. All 145 isolated SQL
+checks pass: 89 workflow, 20 SEO-role and 36 private-redirect-note checks.
+No hosted migration or application release has been performed.
+
+Public CSS falls from 25,061 to 19,431 gzip bytes, a 22.5% reduction. The admin
+layout loads a 13,039-byte supplemental stylesheet to preserve the original
+utility cascade, including after client navigation. Existing design rules,
+fonts, 89 keyframe/property definitions and 115 theme variables are preserved.
+Twelve compared views are pixel-identical with only external review-widget
+pixels masked; first-party geometry/styles, portal fixtures and navigation
+also match. All 33 main-text hashes remain unchanged. Final mobile/desktop home
+checks preserve the selected view, with no page errors.
+
+The consent-gated collector adds 887 initial gzip JavaScript bytes over the CSS
+stage. Current maximum initial JavaScript is 174,608 bytes, about 15.1% below
+the original 205,581-byte baseline; the CSS saving remains 5,630 bytes. Seven
+real-browser module fixture cases cover consent, revocation, disabled integration
+and numeric-only parameters. They made no Google request and do not establish
+production receipt or a field Core Web Vitals pass. Budgets remain unchanged.
+
+Seven Lighthouse 13.5.0 reports measure that final source: two mobile runs per
+page and one desktop-home run, without warnings or runtime errors.
+
+| Page/device | Runs | Performance | LCP | TBT | CLS |
+| --- | --- | --- | --- | --- | --- |
+| Home/mobile | 2 | 90 | 3.587 s | 33.75 ms | 0 |
+| Drink-driving/mobile | 2 | 92 | 3.304 s | 39.25 ms | 0 |
+| Article/mobile | 2 | 96.5 | 2.652 s | 33.5 ms | 0 |
+| Home/desktop | 1 | 100 | 0.738 s | 0 ms | 0 |
+
+All seven automated Accessibility/Best Practices scores are 100. Article
+performance meets 95 in this sample; Home/Service do not, and all three mobile
+LCP medians remain over 2.5 seconds. Two-run variation and the single desktop
+sample limit these results. TBT is not field INP and automated checks do not
+establish full WCAG acceptance. Earlier benchmarks below retain their own source.
+
+The earlier caption/integration and sitemap verification stage generated 74 application routes. All 33 public
+pages pass rendered-page, structured-data and asset gates; runtime, lint,
+TypeScript, 95 unit tests, CMS seed checks, 30 SEO cases, 89 workflow SQL checks
+and 20 SEO-role SQL checks pass. The SQL checks use isolated PostgreSQL with
+minimal Auth fixtures; full Supabase/pgTAP and authenticated migrated acceptance
+still need a suitable environment.
+
+The hero and reviews now use native browser animations with the original
+transforms/timings. Reviews start animation work near the viewport and pause
+offscreen, on hover/focus and for reduced motion. Link prefetch is triggered by
+intent. That stage's asset maxima were 173,728 bytes initial JavaScript, 39,520 bytes
+legacy JavaScript and 25,061 bytes CSS (gzip); the portrait is 137,298 bytes.
+Initial JavaScript is about 15.5% smaller than the preceding 205,581-byte maximum.
+Budgets are unchanged. Chrome checked eight representative views, preserved
+page text, all sixteen hero transforms, review controls/accessibility-tree text
+and prefetch behavior without page errors or overflow.
+
+Neither inline CSS nor CSS content-visibility is retained: the former worsened
+lab results and the latter hid offscreen review names from the tested Chrome
+accessibility tree. Lighthouse trials are retained as measurements of their
+specific earlier candidates.
+
+Nine later Lighthouse 13.5.0 checks measured the preserved-copy caption/integration
+snapshot (source `6e77e0b12f21b3b4d9b96059901f51790be4c52605628b1bbe3992cb5031cbd7`),
+before the subsequent server-only sitemap date change:
+
+| Page/device | Runs | Median performance | Median LCP | Median TBT | CLS |
+| --- | --- | --- | --- | --- | --- |
+| Home/mobile | 2 | 89 | 3.611 s | 129.5 ms | 0 |
+| Drink-driving/mobile | 2 | 91 | 3.460 s | 29.5 ms | 0 |
+| Article/mobile | 2 | 93.5 | 3.096 s | 37 ms | 0 |
+| Home/desktop | 3 | 100 | 0.768 s | 0 ms | 0 |
+
+All nine scored Accessibility and Best Practices 100, with no run errors.
+Mobile LCP and the plan's performance-95 target remain unmet; field INP is
+unmeasured. Home also misses the unchanged performance-90 CI advisory. Common
+CSS/font payload and style/layout work remain investigation areas. Automated
+accessibility scores do not establish complete WCAG acceptance.
+
+The sitemap follow-up dates fixed pages from their actual public CMS section,
+metadata, shared-setting and image-description timestamps, and dates collection
+indexes from published children. Saves/restores refresh the sitemap. No page
+wording or printed article date changes. Sources without recorded dates, failed
+reads, reset/deleted rows and source-controlled edits cannot fabricate a date;
+the literal every-entry lastmod requirement remains partial.
+
+The follow-up build passes all 95 tests and production/runtime/public-page gates.
+All 33 public text/style hashes and all 18 referenced JavaScript/CSS files are
+identical to the measured snapshot. The sitemap retains 33 URLs; dated entries
+increase from 23 to 33, all matched to recorded CMS-source timestamps. The pending
+media migration still prevents media-only timestamps from contributing.
+
+The following paragraphs are historical measurements and checks.
+
+Pre-copy-revert 2026-10-05 Lighthouse CI measurements against the Next.js 16.3.8 production
+build on port 3002, using Lighthouse 13.5.0 (two mobile runs per page):
+
+| Page | Median performance | Median LCP | Median TBT | CLS |
+| --- | --- | --- | --- | --- |
+| Home | 89 | 3.742 s | 58.75 ms | 0 |
+| Drink-driving service | 92 | 3.295 s | 39 ms | 0 |
+| Article | 93.5 | 3.077 s | 37.75 ms | 0 |
+
+These runs predate the withdrawal of the proposed public wording changes and
+must not be presented as fresh validation of the copy-preserving final tree.
+The production build, runtime, rendered-page, schema and asset checks after the
+copy revert passed: 71 application routes, 33 public pages and 33
+schema graphs. The 51 tests, lint, TypeScript, CMS verification, 30-case SEO
+verification and 46 isolated PostgreSQL checks passed. That verification preceded
+the user-approved restoration of the six concise article SEO titles. A subsequent
+production build again generated 71 application routes; all 33 rendered public
+pages pass with zero failures and zero editorial advisories. The six restored
+titles are 51–59 characters including the site suffix. Targeted lint, the 30-case
+SEO verifier and final TypeScript checks also pass after the title restoration.
+
+All six recorded runs scored Accessibility **100** and Best Practices **100**. The CI job
+passes with warnings about unresolved targets; the 95 performance and 2.5-second
+LCP targets are not met, and these runs do not measure field INP. The portrait
+source is now 137,298 bytes of WebP instead of 2,013,504 bytes of PNG (93.2% smaller).
+The remaining measured bottleneck is initial framework/main-thread work, with
+additional third-party widget caching/image advisories. Differences in machine
+load and measurement conditions prevent a reliable comparison with older runs.
+
+Focused Chrome checks after restoring the original copy passed table-of-contents
+navigation, keyboard table access and a mobile view without overflow or page
+errors. Fresh checks following the approved title restoration confirm all six
+exact shorter search titles, unchanged original article headlines and Special
+Reasons labels/notes, no invented captions and no browser page errors.
+
+Before the copy revert, Chrome checked every public
+page at 375px and 1440px without overflow or JavaScript errors, plus representative
+768px and 1024px views. Keyboard checks cover navigation, service tabs, FAQ, table
+of contents and invalid enquiry validation without sending an enquiry. The
+reviews widget's landmark and heading issues have been corrected; 66 axe scans
+reported zero violations, with contrast/cross-origin frame checks incomplete.
+Firefox could
+not launch because its diagnostic command was blocked by execution policy; its
+pass and manual screen-reader acceptance remain unverified.
+
+Earlier Lighthouse measurements, mobile, against a production build (`next build`, then the
 `site-prod` launch configuration on port 3001), 2026-10-03:
 
 | Page            | Performance | Accessibility | Best practices | LCP       |
@@ -785,14 +1082,13 @@ run scored 77 while the machine was busy), so run a page more than once before
 reading anything into a change. The live home page, measured minutes apart on
 the same machine, scored lower than the build above. SEO scores 69 locally only
 because localhost is deliberately `noindex`. Home's missing best-practices
-points are the ReviewSolicitors panel's avatar service (`ui-avatars.com`)
-failing to answer; the remaining accessibility failure is a heading inside that
-panel.
+points were the ReviewSolicitors panel's avatar service (`ui-avatars.com`)
+failing to answer; its heading failure has since been corrected in the host integration.
 
 The LCP figures are Lighthouse's simulation of a slow phone. In the trace the
 home portrait paints with the first content, but the simulation charges it for
-the scripts loaded before it. The hero loads Motion lazily (`LazyMotion` with
-`motion/react-m`). The reviews marquee keeps the full `motion/react` build: the
+the scripts loaded before it. The earlier hero loaded Motion lazily (`LazyMotion` with
+`motion/react-m`). The earlier reviews marquee kept the full `motion/react` build: the
 mini build animates through the Web Animations API, which has no `y`, and the
 columns stood still.
 

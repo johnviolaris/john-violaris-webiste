@@ -1,45 +1,23 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import {
-  domAnimation,
-  LazyMotion,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-} from "motion/react";
-import * as m from "motion/react-m";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { IntentLink as Link } from "@/components/ui/intent-link";
 
 import { OffenceStrip } from "@/components/sections/offence-strip";
 import { Container } from "@/components/ui/container";
 import { Icon } from "@/components/ui/icons";
 import { Lines } from "@/components/ui/lines";
+import { ImageCaption } from "@/components/ui/image-caption";
 import { heroDefaults, offenceStripDefaults } from "@/lib/content/pages";
 import type { HeroContent } from "@/lib/content/pages";
 import { useSiteConfig } from "@/components/layout/site-config-provider";
-
-function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia(query);
-    const updateMatch = () => setMatches(mediaQuery.matches);
-
-    updateMatch();
-    mediaQuery.addEventListener("change", updateMatch);
-    return () => mediaQuery.removeEventListener("change", updateMatch);
-  }, [query]);
-
-  return matches;
-}
 
 /**
  * The opening screen.
  *
  * Copy arrives as a prop rather than being read here: this is a client
- * component — it needs `useScroll` for the card that slides in over the
+ * component — it tracks scroll for the card that slides in over the
  * portrait — and a client component cannot read from Supabase. The home page
  * resolves the section and passes it down, which is the pattern every editable
  * client section follows.
@@ -57,54 +35,50 @@ export function Hero({
   const config = useSiteConfig();
   const scrollStageRef = useRef<HTMLDivElement>(null);
   const mobileScrollStageRef = useRef<HTMLDivElement>(null);
-  const isMobile = useMediaQuery("(max-width: 639px)");
-  const prefersReducedMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: scrollStageRef,
-    offset: ["start start", "end end"],
-  });
-  const { scrollYProgress: mobileScrollYProgress } = useScroll({
-    target: mobileScrollStageRef,
-    offset: ["start start", "end 65%"],
-  });
-  const commitmentCardY = useTransform(
-    scrollYProgress,
-    [0.08, 0.82],
-    ["100%", "0%"],
-  );
-  const commitmentCardRotate = useTransform(
-    scrollYProgress,
-    [0.08, 0.82],
-    [1.1, 0],
-  );
-  const mobileCommitmentCardY = useTransform(
-    mobileScrollYProgress,
-    [0.08, 0.82],
-    ["100%", "0%"],
-  );
-  const mobileCommitmentCardRotate = useTransform(
-    mobileScrollYProgress,
-    [0.08, 0.82],
-    [1.1, 0],
-  );
-  const firstPortraitScale = useTransform(
-    scrollYProgress,
-    [0, 0.82],
-    [1, 1.035],
-  );
-  const mobilePortraitScale = useTransform(
-    mobileScrollYProgress,
-    [0, 0.82],
-    [1, 1.035],
-  );
+  const portraitRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLElement>(null);
 
-  const activeCardY = isMobile ? mobileCommitmentCardY : commitmentCardY;
-  const activeCardRotate = isMobile
-    ? mobileCommitmentCardRotate
-    : commitmentCardRotate;
-  const activePortraitScale = isMobile
-    ? mobilePortraitScale
-    : firstPortraitScale;
+  useEffect(() => {
+    const portrait = portraitRef.current;
+    const card = cardRef.current;
+    if (!portrait || !card) return;
+    const mobile = window.matchMedia("(max-width: 639px)");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const clamp = (value: number) => Math.max(0, Math.min(1, value));
+    let frame = 0;
+
+    // The original start/start → end/end (desktop) and end/65% (mobile)
+    // offsets, scale, slide and rotation, updated once per animation frame.
+    const render = () => {
+      frame = 0;
+      const stage = mobile.matches ? mobileScrollStageRef.current : scrollStageRef.current;
+      if (!stage) return;
+      const bounds = stage.getBoundingClientRect();
+      const end = window.innerHeight * (mobile.matches ? 0.65 : 1);
+      const progress = clamp(-bounds.top / Math.max(1, bounds.height - end));
+      const slide = reduced.matches ? 1 : clamp((progress - 0.08) / 0.74);
+      const scale = reduced.matches ? 1 : 1 + 0.035 * clamp(progress / 0.82);
+      portrait.style.transform = `scale(${scale})`;
+      card.style.transform = `translateY(${100 * (1 - slide)}%) rotate(${1.1 * (1 - slide)}deg)`;
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(render); };
+    render();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    mobile.addEventListener("change", schedule);
+    reduced.addEventListener("change", schedule);
+    const observer = new ResizeObserver(schedule);
+    if (scrollStageRef.current) observer.observe(scrollStageRef.current);
+    if (mobileScrollStageRef.current) observer.observe(mobileScrollStageRef.current);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      mobile.removeEventListener("change", schedule);
+      reduced.removeEventListener("change", schedule);
+    };
+  }, []);
 
   return (
     <section
@@ -150,12 +124,9 @@ export function Hero({
             <div ref={mobileScrollStageRef} className="hero-profile-stage">
               <div className="hero-profile">
                 <figure className="hero-portrait">
-                  <LazyMotion features={domAnimation} strict>
-                    <m.div
+                    <div
+                      ref={portraitRef}
                       className="hero-photo-layer hero-photo-primary"
-                      style={{
-                        scale: prefersReducedMotion ? 1 : activePortraitScale,
-                      }}
                     >
                       {/*
                         The home page's largest paint. Already in the server
@@ -165,8 +136,13 @@ export function Hero({
                         this over `preload`.
                       */}
                       <Image
-                        src={content.portrait}
+                        // Existing CMS rows can still contain the old filename.
+                        // Use the compressed source without changing saved copy.
+                        src={content.portrait === "/Profile 7.png"
+                          ? "/john-violaris-portrait.webp"
+                          : content.portrait}
                         alt={content.portraitAlt}
+                        title={content.portraitTitle}
                         fill
                         loading="eager"
                         fetchPriority="high"
@@ -176,14 +152,15 @@ export function Hero({
                       <figcaption className="portrait-caption">
                         <span>{config.name}</span>
                         <small>{config.role}</small>
+                        {content.portraitCaption && <small className="whitespace-pre-wrap"><ImageCaption caption={content.portraitCaption} format={content.portraitCaptionFormat} /></small>}
                       </figcaption>
-                    </m.div>
-                    <m.aside
+                    </div>
+                    <aside
+                      ref={cardRef}
                       className="hero-scroll-card"
                       aria-label="John’s personal commitment"
                       style={{
-                        y: prefersReducedMotion ? "0%" : activeCardY,
-                        rotate: prefersReducedMotion ? 0 : activeCardRotate,
+                        transform: "translateY(100%) rotate(1.1deg)",
                       }}
                     >
                       <div className="letter-top">
@@ -208,8 +185,7 @@ export function Hero({
                         {content.cardFooterLabel}{" "}
                         <Icon name="arrowRight" size={18} />
                       </Link>
-                    </m.aside>
-                  </LazyMotion>
+                    </aside>
                 </figure>
               </div>
             </div>

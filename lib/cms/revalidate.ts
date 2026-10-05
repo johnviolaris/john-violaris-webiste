@@ -27,6 +27,7 @@ export type ContentEntity =
   | "page-sections"
   | "services"
   | "service-pages"
+  | "location-pages"
   | "testimonials"
   | "blog-posts"
   | "blog-categories"
@@ -63,12 +64,13 @@ const sitemap: Target = { path: "/sitemap.xml" };
 const targets: Record<ContentEntity, Target[]> = {
   // Keyed by section, and a section knows the routes it renders on — several
   // appear on more than one. The caller passes them, from `appearsOn`.
-  "page-sections": [],
+  "page-sections": [sitemap],
   // In the header mega-menu, so on every page — and each is a sitemap entry.
   services: [{ path: "/", type: "layout" }, sitemap],
   // The catalogue index plus the page itself, which the caller adds. The
   // sitemap dates an offence page by its last edit.
   "service-pages": [{ path: "/services" }, sitemap],
+  "location-pages": [sitemap],
   // Homepage only today; the about page shows none.
   testimonials: [{ path: "/" }],
   "blog-posts": [{ path: "/blog" }, sitemap],
@@ -78,7 +80,7 @@ const targets: Record<ContentEntity, Target[]> = {
   "seo-metadata": [sitemap],
   // Contact details in the header and footer, so on every page — and the name
   // and role on the default share card, which is a route handler of its own.
-  "site-settings": [{ path: "/", type: "layout" }, { path: "/share-image" }],
+  "site-settings": [{ path: "/", type: "layout" }, { path: "/share-image" }, sitemap],
 };
 
 /** The admin list a section's own writes should refresh. */
@@ -86,6 +88,7 @@ const adminSection: Record<ContentEntity, string> = {
   "page-sections": "/admin/website-content",
   services: "/admin/services",
   "service-pages": "/admin/service-pages",
+  "location-pages": "/admin/location-pages",
   testimonials: "/admin/testimonials",
   "blog-posts": "/admin/blog-posts",
   "blog-categories": "/admin/blog-categories",

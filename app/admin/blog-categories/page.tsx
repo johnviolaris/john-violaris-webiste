@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { BlogCategoryManager } from "@/components/admin/blog-category-manager";
+import { RevisionHistory } from "@/components/admin/revision-history";
 import {
   countPostsByCategory,
   listBlogCategories,
@@ -43,6 +44,7 @@ export default async function AdminBlogCategoriesPage() {
           postCount: counts[category.id] ?? 0,
         }))}
       />
+      <RevisionHistory entity="blog_categories" id="" />
     </div>
   );
 }

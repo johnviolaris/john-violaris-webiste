@@ -4,6 +4,7 @@ import { ExternalLink, Lock } from "lucide-react";
 
 import { Stars } from "@/components/ui/stars";
 import { testimonials } from "@/lib/content/home";
+import { RevisionHistory } from "@/components/admin/revision-history";
 
 export const metadata: Metadata = {
   title: "Reviews",
@@ -76,6 +77,7 @@ export default function AdminTestimonialsPage() {
           </li>
         ))}
       </ul>
+      <details className="mt-8 rounded-xl border p-4"><summary className="cursor-pointer font-medium">Database audit history (read only)</summary><p className="mt-2 text-sm text-muted-foreground">These are archived database records. Public verified reviews continue to use their independent source.</p><RevisionHistory entity="testimonials" id="" /></details>
 
       <p className="mt-6 text-sm text-muted-foreground">
         The wording framing this section — the heading above it and the note

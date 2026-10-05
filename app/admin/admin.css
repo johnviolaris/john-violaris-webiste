@@ -1,0 +1,12 @@
+/* A full utility set preserves Tailwind cascade when admin CSS persists after navigation.
+ * Global reset and site design rules remain in globals.css. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@reference "tw-animate-css";
+@reference "shadcn/tailwind.css";
+@import "../theme-tokens.css";
+@custom-variant dark (&:is(.dark *));
+
+@layer utilities {
+  @tailwind utilities;
+}

@@ -1,6 +1,8 @@
 "use server";
 
 import { requireAdmin } from "@/lib/auth";
+import { getPublicationSeoWarnings } from "@/lib/cms/seo/publication-check";
+import { listSeoRoutes } from "@/lib/cms/seo/routes";
 import { formError, isAddress } from "@/lib/cms/form";
 import { type RevalidateTarget } from "@/lib/cms/revalidate";
 import {
@@ -143,10 +145,12 @@ export async function savePageSection(
         .maybeSingle(),
   });
 
+  const affected = state.status === "success" ? (await listSeoRoutes()).filter((route) => definition.appearsOn.includes("*") || definition.appearsOn.includes(route.path)) : [];
+  const warnings = [...new Set((await Promise.all(affected.map((route) => getPublicationSeoWarnings(route.path, route.defaults, content)))).flat())];
   // Rebuilt field by field rather than spread: `data` stays on the server.
   return {
     status: state.status,
-    message: state.message,
+    message: warnings.length ? `${state.message} SEO advisories: ${warnings.join(" ")}` : state.message,
     fieldErrors: state.fieldErrors,
     values: state.values,
   };

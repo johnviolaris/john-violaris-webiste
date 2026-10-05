@@ -58,7 +58,7 @@ const fontFiles = Promise.all([
   readFile(join(process.cwd(), "assets/fonts/DMSans-Medium.ttf")),
 ]);
 
-const portrait = readFile(join(process.cwd(), "public/Profile 7.png")).then((photo) =>
+const portrait = readFile(join(process.cwd(), "public/john-violaris-portrait.webp")).then((photo) =>
   sharp(photo)
     // Cropped from the top, where the face is; the portrait is already close
     // to the column's shape, so little is lost.

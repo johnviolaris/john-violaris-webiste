@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import { ExternalLink, Trash2 } from "lucide-react";
 
 import { DetachedActionForm } from "@/components/admin/detached-action-form";
+import { SlugChangeConfirmation } from "@/components/admin/slug-change-confirmation";
 import { SeoTip } from "@/components/admin/seo-tip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,6 +104,9 @@ export function ServiceForm({ service, groups, defaultGroup }: ServiceFormProps)
     <>
       <form ref={formRef} action={formAction} className="space-y-8">
         {service ? <input type="hidden" name="id" value={service.id} /> : null}
+        {service && service.path.startsWith("/services/") &&
+          <SlugChangeConfirmation previous={service.values.slug} next={slug}
+            wasPublished={service.published} prefix="/services/" />}
 
         {state.message ? (
           <p

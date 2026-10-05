@@ -5,9 +5,11 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 
 import { SectionForm } from "@/components/admin/section-form";
 import { SeoTip } from "@/components/admin/seo-tip";
+import { SeoPanel } from "@/components/admin/seo-panel";
 import { getPageSections } from "@/lib/cms/admin-queries";
 import { findGroup, pageGroups } from "@/lib/cms/sections/schema";
 import { seoTips } from "@/lib/cms/seo-tips";
+import { RevisionHistory } from "@/components/admin/revision-history";
 
 export function generateStaticParams() {
   return pageGroups.map((group) => ({ page: group.key }));
@@ -64,6 +66,7 @@ export default async function AdminPageContentPage({
         ) : null}
       </header>
 
+      {page !== "shared" ? <SeoPanel path={page === "home" ? "/" : `/${page}`} /> : null}
       <div className="space-y-4">
         {group.sections.map((section) => {
           const edited = stored[section.key] !== undefined;
@@ -130,6 +133,7 @@ export default async function AdminPageContentPage({
                   definition={section}
                   stored={stored[section.key]}
                 />
+                <RevisionHistory entity="page_sections" id={`${page}/${section.key}`} />
               </div>
             </details>
           );

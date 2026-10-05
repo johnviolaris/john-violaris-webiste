@@ -2,21 +2,26 @@ import { CookieSettingsButton } from "@/components/layout/analytics";
 import { Container } from "@/components/ui/container";
 import { consentStorageKey, gaMeasurementId } from "@/lib/analytics";
 import { enquiryAttributionStorageKey } from "@/lib/enquiries/attribution";
+import { getIntegrationSettings } from "@/lib/cms/seo/integration-queries";
 
 /**
  * The cookie policy's body (REQ-054).
  *
  * Written in code rather than the CMS, and on purpose: it describes what the
  * code stores, so it has to change when the code does, and it follows the
- * analytics switch by itself. With no measurement ID configured it says the
+ * same public integration switch as the site layout. With analytics disabled
+ * or no measurement ID configured it says the
  * site sets no cookies or campaign-attribution storage for visitors, which is
  * then the truth.
  *
  * Checked 2026-09-25: the ReviewSolicitors panels set no cookies on this
  * domain and their responses carry no `Set-Cookie`.
  */
-export function CookiePolicy() {
-  const rows = gaMeasurementId
+export async function CookiePolicy() {
+  const integrations = await getIntegrationSettings();
+  const measurementId = gaMeasurementId ?? "";
+  const analyticsEnabled = integrations.ga4 && Boolean(measurementId);
+  const rows = analyticsEnabled
     ? [
         {
           name: consentStorageKey,
@@ -40,7 +45,7 @@ export function CookiePolicy() {
           kept: "2 years",
         },
         {
-          name: `_ga_${gaMeasurementId.slice(2)}`,
+          name: `_ga_${measurementId.slice(2)}`,
           by: "Google Analytics, only if you accept",
           purpose: "Keeps track of the current visit.",
           kept: "2 years",
@@ -54,7 +59,7 @@ export function CookiePolicy() {
         <div className="article-body policy-body">
           <section>
             <h2>What this site stores</h2>
-            {gaMeasurementId ? (
+            {analyticsEnabled ? (
               <p>
                 Nothing is stored in your browser until you answer the cookie
                 question. Your answer is then remembered. If you accept, this
@@ -68,7 +73,12 @@ export function CookiePolicy() {
               </p>
             )}
             {rows.length > 0 ? (
-              <div className="service-outcomes-table-wrap">
+              <div
+                className="service-outcomes-table-wrap"
+                role="region"
+                aria-label="Cookies and storage"
+                tabIndex={0}
+              >
                 <table className="service-outcomes-table">
                   <caption>Cookies and storage</caption>
                   <thead>
@@ -96,7 +106,7 @@ export function CookiePolicy() {
             ) : null}
           </section>
 
-          {gaMeasurementId ? (
+          {analyticsEnabled ? (
             <section>
               <h2>What analytics is used for</h2>
               <p>
@@ -104,6 +114,10 @@ export function CookiePolicy() {
                 them lead to a call, a WhatsApp message, an email or an enquiry.
                 It is never sent your name, your contact details or anything
                 about your enquiry.
+              </p>
+              <p>
+                With your consent, it also measures page loading, responsiveness
+                and layout movement.
               </p>
               <h2>Changing your mind</h2>
               <p>

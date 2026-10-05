@@ -36,6 +36,8 @@ import {
   type SiteSettings,
 } from "@/lib/site-config";
 import { publicClient } from "@/utils/supabase/public";
+import { getPublicMedia } from "@/lib/cms/media/queries";
+import { mediaPresentation } from "@/lib/cms/media/schema";
 
 /**
  * Public content reads.
@@ -52,7 +54,9 @@ import { publicClient } from "@/utils/supabase/public";
  *     identical round trips into one.
  *
  *  3. Fall back on failure, never on emptiness. If Supabase errors or is
- *     unconfigured, the static seed is served and the failure is logged loudly.
+ *     unconfigured, a safe fallback is served and the failure is logged loudly.
+ *     Configured blog reads fail closed instead of bringing back seed articles
+ *     that may have been withdrawn or scheduled by their editor.
  *     If it answers with no rows, that is the truthful answer — nothing is
  *     published — and the page renders empty. Anything else would make it
  *     impossible for John to unpublish the last testimonial.
@@ -77,7 +81,7 @@ async function safely<T>(
     return await run();
   } catch (error) {
     console.error(
-      `[cms] ${label} could not be read from Supabase — serving static content instead.`,
+      `[cms] ${label} could not be read from Supabase — using its safe fallback.`,
       error,
     );
 
@@ -288,6 +292,17 @@ const blogPostSelect = "slug, title, published_at, content, blog_categories(name
 
 /** Shown when a post has no category, rather than an empty pill on the card. */
 const uncategorised = "Guides";
+async function withArticleMedia(row: BlogPostSelect): Promise<BlogPostSelect> {
+  const asset = row.content.featuredImage ? (await getPublicMedia()).get(row.content.featuredImage) : undefined;
+  if (!asset) return row;
+  const image = mediaPresentation(asset);
+  return { ...row, content: { ...row.content, featuredImageAlt: image.alt, featuredImageTitle: image.title, featuredImageCaption: image.caption, featuredImageCaptionFormat: image.captionFormat } };
+}
+// A configured CMS failure must not resurrect a seed article that an editor
+// has withdrawn or scheduled. Seed articles are only for an unconfigured demo.
+function canUseSeedArticles() {
+  return !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+}
 
 /** Category name for a seeded post, for the fallback path. */
 function seedCategoryName(categorySlug: string): string {
@@ -312,18 +327,22 @@ export const getArticles = cache(async function getArticles(): Promise<Article[]
       const { data, error } = await publicClient()
         .from("blog_posts")
         .select(blogPostSelect)
+        .eq("published", true)
+        .or(`published_at.is.null,published_at.lte.${new Date().toISOString()}`)
         .order("published_at", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
         .returns<BlogPostSelect[]>();
 
       if (error) throw error;
 
-      return (data ?? []).map((row) =>
-        toArticle(row, row.blog_categories?.name ?? uncategorised),
-      );
+      return Promise.all((data ?? []).map(async (row) =>
+        toArticle(await withArticleMedia(row), row.blog_categories?.name ?? uncategorised),
+      ));
     },
     () =>
-      seedBlogPosts.map((row) => toArticle(row, seedCategoryName(row.categorySlug))),
+      canUseSeedArticles()
+        ? seedBlogPosts.map((row) => toArticle(row, seedCategoryName(row.categorySlug)))
+        : [],
   );
 });
 
@@ -337,14 +356,17 @@ export const getArticle = cache(async function getArticle(
         .from("blog_posts")
         .select(blogPostSelect)
         .eq("slug", slug)
+        .eq("published", true)
+        .or(`published_at.is.null,published_at.lte.${new Date().toISOString()}`)
         .maybeSingle<BlogPostSelect>();
 
       if (error) throw error;
       if (!data) return null;
 
-      return toArticle(data, data.blog_categories?.name ?? uncategorised);
+      return toArticle(await withArticleMedia(data), data.blog_categories?.name ?? uncategorised);
     },
     () => {
+      if (!canUseSeedArticles()) return null;
       const row = seedBlogPosts.find((post) => post.slug === slug);
 
       return row ? toArticle(row, seedCategoryName(row.categorySlug)) : null;
@@ -438,6 +460,8 @@ export const getRouteIndex = cache(async function getRouteIndex(): Promise<{
           .select(
             "slug, title, updated_at, published_at, excerpt:content->>excerpt, featuredImage:content->>featuredImage, featuredImageAlt:content->>featuredImageAlt",
           )
+          .eq("published", true)
+          .or(`published_at.is.null,published_at.lte.${new Date().toISOString()}`)
           .order("published_at", { ascending: false, nullsFirst: false })
           .order("created_at", { ascending: false })
           .returns<IndexedArticle[]>(),
@@ -474,7 +498,7 @@ export const getRouteIndex = cache(async function getRouteIndex(): Promise<{
           page: page ? { intro: page.content.intro, updated_at: null } : null,
         };
       }),
-      articles: seedBlogPosts.map((post) => ({
+      articles: canUseSeedArticles() ? seedBlogPosts.map((post) => ({
         slug: post.slug,
         title: post.title,
         updated_at: null,
@@ -482,7 +506,7 @@ export const getRouteIndex = cache(async function getRouteIndex(): Promise<{
         excerpt: post.content.excerpt,
         featuredImage: post.content.featuredImage ?? null,
         featuredImageAlt: post.content.featuredImageAlt ?? null,
-      })),
+      })) : [],
     }),
   );
 });
@@ -634,6 +658,16 @@ export const getSiteSettings = cache(
  * page whose database is unreachable render identically, and only the second
  * one logs.
  */
+async function withPortraitMedia(content: Record<string, SectionContent>, page: string) {
+  if (page !== "home") return content;
+  const hero = content.hero ?? {};
+  const url = typeof hero.portrait === "string" ? hero.portrait : "/john-violaris-portrait.webp";
+  const asset = (await getPublicMedia()).get(url === "/Profile 7.png" ? "/john-violaris-portrait.webp" : url);
+  if (!asset) return content;
+  const image = mediaPresentation(asset);
+  return { ...content, hero: { ...hero, portraitAlt: image.alt, portraitTitle: image.title ?? "", portraitCaption: image.caption ?? "", portraitCaptionFormat: image.captionFormat } };
+}
+
 export const getPageContent = cache(async function getPageContent(
   page: string,
 ): Promise<Record<string, SectionContent>> {
@@ -648,9 +682,9 @@ export const getPageContent = cache(async function getPageContent(
 
       if (error) throw error;
 
-      return Object.fromEntries(
+      return withPortraitMedia(Object.fromEntries(
         (data ?? []).map(({ section, content }) => [section, content]),
-      );
+      ), page);
     },
     () => ({}),
   );
@@ -683,6 +717,8 @@ export const getPagesContent = cache(async function getPagesContent(
       for (const row of data ?? []) {
         (grouped[row.page] ??= {})[row.section] = row.content;
       }
+
+      if (grouped.home) grouped.home = await withPortraitMedia(grouped.home, "home");
 
       return grouped;
     },

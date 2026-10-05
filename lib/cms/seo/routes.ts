@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 
 import { getRouteIndex } from "@/lib/cms/queries";
+import { getLocationPages } from "@/lib/cms/locations/queries";
 import type { RouteDefaults } from "@/lib/cms/seo/resolve";
 
 /**
@@ -26,7 +27,7 @@ import type { RouteDefaults } from "@/lib/cms/seo/resolve";
  * public. Admin, auth and API routes are never here.
  */
 
-export type SeoRouteGroup = "Pages" | "Services" | "Articles";
+export type SeoRouteGroup = "Pages" | "Services" | "Articles" | "Locations";
 
 export type SeoRoute = {
   path: string;
@@ -234,6 +235,34 @@ const offenceDefaults: Record<string, RouteDefaults> = {
   },
 };
 
+/**
+ * User-approved restoration of the earlier concise article search titles.
+ * Public article headlines/body copy and saved SEO overrides remain intact.
+ */
+const articleSearchTitles: Record<string, string> = {
+  "what-happens-after-a-drink-driving-arrest": "After a Drink Driving Arrest: What Happens?",
+  "exceptional-hardship-what-the-court-looks-for": "Exceptional Hardship: What Courts Look For",
+  "mobile-phone-driving-law-changes": "Mobile Phone Driving Law: The 2022 Changes",
+  "laced-drinks-and-drink-driving": "Laced Drinks and Drink Driving Bans",
+  "notice-of-intended-prosecution": "Notice of Intended Prosecution: What to Do",
+  "answering-questions-in-a-police-interview": "Police Interviews: Should You Answer?",
+};
+
+/** Shared by the public registry and authenticated saved-draft SEO panels. */
+export function serviceSeoDefaults(path: string, name: string, description?: string): RouteDefaults {
+  return offenceDefaults[path] ?? { title: `${name} Solicitor`, description };
+}
+
+export function articleSeoDefaults(slug: string, title: string, excerpt?: string, image?: string, alt?: string, publishedTime?: string | null): RouteDefaults {
+  return {
+    title: articleSearchTitles[slug] ?? title,
+    description: excerpt,
+    ogType: "article",
+    ...(image ? { image: { url: image, alt } } : {}),
+    ...(publishedTime ? { publishedTime } : {}),
+  };
+}
+
 /** Newest of two optional timestamps. */
 function latest(...values: (string | null | undefined)[]): string | undefined {
   const dates = values.filter((value): value is string => Boolean(value));
@@ -244,7 +273,7 @@ function latest(...values: (string | null | undefined)[]): string | undefined {
 export const listSeoRoutes = cache(async function listSeoRoutes(): Promise<
   SeoRoute[]
 > {
-  const { services, articles } = await getRouteIndex();
+  const [{ services, articles }, locations] = await Promise.all([getRouteIndex(), getLocationPages()]);
 
   const pages: SeoRoute[] = [
     { path: "/", label: "Home", group: "Pages", defaults: homeDefaults },
@@ -272,12 +301,7 @@ export const listSeoRoutes = cache(async function listSeoRoutes(): Promise<
         path,
         label: service.name,
         group: "Services",
-        defaults: offenceDefaults[path] ?? {
-          // The offence leads, because the offence is what was searched for.
-          title: `${service.name} Solicitor`,
-          description:
-            service.page?.intro ?? service.content.intro ?? undefined,
-        },
+        defaults: serviceSeoDefaults(path, service.name, service.page?.intro ?? service.content.intro ?? undefined),
         lastModified: latest(service.updated_at, service.page?.updated_at),
       };
     });
@@ -287,25 +311,17 @@ export const listSeoRoutes = cache(async function listSeoRoutes(): Promise<
       path: `/blog/${article.slug}`,
       label: article.title,
       group: "Articles",
-      defaults: {
-        title: article.title,
-        description: article.excerpt ?? undefined,
-        ogType: "article",
-        ...(article.featuredImage
-          ? {
-              image: {
-                url: article.featuredImage,
-                alt: article.featuredImageAlt ?? undefined,
-              },
-            }
-          : {}),
-        ...(article.published_at ? { publishedTime: article.published_at } : {}),
-      },
+      defaults: articleSeoDefaults(article.slug, article.title, article.excerpt ?? undefined, article.featuredImage ?? undefined, article.featuredImageAlt ?? undefined, article.published_at),
       lastModified: latest(article.updated_at),
     }),
   );
 
-  return [...pages, ...offencePages, ...articlePages];
+  const locationPages: SeoRoute[] = locations.map((location) => ({
+    path: `/locations/${location.slug}`, label: location.location, group: "Locations",
+    defaults: { title: location.title, description: location.content.description },
+    lastModified: location.updated_at,
+  }));
+  return [...pages, ...offencePages, ...articlePages, ...locationPages];
 });
 
 /** One route by path, or undefined when it is not a public route. */

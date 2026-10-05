@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 import { isIconName } from "@/components/ui/icons";
 import { requireAdmin } from "@/lib/auth";
@@ -22,6 +23,10 @@ import {
 import type { ServiceContent } from "@/lib/cms/types";
 import { cmsWrite } from "@/lib/cms/write";
 import { createClient } from "@/utils/supabase/server";
+import { hasConfirmedSlugChange } from "@/lib/cms/slug-confirmation";
+import { getPublicationSeoWarnings } from "@/lib/cms/seo/publication-check";
+import { serviceSeoDefaults } from "@/lib/cms/seo/routes";
+import type { PublicationMutationResult } from "@/lib/cms/seo/publication-result";
 
 /**
  * Service catalogue mutations.
@@ -37,6 +42,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 type StoredService = {
   id: string;
   slug: string;
+  published: boolean;
   sort_order: number;
   content: ServiceContent;
 };
@@ -104,7 +110,7 @@ export async function saveService(
   if (serviceId) {
     const { data } = await supabase
       .from("services")
-      .select("id, slug, sort_order, content")
+      .select("id, slug, published, sort_order, content")
       .eq("id", serviceId)
       .maybeSingle<StoredService>();
 
@@ -130,6 +136,9 @@ export async function saveService(
   }
 
   const values = validation.values;
+  if (existing && !hasConfirmedSlugChange(existing.slug, values.slug, existing.published, formData.get("confirmSlugChange"))) {
+    return formError(values, { slug: "Confirm the URL change before saving. If this service changed in another tab, reload first." });
+  }
 
   if (!isIconName(values.icon)) {
     return formError(values, { icon: "Choose an icon from the list." });
@@ -215,6 +224,10 @@ export async function saveService(
       `/services/${values.slug}`,
     );
   }
+  if (state.status === "success" && serviceId) revalidatePath(`/admin/services/${serviceId}`);
+  const warnings = state.status === "success" && published && !content.href
+    ? await getPublicationSeoWarnings(`/services/${values.slug}`, serviceSeoDefaults(`/services/${values.slug}`, values.name, values.intro), content)
+    : [];
 
   if (state.status === "success" && !serviceId && state.data?.id) {
     // Straight into the editor for the service that now exists, so the next
@@ -225,7 +238,7 @@ export async function saveService(
   // Rebuilt field by field rather than spread: `data` stays on the server.
   return {
     status: state.status,
-    message: state.message,
+    message: warnings.length ? `${state.message} SEO suggestions: ${warnings.join(" ")}` : state.message,
     fieldErrors: state.fieldErrors,
     values: state.values,
   };
@@ -238,12 +251,14 @@ export async function saveService(
  * and the rail beneath the hero, and its offence page stops resolving. The
  * page's own row is untouched, so publishing again brings all of it back.
  */
-export async function setServicePublished(id: string, published: boolean) {
+export async function setServicePublished(id: string, published: boolean): Promise<PublicationMutationResult> {
   await requireAdmin();
 
-  if (typeof id !== "string" || typeof published !== "boolean") return;
+  if (typeof id !== "string" || typeof published !== "boolean") return { ok: false, error: "This service could not be identified. Reload before changing publication." };
 
   const supabase = await createClient();
+  const { data: service, error: loadError } = await supabase.from("services").select("slug,name,content").eq("id", id).maybeSingle<{ slug: string; name: string; content: ServiceContent }>();
+  if (loadError || !service) return { ok: false, error: "This service could not be loaded. Reload before changing publication." };
 
   const { error } = await supabase
     .from("services")
@@ -253,10 +268,12 @@ export async function setServicePublished(id: string, published: boolean) {
   if (error) {
     console.error(`[cms] Failed to change publish state of service ${id}`, error);
 
-    return;
+    return { ok: false, error: "The service publication state could not be saved." };
   }
 
   revalidateFor("services");
+  const warnings = published && !service.content.href ? await getPublicationSeoWarnings(`/services/${service.slug}`, serviceSeoDefaults(`/services/${service.slug}`, service.name, service.content.intro), service.content) : [];
+  return { ok: true, warnings };
 }
 
 /**

@@ -6,6 +6,8 @@ import { ServicePageForm } from "@/components/admin/service-page-form";
 import { getService, getServicePageFor } from "@/lib/cms/admin-queries";
 import { servicePath } from "@/lib/cms/services/schema";
 import { formatUkShortDateTime } from "@/lib/format";
+import { RevisionHistory } from "@/components/admin/revision-history";
+import { SeoPanel } from "@/components/admin/seo-panel";
 
 export const metadata: Metadata = {
   title: "Edit service page",
@@ -90,6 +92,10 @@ export default async function EditServicePagePage({
         }}
         page={page ? { content: page.content, published: page.published } : null}
       />
+      <a href={`/preview/services/${service.id}`} target="_blank" rel="noopener"
+        className="mt-5 inline-flex text-sm underline underline-offset-4">Preview saved service page</a>
+      {page && <RevisionHistory entity="service_pages" id={page.id} previewPath={`/preview/services/${service.id}`} />}
+      <SeoPanel path={servicePath(service)} />
     </div>
   );
 }

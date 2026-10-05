@@ -78,7 +78,7 @@ export function titleSuffix(siteName: string): string {
  * render an empty `<title>`.
  */
 function set(value: string | undefined): string | undefined {
-  const trimmed = value?.trim();
+  const trimmed = typeof value === "string" ? value.trim() : "";
 
   return trimmed ? trimmed : undefined;
 }
@@ -137,7 +137,9 @@ export function resolveMetadata(
     ? { url: overrideImage, alt: set(override?.ogImageAlt) }
     : (defaults.image ?? fallbackImage);
 
-  const type = defaults.ogType ?? "website";
+  const type = override?.ogType === "website" || override?.ogType === "article"
+    ? override.ogType
+    : defaults.ogType ?? "website";
   const ogDescription = set(override?.ogDescription) ?? description;
 
   /*
@@ -150,6 +152,11 @@ export function resolveMetadata(
   const ogTitle =
     set(override?.ogTitle) ??
     (type === "article" ? title : `${title}${titleSuffix(siteName)}`);
+
+  const twitterImage = set(override?.twitterImage);
+  const xImage = twitterImage
+    ? { url: twitterImage, alt: set(override?.twitterImageAlt) }
+    : image;
 
   const metadata: Metadata = {
     title,
@@ -166,6 +173,14 @@ export function resolveMetadata(
       ...(type === "article" && defaults.publishedTime
         ? { publishedTime: defaults.publishedTime }
         : {}),
+    },
+    twitter: {
+      card: override?.twitterCard === "summary" ? "summary" : "summary_large_image",
+      title: set(override?.twitterTitle) ?? ogTitle,
+      ...(set(override?.twitterDescription) ?? ogDescription
+        ? { description: set(override?.twitterDescription) ?? ogDescription }
+        : {}),
+      ...(xImage ? { images: [xImage] } : {}),
     },
   };
 

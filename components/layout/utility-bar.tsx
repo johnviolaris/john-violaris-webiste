@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/ui/intent-link";
 
 import { Icon } from "@/components/ui/icons";
 import { whatsappHref, type SiteConfig } from "@/lib/site-config";
@@ -19,7 +19,12 @@ export function UtilityBar({ config }: { config: SiteConfig }) {
   const whatsapp = whatsappHref(config);
 
   return (
-    <div className="utility-bar" data-track="utility_bar">
+    <div
+      className="utility-bar"
+      data-track="utility_bar"
+      role="region"
+      aria-label="Contact details and consultation"
+    >
       <div className="utility-bar-inner">
         <p className="utility-promise">
           <span className="utility-dot" aria-hidden="true" />

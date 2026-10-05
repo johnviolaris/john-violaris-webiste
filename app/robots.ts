@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 
 import { deployment } from "@/lib/site-config";
+import { getSiteSettings } from "@/lib/cms/queries";
+import { crawlFile, resolvedCrawlSettings } from "@/lib/cms/seo/robots";
 
 /**
  * `/robots.txt`.
@@ -14,13 +16,7 @@ import { deployment } from "@/lib/site-config";
  * links elsewhere, and a crawler that may not fetch it never sees the
  * `noindex` that would have kept it out.
  */
-export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: ["/admin", "/auth", "/api"],
-    },
-    sitemap: new URL("/sitemap.xml", deployment.url).href,
-  };
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const settings = await getSiteSettings();
+  return crawlFile(resolvedCrawlSettings(settings.robots), deployment.url);
 }

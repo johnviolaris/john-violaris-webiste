@@ -1,4 +1,5 @@
 import type { IconName } from "@/components/ui/icons";
+import type { FaqItem } from "@/lib/cms/faq";
 import type { ArticleBlock } from "@/lib/content/blog";
 import type { ServiceDetail } from "@/lib/content/service-detail";
 import type { Service, ServiceGroup } from "@/lib/content/services";
@@ -140,6 +141,8 @@ export type BlogCategoryRow = {
 
 /** `blog_posts.content`. */
 export type BlogPostContent = {
+  /** Only saved, reviewed FAQs are rendered and described by FAQPage schema. */
+  faqItems?: FaqItem[];
   /** Card summary, and the meta description for the article page. */
   excerpt: string;
   /** Standfirst beneath the article heading. */
@@ -152,6 +155,10 @@ export type BlogPostContent = {
   /** Storage path of the featured image, once uploads exist. */
   featuredImage?: string;
   featuredImageAlt?: string;
+  featuredImageTitle?: string;
+  featuredImageCaption?: string;
+  /** Missing values preserve historical captions as literal plain text. */
+  featuredImageCaptionFormat?: "plain" | "markdown";
 };
 
 export type BlogPostRow = Timestamps & {
@@ -161,6 +168,8 @@ export type BlogPostRow = Timestamps & {
   category_id: string | null;
   published: boolean;
   published_at: string | null;
+  /** Stops publication at this instant; entered by editors in UK local time. */
+  unpublish_at?: string | null;
   content: BlogPostContent;
 };
 
@@ -187,6 +196,16 @@ export type SeoContent = {
   ogDescription?: string;
   ogImage?: string;
   ogImageAlt?: string;
+  /** Left unset to follow the page's content type. */
+  ogType?: "website" | "article";
+  /** X/Twitter overrides fall back to their Open Graph equivalents. */
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
+  twitterImageAlt?: string;
+  twitterCard?: "summary" | "summary_large_image";
+  /** Validated additive Schema.org JSON-LD, edited by administrators only. */
+  customJsonLd?: string;
   /** Asks search engines to leave the page out, and drops it from the sitemap. */
   noIndex?: true;
   noFollow?: true;
@@ -196,6 +215,28 @@ export type SeoRow = Timestamps & {
   id: string;
   path: string;
   content: SeoContent;
+};
+
+/** Bespoke service-area content. No office/address fields or seeded locations. */
+export type LocationPageContent = {
+  description: string;
+  intro: string;
+  localContext: string[];
+  body: string[];
+  relatedServices: string[];
+};
+
+export type LocationPageRow = Timestamps & {
+  id: string;
+  slug: string;
+  location: string;
+  title: string;
+  published: boolean;
+  published_at?: string | null;
+  unpublish_at?: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  content: LocationPageContent;
 };
 
 /**

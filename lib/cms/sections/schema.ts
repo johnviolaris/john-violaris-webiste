@@ -343,7 +343,7 @@ export const pageGroups: PageGroup[] = [
             key: "portrait",
             label: "Portrait",
             kind: "image",
-            hint: "The photograph beside the heading. A portrait-shaped image works best — it is shown taller than it is wide. JPEG, PNG, WebP or AVIF, up to 5 MB.",
+            hint: "The photograph beside the heading. A portrait-shaped image works best — it is shown taller than it is wide. JPEG, PNG, WebP or AVIF, up to 4 MB.",
             seo: seoTips.image,
             required: true,
             maxLength: 500,

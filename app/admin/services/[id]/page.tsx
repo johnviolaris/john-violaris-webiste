@@ -5,6 +5,8 @@ import { ServiceForm } from "@/components/admin/service-form";
 import { getService, listServiceGroups } from "@/lib/cms/admin-queries";
 import { servicePath, serviceValuesFrom } from "@/lib/cms/services/schema";
 import { formatUkShortDateTime } from "@/lib/format";
+import { SeoPanel } from "@/components/admin/seo-panel";
+import { RevisionHistory } from "@/components/admin/revision-history";
 
 export const metadata: Metadata = {
   title: "Edit service",
@@ -54,6 +56,8 @@ export default async function EditServicePage({
         }}
         groups={groups}
       />
+      <SeoPanel path={servicePath(service)} />
+      <RevisionHistory entity="services" id={id} />
     </div>
   );
 }

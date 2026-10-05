@@ -21,10 +21,13 @@
  * so server components can read `gaMeasurementId`.
  */
 
+import { createCoreWebVitalsCollector } from "@/lib/analytics-web-vitals";
+
 declare global {
   interface Window {
     dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
+    [key: `ga-disable-${string}`]: boolean | undefined;
   }
 }
 
@@ -34,6 +37,36 @@ export const gaMeasurementId: string | null = (() => {
 
   return id && /^G-[A-Z0-9]{4,}$/.test(id) ? id : null;
 })();
+
+/** Independent of visitor consent: administrators can turn the integration off. */
+let integrationEnabled = true;
+
+function analyticsAllowed(): boolean {
+  return integrationEnabled && typeof window !== "undefined" && !!gaMeasurementId && !!window.gtag
+    && readConsent() === "granted" && !window[`ga-disable-${gaMeasurementId}`];
+}
+
+const collectCoreWebVitals = createCoreWebVitalsCollector({
+  // First-party bundled chunk, requested only after the same GA4 gates pass.
+  load: () => import("web-vitals"),
+  allowed: analyticsAllowed,
+  send: (name, params) => {
+    if (!analyticsAllowed()) return;
+    // GA4 keeps its existing consented page context. Our added parameters
+    // contain only numeric measurements and an ephemeral correlation number.
+    window.gtag?.("event", name, params);
+  },
+});
+
+function startCoreWebVitals(): void {
+  if (typeof document === "undefined" || typeof window === "undefined" || typeof window.PerformanceObserver !== "function") return;
+  void collectCoreWebVitals(document);
+}
+
+export function setAnalyticsIntegrationEnabled(enabled: boolean, measurementId: string): void {
+  integrationEnabled = enabled;
+  if (!enabled && typeof window !== "undefined") stopAnalytics(measurementId);
+}
 
 /** The event the footer's "Cookie settings" button sends to reopen the banner. */
 export const openConsentEvent = "jv:cookie-settings";
@@ -123,7 +156,13 @@ export function clearAnalyticsCookies(): void {
  * arrow. Defining it only here is what keeps `track` inert before consent.
  */
 export function startAnalytics(measurementId: string): void {
-  if (window.gtag) return;
+  if (!integrationEnabled || readConsent() !== "granted") return;
+  window[`ga-disable-${measurementId}`] = false;
+  if (window.gtag) {
+    window.gtag("consent", "update", { analytics_storage: "granted" });
+    startCoreWebVitals();
+    return;
+  }
 
   window.dataLayer = window.dataLayer ?? [];
   window.gtag = function gtag() {
@@ -142,7 +181,18 @@ export function startAnalytics(measurementId: string): void {
   // Page views after the first, on client-side navigation, come from GA4's
   // enhanced measurement ("page changes based on browser history events"),
   // which is on by default. Sending them here as well would count each twice.
-  window.gtag("config", measurementId);
+  window.gtag("config", measurementId, {
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+  });
+  startCoreWebVitals();
+}
+
+/** Stop an already-loaded tag when consent is withdrawn, including in another tab. */
+export function stopAnalytics(measurementId: string): void {
+  window[`ga-disable-${measurementId}`] = true;
+  window.gtag?.("consent", "update", { analytics_storage: "denied" });
+  clearAnalyticsCookies();
 }
 
 // ---------------------------------------------------------------------------
@@ -160,6 +210,7 @@ type EventParams = {
   email_click: { location: string };
   booking_click: { location: string };
   form_submit: Record<string, never>;
+  generate_lead: Record<string, never>;
   form_error: { error_type: "validation" | "server" };
 };
 
@@ -170,9 +221,9 @@ export function track<E extends AnalyticsEventName>(
   event: E,
   params: EventParams[E],
 ): void {
-  if (typeof window === "undefined" || !window.gtag) return;
+  if (!analyticsAllowed()) return;
 
-  window.gtag("event", event, {
+  window.gtag?.("event", event, {
     page_path: window.location.pathname,
     ...params,
   });

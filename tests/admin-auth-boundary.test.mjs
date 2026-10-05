@@ -25,8 +25,8 @@ test("the authorized client verifies the admin before creating a session client"
 test("missing Supabase configuration fails closed before client creation", async () => {
   const auth = await source("lib/auth.ts");
   const sessionBoundary = auth.slice(
+    auth.indexOf("export const getCmsSession"),
     auth.indexOf("export const getAdminSession"),
-    auth.indexOf("export async function requireAdmin"),
   );
   const urlCheck = sessionBoundary.indexOf("NEXT_PUBLIC_SUPABASE_URL");
   const keyCheck = sessionBoundary.indexOf(
@@ -61,6 +61,10 @@ test("public account creation is absent from both the UI and server actions", as
 });
 
 const protectedReadModules = [
+  {
+    path: "lib/cms/locations/admin-queries.ts",
+    exports: ["listLocationPagesAdmin", "getLocationPageAdmin"],
+  },
   {
     path: "lib/cms/admin-queries.ts",
     exports: [

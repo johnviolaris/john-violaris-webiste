@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ServiceGroupForm } from "@/components/admin/service-group-form";
 import { getServiceGroup, listServices } from "@/lib/cms/admin-queries";
 import { formatUkShortDateTime } from "@/lib/format";
+import { RevisionHistory } from "@/components/admin/revision-history";
 
 export const metadata: Metadata = {
   title: "Edit group",
@@ -52,6 +53,7 @@ export default async function EditServiceGroupPage({
           serviceCount: members.length,
         }}
       />
+      <RevisionHistory entity="service_groups" id={id} />
     </div>
   );
 }

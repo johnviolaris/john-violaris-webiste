@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { Analytics } from "@/components/layout/analytics";
+import { IntegrationProvider } from "@/components/layout/integration-provider";
 import { EnquiryAttributionCapture } from "@/components/layout/enquiry-attribution";
 import { MobileContactBar } from "@/components/layout/mobile-contact-bar";
 import { ServiceCatalogueProvider } from "@/components/layout/service-catalogue-provider";
@@ -14,6 +15,7 @@ import {
   getServiceGroups,
   getSiteConfig,
 } from "@/lib/cms/queries";
+import { getIntegrationSettings } from "@/lib/cms/seo/integration-queries";
 
 /**
  * The one place the site configuration and the service catalogue are read for
@@ -30,13 +32,15 @@ export default async function SiteLayout({
 }: {
   children: ReactNode;
 }) {
-  const [config, groups, descriptions] = await Promise.all([
+  const [config, groups, descriptions, integrations] = await Promise.all([
     getSiteConfig(),
     getServiceGroups(),
     getServiceDescriptions(),
+    getIntegrationSettings(),
   ]);
 
   return (
+    <IntegrationProvider settings={integrations}>
     <SiteConfigProvider config={config}>
       <ServiceCatalogueProvider catalogue={{ groups, descriptions }}>
         <div className="flex min-h-full flex-col bg-cream">
@@ -73,5 +77,6 @@ export default async function SiteLayout({
         </div>
       </ServiceCatalogueProvider>
     </SiteConfigProvider>
+    </IntegrationProvider>
   );
 }

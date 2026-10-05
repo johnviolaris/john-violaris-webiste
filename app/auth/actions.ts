@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { hasAdminRole } from "@/lib/auth";
+import { hasCmsRole } from "@/lib/auth";
 import { minimumPasswordLength } from "@/lib/passwords";
 import { deployment } from "@/lib/site-config";
 import { createClient } from "@/utils/supabase/server";
@@ -64,7 +64,7 @@ export async function signIn(
     if (
       claimsError ||
       !userId ||
-      !(await hasAdminRole(supabase, userId))
+      !(await hasCmsRole(supabase, userId))
     ) {
       await supabase.auth.signOut({ scope: "local" });
       return {

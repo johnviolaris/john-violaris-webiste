@@ -1,24 +1,27 @@
 "use server";
 
-import { requireAdmin } from "@/lib/auth";
+import { requireSeoEditor } from "@/lib/auth";
+import { listSeoMetadataForEditor as listSeoMetadata } from "@/lib/cms/seo/admin-queries";
+import { getSiteConfig, getSiteSettings } from "@/lib/cms/queries";
+import { analyseSeoHealth } from "@/lib/cms/seo/health";
 import {
   formError,
   formFailure,
-  isAddress,
   readCheckbox,
   readFields,
-  validateFields,
 } from "@/lib/cms/form";
-import { findSeoRoute } from "@/lib/cms/seo/routes";
+import { listSeoRoutes } from "@/lib/cms/seo/routes";
+import { findEditableSeoRoute } from "@/lib/cms/seo/admin-routes";
+import { publicationSeoWarnings } from "@/lib/cms/seo/publication-warnings";
+import { noIndexCrawlConflicts, resolvedCrawlSettings } from "@/lib/cms/seo/robots";
+import { validateSeoContent } from "@/lib/cms/seo/content-validation";
+import { deployment } from "@/lib/site-config";
 import {
   emptySeoValues,
   seoFields,
-  seoRules,
-  type SeoField,
   type SeoFormState,
 } from "@/lib/cms/seo/schema";
-import type { SeoContent } from "@/lib/cms/types";
-import { cmsWrite } from "@/lib/cms/write";
+import { seoWrite } from "@/lib/cms/seo/write";
 
 /**
  * SEO override mutations.
@@ -42,12 +45,13 @@ export async function saveSeo(
   _previous: SeoFormState,
   formData: FormData,
 ): Promise<SeoFormState> {
-  await requireAdmin();
+  await requireSeoEditor();
 
   const path = readPath(formData);
   const submitted = readFields(formData, seoFields);
 
-  if (!(await findSeoRoute(path))) {
+  const route = await findEditableSeoRoute(path);
+  if (!route) {
     return formFailure(
       submitted,
       "That page is not one this site publishes. Reload the list and try again.",
@@ -61,11 +65,11 @@ export async function saveSeo(
    * it just removed. Deleting rather than blanking, for the reason below.
    */
   if (formData.get("intent") === "reset") {
-    const state = await cmsWrite({
-      entity: "seo-metadata",
+    const state = await seoWrite({
       values: emptySeoValues,
       successMessage: "Reset. The page uses its defaults again.",
       paths: [path],
+      allowEmpty: true,
       run: async (supabase) =>
         supabase.from("seo_metadata").delete().eq("path", path).select("path"),
     });
@@ -82,57 +86,19 @@ export async function saveSeo(
   const noIndex = readCheckbox(formData, "noIndex");
   const noFollow = readCheckbox(formData, "noFollow");
 
-  const validation = validateFields(submitted, seoRules);
-
-  if (!validation.ok) {
-    return formError(submitted, validation.fieldErrors);
-  }
-
-  const values = validation.values;
-  const fieldErrors: Partial<Record<SeoField, string>> = {};
-
-  if (values.canonical && !isAddress(values.canonical)) {
-    fieldErrors.canonical =
-      "Use an address on this site starting with /, or a full address starting with https://.";
-  }
-
-  if (values.ogImage && !isAddress(values.ogImage)) {
-    fieldErrors.ogImage = "Upload the image again — that address cannot be used.";
-  }
-
-  if (values.ogImage && !values.ogImageAlt) {
-    fieldErrors.ogImageAlt =
-      "Describe the image for anyone who cannot see it. An image with no description is invisible to a screen reader.";
-  }
-
-  if (Object.keys(fieldErrors).length > 0) {
-    return formError(values, fieldErrors);
-  }
-
-  // Only what was filled in. The alt text goes with its image: a description
-  // left behind after the image was removed would describe nothing.
-  const content: SeoContent = {
-    ...(values.title ? { title: values.title } : {}),
-    ...(values.description ? { description: values.description } : {}),
-    ...(values.canonical ? { canonical: values.canonical } : {}),
-    ...(values.ogTitle ? { ogTitle: values.ogTitle } : {}),
-    ...(values.ogDescription ? { ogDescription: values.ogDescription } : {}),
-    ...(values.ogImage
-      ? { ogImage: values.ogImage, ogImageAlt: values.ogImageAlt }
-      : {}),
-    ...(noIndex ? { noIndex: true as const } : {}),
-    ...(noFollow ? { noFollow: true as const } : {}),
-  };
+  const checked = validateSeoContent({ ...submitted, noIndex, noFollow }, path, deployment.url);
+  if (!checked.ok) return formError(submitted, checked.fieldErrors, checked.error);
+  const { values, content } = checked;
 
   const isEmpty = Object.keys(content).length === 0;
 
-  const state = await cmsWrite({
-    entity: "seo-metadata",
+  const state = await seoWrite({
     values,
     successMessage: isEmpty
       ? "Saved. With nothing overridden, the page uses its defaults."
       : "SEO settings saved.",
     paths: [path],
+    allowEmpty: isEmpty,
     // An override with nothing in it is no override: the row is removed rather
     // than kept empty, so "has this page been customised?" is simply "does it
     // have a row?" — which is what the list shows.
@@ -145,11 +111,23 @@ export async function saveSeo(
             .select("path"),
   });
 
+  let warnings: string[] = [];
+  if (state.status === "success") {
+    const [routes, rows, config, settings] = await Promise.all([listSeoRoutes(), listSeoMetadata(), getSiteConfig(), getSiteSettings()]);
+    warnings = analyseSeoHealth({ routes, overrides: Object.fromEntries(rows.map((row) => [row.path, row.content])), siteName: config.name, siteUrl: deployment.url })
+      .filter((issue) => issue.path === path && issue.code.startsWith("duplicate-"))
+      .map((issue) => issue.message);
+    warnings.push(...publicationSeoWarnings({ path, defaults: route.defaults, override: content, siteName: config.name, siteUrl: deployment.url, knownRoutes: routes }));
+    if (content.noIndex && noIndexCrawlConflicts(resolvedCrawlSettings(settings.robots), [path]).length) warnings.push("This page is blocked by crawl rules, so crawlers cannot read its noindex directive. Remove the crawl block when hiding it from search.");
+    warnings = [...new Set(warnings)];
+  }
+
   // Rebuilt field by field rather than spread: `data` stays on the server.
   return {
     status: state.status,
     message: state.message,
     fieldErrors: state.fieldErrors,
     values: state.values,
+    warnings,
   };
 }

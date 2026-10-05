@@ -130,11 +130,22 @@ how you can help.
 6. Optionally add a **Featured image** (JPEG, PNG, WebP or AVIF, up to 5 MB)
    with an **Image description** of what it shows.
 7. **Related service** is where the article sends a reader who wants help.
-8. **Read time** and **Publication date** fill themselves in if left blank.
+8. **Read time** fills itself in if left blank. Publication and expiry times are
+   entered in UK local time (Europe/London). Future publication waits until that
+   time; expiry removes the article from public pages and the sitemap. Changes
+   around the scheduled time appear as the pages refresh, normally within the
+   60-second refresh cycle. Ambiguous or nonexistent clock-change times are rejected.
 9. Tick **Published** and save.
 
 The article shows your name and the date it was last updated. Renaming the URL
 slug of a published article keeps the old address working, as for services.
+
+Use **Preview saved content** to see an article or service page before publishing.
+The preview requires an administrator login and shows the last saved content.
+**Saved versions** records changes after the publishing migration is installed.
+Restoring a version makes it a draft, so review and republish before expecting it
+on the public site. Image title and caption fields are optional; image descriptions
+remain required for meaningful content images.
 
 **Blog Categories** lets you add, rename and delete categories. Deleting one
 that is in use leaves its articles published, without a category.
@@ -148,6 +159,13 @@ this side can change them. To correct, remove or add a review, go through
 ReviewSolicitors.
 
 ## SEO Metadata: how pages appear in Google
+
+Service-page wording, including headings and search wording, is being kept unchanged until John
+reviews proposed edits. Other project work is authorised. The user has approved restoring the six earlier concise
+article search titles. That title-only improvement is restored; article bodies
+and visible headlines are unchanged. The added drink-driving service synonym
+paragraph and Special Reasons wording changes remain withdrawn. Treat outcome
+wording warnings as review tasks, not permission to publish new service copy.
 
 **SEO Metadata** lists every public page. Each already has a sensible title and
 description, so you only need this to improve one.
@@ -166,6 +184,15 @@ description, so you only need this to improve one.
   it. Rarely needed.
 - **Canonical address**: leave empty unless your developer asks otherwise.
 - **Reset to defaults** goes back to the original title and description.
+- **X / Twitter** fields can differ from the other share preview. Leave them
+  blank to use the Open Graph values.
+- **Custom JSON-LD** is an advanced field for factual Schema.org information
+  that describes visible content. It cannot replace the site's automatic entity
+  definitions. Structural validation does not confirm legal accuracy.
+
+**SEO health** lists missing or repeated search copy, links to unknown pages,
+image-description warnings and wording that may imply an assured outcome.
+Review warnings and reload the report after saving.
 
 Never promise an outcome in a title or description. "Speak to a drink driving
 solicitor before you plead" is fine; "Keep your licence" is not.
@@ -216,7 +243,106 @@ Leave a field blank to use the value shown in grey. Enter only details that are
 true and current: the SRA number appears in the footer and in the information
 Google reads about the site.
 
+**Confirmed practice details** holds the separate practice identifier, public
+address, coordinates and opening hours. Leave unknown fields empty. Record the
+date John confirmed the details before publishing them. A partially completed
+address or invalid coordinates cannot be saved. Confirmed facts appear on
+Contact and in the same structured data; an individual solicitor's SRA number
+belongs to John's Person record, while a practice identifier belongs to the
+practice. The implementation has not populated these optional facts.
+
+## Media Library and saved versions
+
+**Media Library** stores reusable image descriptions. Upload a still JPEG, PNG,
+WebP or AVIF up to 4 MB, choose a lowercase hyphenated filename without an
+extension, and describe the image or explicitly mark it decorative. The file is
+decoded and its dimensions checked before storage. Small share images trigger
+guidance to use at least 1200×630 pixels. Existing served URLs remain stable;
+upload a new image when a different filename is needed.
+Uploads are public website imagery, readable by URL. Do not upload confidential
+case documents or images. Descriptions for images used only in unpublished or
+scheduled/expired articles are not publicly listed; descriptions shared with a
+live article or the home portrait are public.
+
+Image fields can select an existing library image. Editing a library image's
+alt text, optional title or caption refreshes its public uses. Captions display
+only when provided; the site never invents one. Captions default to plain text.
+Choose formatted text to use bold, italic and safe links, and check the preview
+before saving. Existing captions stay plain unless explicitly changed. Existing images retain their
+per-page descriptions until they are registered in the library.
+
+**Saved versions** records the editor, UK time and field snapshot across content,
+settings, SEO and media. Compare a version with the latest, then review the
+confirmation before restoring. Article, service and location restores create
+drafts. Settings, page sections, image descriptions and category/group fields
+restore directly to the live configuration; their previous values remain in
+history. Reviews can be inspected in history but cannot be restored through
+this tool, preserving the external verified-review source.
+
+## SEO panels, crawl rules and permissions
+
+Saved service, service-page, article, static-page and location editors have a
+collapsed SEO panel. Its metadata save is separate from the content save. New
+content gains the panel after its first save. Search/social previews, counters,
+Open Graph type and X fields use the same path-keyed source as SEO Metadata.
+Publication controls show advisory schema and SEO warnings without rewriting
+content or blocking a permitted publication.
+
+**Crawl Rules** edits the generated robots.txt rules. Preview the output before
+saving. Private routes stay protected, and blocking a public route requires an
+explicit acknowledgment. Blocking crawling does not remove a URL from Google's
+index; use the page's search-visibility setting for that purpose. The editor
+flags conflicts where a blocked crawler cannot read a page's noindex directive.
+
+**Integrations** is administrator-only. Its switches enable or disable the
+existing Google Analytics and ReviewSolicitors integrations without a deploy.
+Their providers and loading strategies are fixed. Analytics still requires
+visitor consent; disabling it also prevents events from an already-loaded tag.
+Do not put credentials or additional scripts in configuration. Integration
+history restores use the same current validation as ordinary saves.
+
+The **admin** role manages content and enquiries. The **seo_editor** role can
+manage SEO metadata, crawl rules and their history, without access to enquiries,
+private draft bodies, users, general settings or media uploads. Both the app
+and database enforce these limits. Role assignment remains an authorised
+operator's database task; this implementation has promoted no existing account.
+It does not yet provide a general content-editor role.
+
 ## Good habits
+
+**Location Pages** is ready for future bespoke local information at
+`/locations/[slug]`. It starts empty. Keep a page in draft until its local facts
+and legal advice have been reviewed. Publishing requires substantial body copy,
+distinct local context and links to relevant live services; a word-count check
+cannot replace review of the facts. Do not suggest an office exists unless it
+does. A draft is absent from the public site and sitemap.
+
+**Redirects** lets you add, edit or disable a former URL's redirect. Choose a
+working published destination; queries, external destinations, private paths,
+loops and still-published source pages are rejected. Disable rules rather than
+deleting their history. Renaming a published article or service creates history
+automatically.
+
+An optional **Internal note** records why a redirect exists, using up to 1,000
+characters of plain text. Only administrators can read it; visitors and SEO
+editors cannot. The form also shows the rule's original creation time in the UK.
+The rule and its note save together: a rejected note cannot leave a changed
+redirect behind. Clear the field to remove a note. Notes have no saved-version
+history. If the pending private-notes migration is missing, the page disables
+saving and explains what needs installing. If a network failure makes the result
+uncertain, reload and check the stored rule before trying again.
+
+Article and service-page editors also have **Optional FAQs**. Add, remove and
+reorder complete question/answer pairs. Answers support bold, italic and safe
+links. The same saved questions appear in the public page, draft preview and
+FAQ schema; an empty list produces no section or markup. Nothing is prefilled
+or published automatically. Check legal answers before publishing. Existing
+service-page wording remains frozen pending John's approval, including adding
+new answers. This feature does not promise an FAQ dropdown in Google results.
+
+**Refresh Pages** requests regeneration of one public page or the whole website
+and sitemap. CMS saves already do this automatically; use it after a change made
+outside the CMS.
 
 - Write in plain English. Visitors are often worried and reading on a phone.
 - Never invent results, credentials or reviews, and never guarantee an outcome.

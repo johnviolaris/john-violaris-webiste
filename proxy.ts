@@ -13,7 +13,7 @@ const canonicalAliases = new Set([
 ]);
 
 /** Private areas, never to be indexed on any host (SEO requirement REQ-035). */
-const privatePath = /^\/(admin|auth)(\/|$)/;
+const privatePath = /^\/(admin|auth|preview)(\/|$)/;
 
 /**
  * Keep everything but the canonical site out of search.
@@ -41,6 +41,9 @@ export async function proxy(request: NextRequest) {
   const host = (request.headers.get("host") ?? "").split(":")[0].toLowerCase();
   const pathname = request.nextUrl.pathname;
   const lowercasePathname = pathname.toLowerCase();
+  // Next can resolve encoded segment names. Protect their decoded spelling too.
+  let protectedPathname = lowercasePathname;
+  try { protectedPathname = decodeURIComponent(lowercasePathname).toLowerCase(); } catch { /* Malformed paths still reach the normal 404 handling. */ }
 
   /*
    * Canonical URL redirects happen before the Supabase session refresh. They
@@ -68,8 +71,11 @@ export async function proxy(request: NextRequest) {
 
   const response = await updateSession(request);
 
-  if (host !== canonicalHost || privatePath.test(pathname)) {
+  if (host !== canonicalHost || privatePath.test(protectedPathname)) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+  if (privatePath.test(protectedPathname)) {
+    response.headers.set("Cache-Control", "private, no-store");
   }
 
   return response;

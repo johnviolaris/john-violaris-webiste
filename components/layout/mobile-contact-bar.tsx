@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/ui/intent-link";
 import { useEffect, useState } from "react";
 
 import { Icon } from "@/components/ui/icons";

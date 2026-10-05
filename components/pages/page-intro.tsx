@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/ui/intent-link";
 import type { ReactNode } from "react";
 import { Container } from "@/components/ui/container";
 export function PageIntro({

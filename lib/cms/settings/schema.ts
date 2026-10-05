@@ -52,6 +52,23 @@ export type SettingGroup = {
 
 export const settingGroups: SettingGroup[] = [
   {
+    label: "Confirmed practice details",
+    description: "Leave these empty until John confirms the practice identity, public address and hours. Confirmation is recorded before any details appear on Contact or in structured data. A solicitor's personal SRA number and a practice identifier are different records.",
+    fields: [
+      { key: "practiceLegalName", label: "Practice legal/trading name", maxLength: 160 },
+      { key: "practiceSraNumber", label: "Practice SRA identifier", maxLength: 10 },
+      { key: "addressStreet", label: "Public street address", maxLength: 160 },
+      { key: "addressLocality", label: "Town or city", maxLength: 80 },
+      { key: "addressRegion", label: "County or region", maxLength: 80 },
+      { key: "addressPostalCode", label: "Postcode", maxLength: 20 },
+      { key: "addressCountry", label: "Country code", maxLength: 2, hint: "For example GB. Confirm the address is intended to be public." },
+      { key: "latitude", label: "Confirmed latitude", maxLength: 20 },
+      { key: "longitude", label: "Confirmed longitude", maxLength: 20 },
+      { key: "openingHours", label: "Confirmed opening hours", maxLength: 250, hint: "For example Mo-Fr 09:00-18:00; Sa 09:00-12:00. Leave blank when hours are unknown." },
+      { key: "practiceDetailsReviewedAt", label: "Date John confirmed these details", maxLength: 10, hint: "YYYY-MM-DD. Record an actual confirmation, rather than today's date by default." },
+    ],
+  },
+  {
     label: "Identity",
     description:
       "How John is named across the site — in the masthead, the footer, the page titles and the enquiry emails.",

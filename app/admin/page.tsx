@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { AlertTriangle, ArrowRight } from "lucide-react";
 
 import { EnquiryStatusBadge } from "@/components/admin/enquiry-status-badge";
-import { requireAdmin } from "@/lib/auth";
+import { requireCmsSession } from "@/lib/auth";
 import {
   countEnquiries,
   countUndeliveredEnquiries,
@@ -19,7 +20,8 @@ import { formatUkShortDateTime } from "@/lib/format";
 const recentLimit = 5;
 
 export default async function AdminPage() {
-  const session = await requireAdmin();
+  const session = await requireCmsSession();
+  if (session.role !== "admin") redirect("/admin/seo-metadata");
 
   // Five rows and two numbers. Asking for the whole inbox and slicing it here
   // meant fetching every description on the way to a list that shows none.

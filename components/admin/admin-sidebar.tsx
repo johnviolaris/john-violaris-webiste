@@ -6,15 +6,19 @@ import type { ReactNode } from "react";
 import {
   BriefcaseBusiness,
   FolderTree,
+  MapPin,
   FileText,
   House,
   Inbox,
+  Image as ImageIcon,
   LayoutDashboard,
   LibraryBig,
   LogOut,
   MessageSquareQuote,
   Newspaper,
   Search,
+  ArrowRightLeft,
+  RefreshCw,
   Settings2,
   type LucideIcon,
 } from "lucide-react";
@@ -34,6 +38,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { signOut } from "@/app/auth/actions";
+import type { CmsRole } from "@/lib/cms/permissions";
 
 type NavItem = {
   title: string;
@@ -55,6 +60,8 @@ const contentItems: NavItem[] = [
   { title: "Website Content", href: "/admin/website-content", icon: FileText },
   { title: "Services", href: "/admin/services", icon: BriefcaseBusiness },
   { title: "Service Pages", href: "/admin/service-pages", icon: FolderTree },
+  { title: "Location Pages", href: "/admin/location-pages", icon: MapPin },
+  { title: "Media Library", href: "/admin/media", icon: ImageIcon },
   {
     title: "Reviews",
     href: "/admin/testimonials",
@@ -70,12 +77,18 @@ const contentItems: NavItem[] = [
 
 const configurationItems: NavItem[] = [
   { title: "SEO Metadata", href: "/admin/seo-metadata", icon: Search },
+  { title: "Crawl Rules", href: "/admin/seo-metadata/robots", icon: Search },
+  { title: "Integrations", href: "/admin/seo-metadata/integrations", icon: Settings2 },
+  { title: "Redirects", href: "/admin/redirects", icon: ArrowRightLeft },
+  { title: "Refresh Pages", href: "/admin/rebuild", icon: RefreshCw },
   { title: "Site Settings", href: "/admin/site-settings", icon: Settings2 },
 ];
 
 export function AdminSidebar({
   enquiryBadge,
+  role = "admin",
 }: {
+  role?: CmsRole;
   /** Unactioned enquiry count, streamed in by the layout. */
   enquiryBadge?: ReactNode;
 }) {
@@ -113,16 +126,17 @@ export function AdminSidebar({
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <NavGroup label="Overview" items={overviewItems} pathname={pathname} />
-        <NavGroup label="Inbox" items={inboxItems} pathname={pathname} />
+        {role === "admin" ? <NavGroup label="Overview" items={overviewItems} pathname={pathname} /> : null}
+        {role === "admin" ? <NavGroup label="Inbox" items={inboxItems} pathname={pathname} /> : null}
+        {role === "admin" ?
         <NavGroup
           label="Content"
           items={contentItems}
           pathname={pathname}
-        />
+        /> : null}
         <NavGroup
           label="Configuration"
-          items={configurationItems}
+          items={role === "admin" ? configurationItems : configurationItems.filter((item) => item.href === "/admin/seo-metadata" || item.href === "/admin/seo-metadata/robots")}
           pathname={pathname}
         />
       </SidebarContent>

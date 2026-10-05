@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/ui/intent-link";
 import { Container } from "@/components/ui/container";
 import { Icon } from "@/components/ui/icons";
 import { Lines } from "@/components/ui/lines";

@@ -10,6 +10,7 @@ import {
 } from "@/lib/cms/form";
 import type { BlogPostRow } from "@/lib/cms/types";
 import type { ArticleBlock } from "@/lib/content/blog";
+import { londonInputValue } from "@/lib/cms/publication";
 
 /**
  * The blog editor's field list, rules and encoding.
@@ -33,7 +34,10 @@ export const blogPostFields = [
   "relatedService",
   "featuredImage",
   "featuredImageAlt",
+  "featuredImageTitle",
+  "featuredImageCaption",
   "publishedAt",
+  "unpublishAt",
 ] as const;
 
 export type BlogPostField = (typeof blogPostFields)[number];
@@ -51,7 +55,10 @@ export const emptyBlogPostValues: BlogPostValues = {
   relatedService: "",
   featuredImage: "",
   featuredImageAlt: "",
+  featuredImageTitle: "",
+  featuredImageCaption: "",
   publishedAt: "",
+  unpublishAt: "",
 };
 
 /**
@@ -73,7 +80,10 @@ export const blogPostRules: Record<BlogPostField, FieldRule> = {
   relatedService: { label: "Related service", maxLength: 120 },
   featuredImage: { label: "Featured image", maxLength: 400 },
   featuredImageAlt: { label: "Image description", maxLength: 200 },
-  publishedAt: { label: "Publication date", format: "date" },
+  featuredImageTitle: { label: "Image title", maxLength: 160 },
+  featuredImageCaption: { label: "Image caption", maxLength: 1000 },
+  publishedAt: { label: "Publication date and time", maxLength: 32 },
+  unpublishAt: { label: "Unpublish date and time", maxLength: 32 },
 };
 
 /**
@@ -86,6 +96,7 @@ export const blogPostRules: Record<BlogPostField, FieldRule> = {
 export type BlogPostFormState = CmsFormState<BlogPostField> & {
   /** Keyed by section index, because the fields are positional. */
   sectionErrors: Record<number, string>;
+  faqError?: string;
 };
 
 export const initialBlogPostFormState: BlogPostFormState = {
@@ -245,8 +256,10 @@ export function blogPostValuesFrom(row: BlogPostRow): BlogPostValues {
     relatedService: content.relatedService ?? "",
     featuredImage: content.featuredImage ?? "",
     featuredImageAlt: content.featuredImageAlt ?? "",
-    // A `<input type="date">` wants `YYYY-MM-DD`; the column is a timestamptz.
-    publishedAt: row.published_at ? row.published_at.slice(0, 10) : "",
+    featuredImageTitle: content.featuredImageTitle ?? "",
+    featuredImageCaption: content.featuredImageCaption ?? "",
+    publishedAt: londonInputValue(row.published_at),
+    unpublishAt: londonInputValue(row.unpublish_at),
   };
 }
 

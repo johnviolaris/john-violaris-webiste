@@ -105,6 +105,9 @@ export type HeroContent = {
    */
   portrait: string;
   portraitAlt: string;
+  portraitTitle?: string;
+  portraitCaption?: string;
+  portraitCaptionFormat?: "plain" | "markdown";
   cardLabel: string;
   cardEyebrow: string;
   cardBody: string[];
@@ -129,7 +132,7 @@ export const heroDefaults: HeroContent = {
   ctaLabel: "Let’s talk about your case",
   reassuranceLeft: "Free initial consultation",
   reassuranceRight: "No obligation",
-  portrait: "/Profile 7.png",
+  portrait: "/john-violaris-portrait.webp",
   portraitAlt: "Portrait of John Violaris, criminal defence solicitor",
   cardLabel: "A personal commitment",
   cardEyebrow: "One solicitor. Throughout.",

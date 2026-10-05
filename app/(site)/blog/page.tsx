@@ -16,6 +16,8 @@ import { blogIntroDefaults } from "@/lib/content/pages";
  * ambiguity about which route serves `/blog`.
  */
 const intro = blogIntroDefaults;
+// Publication schedules must update lists even when no editor saves a row.
+export const revalidate = 60;
 
 export function generateMetadata(): Promise<Metadata> {
   return seoMetadataFor("/blog");

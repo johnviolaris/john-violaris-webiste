@@ -1,0 +1,22 @@
+import Link from "next/link";
+import { Container } from "@/components/ui/container";
+import { ButtonLink } from "@/components/ui/button-link";
+import { JsonLd } from "@/components/ui/json-ld";
+import { CtaBanner } from "@/components/layout/cta-banner";
+import type { PublicLocationPage } from "@/lib/cms/locations/queries";
+import type { Service } from "@/lib/cms/types";
+import type { SiteConfig } from "@/lib/site-config";
+import { breadcrumbNode, graph, webPageNode } from "@/lib/cms/seo/json-ld";
+import { structuredDataFor } from "@/lib/cms/seo/metadata";
+
+export async function LocationPageContent({ location, services, config, preview = false }: { location: PublicLocationPage; services: Service[]; config: SiteConfig; preview?: boolean }) {
+  const path = `/locations/${location.slug}`;
+  const relevant = services.filter((service) => location.content.relatedServices.includes(service.href));
+  const structured = preview ? null : await structuredDataFor(path, location.title);
+  return <>
+    {structured && <JsonLd data={graph([...structured.site, webPageNode({ page: structured.page, hasBreadcrumb: true }), breadcrumbNode(path, [{ name: location.location, path }])])} />}
+    <section className="page-intro"><Container><Link href="/" className="breadcrumb">Home <span>/</span> {location.location}</Link><p className="eyebrow"><span className="small-rule" />Service area · {location.location}</p><h1>{location.title}</h1><p className="page-intro-description">{location.content.intro}</p><div className="page-intro-action"><ButtonLink href="/contact">Free initial consultation</ButtonLink></div></Container></section>
+    <section className="section-space"><Container><div className="mx-auto max-w-3xl space-y-10"><section><h2 className="font-display text-2xl">Advice for people in {location.location}</h2><div className="mt-4 space-y-4 text-sm leading-relaxed text-muted-foreground">{location.content.localContext.map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div></section><section><h2 className="font-display text-2xl">How John can help</h2><div className="mt-4 space-y-4 text-sm leading-relaxed text-muted-foreground">{location.content.body.map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div></section>{relevant.length > 0 ? <section><h2 className="font-display text-2xl">Related services</h2><ul className="mt-4 space-y-3">{relevant.map((service) => <li key={service.href}><Link href={service.href} className="underline underline-offset-4">{service.name}</Link></li>)}</ul></section> : null}</div></Container></section>
+    <CtaBanner config={config} />
+  </>;
+}

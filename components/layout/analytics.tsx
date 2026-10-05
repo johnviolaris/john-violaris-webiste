@@ -5,13 +5,16 @@ import Script from "next/script";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { useSiteConfig } from "@/components/layout/site-config-provider";
+import { useIntegrationSettings } from "@/components/layout/integration-provider";
+import { integrationDefinitions } from "@/lib/cms/seo/integrations";
 import {
-  clearAnalyticsCookies,
   eventForLink,
   gaMeasurementId,
   openConsentEvent,
   readConsent,
+  setAnalyticsIntegrationEnabled,
   startAnalytics,
+  stopAnalytics,
   subscribeConsent,
   track,
   writeConsent,
@@ -25,13 +28,14 @@ import {
  * no banner asking permission for something it does not do.
  */
 export function Analytics() {
-  return gaMeasurementId ? <ConsentedAnalytics id={gaMeasurementId} /> : null;
+  const { ga4 } = useIntegrationSettings();
+  return gaMeasurementId ? <ConsentedAnalytics id={gaMeasurementId} enabled={ga4} /> : null;
 }
 
 /** Nothing to subscribe to: the host does not change under a page. */
 const noSubscription = () => () => {};
 
-function ConsentedAnalytics({ id }: { id: string }) {
+function ConsentedAnalytics({ id, enabled }: { id: string; enabled: boolean }) {
   const { bookingHref } = useSiteConfig();
   // `undefined` on the server and during hydration, where the stored choice
   // cannot be read; the banner waits for it rather than flashing on every
@@ -65,7 +69,12 @@ function ConsentedAnalytics({ id }: { id: string }) {
   }, [reopened]);
 
   useEffect(() => {
-    if (choice !== "granted") return;
+    setAnalyticsIntegrationEnabled(enabled, id);
+    if (!enabled) return;
+    if (choice !== "granted") {
+      if (choice !== undefined) stopAnalytics(id);
+      return;
+    }
 
     startAnalytics(id);
 
@@ -89,7 +98,7 @@ function ConsentedAnalytics({ id }: { id: string }) {
     document.addEventListener("click", onClick, { capture: true });
     return () =>
       document.removeEventListener("click", onClick, { capture: true });
-  }, [choice, id, bookingHref]);
+  }, [choice, id, bookingHref, enabled]);
 
   function decide(next: ConsentChoice) {
     const withdrawing = choice === "granted" && next === "denied";
@@ -100,7 +109,7 @@ function ConsentedAnalytics({ id }: { id: string }) {
     if (withdrawing) {
       // Google's script cannot be unloaded, so withdrawing consent removes its
       // cookies and reloads the page without it.
-      clearAnalyticsCookies();
+      stopAnalytics(id);
       window.location.reload();
     }
   }
@@ -116,14 +125,14 @@ function ConsentedAnalytics({ id }: { id: string }) {
     <div className="consent-slot">
       {/* Locally everything runs except the request to Google, so events can
           be checked in `window.dataLayer` without reporting anything. */}
-      {choice === "granted" && !isLocal ? (
+      {enabled && choice === "granted" && !isLocal ? (
         <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${id}`}
+          src={`${integrationDefinitions[0].src}?id=${id}`}
           strategy="afterInteractive"
         />
       ) : null}
 
-      {bannerOpen ? (
+      {enabled && bannerOpen ? (
         <section className="consent-banner" aria-label="Cookie choice">
           <p>
             <strong>May we use analytics storage?</strong> This site and Google
@@ -162,7 +171,8 @@ function ConsentedAnalytics({ id }: { id: string }) {
  * revisit.
  */
 export function CookieSettingsButton({ className }: { className?: string }) {
-  if (!gaMeasurementId) return null;
+  const { ga4 } = useIntegrationSettings();
+  if (!gaMeasurementId || !ga4) return null;
 
   return (
     <button
@@ -186,6 +196,8 @@ export function useEnquiryTracking(state: {
   useEffect(() => {
     if (state.status === "success") {
       track("form_submit", {});
+      // Separate confirmed enquiries from Google's automatic form interactions.
+      track("generate_lead", {});
     } else if (state.status === "error") {
       track("form_error", {
         error_type:

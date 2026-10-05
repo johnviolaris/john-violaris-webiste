@@ -49,7 +49,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Verify rendered structured data
+      - name: Verify rendered public pages and structured data
         shell: bash
         run: |
           npm start &
@@ -71,7 +71,20 @@ jobs:
 
           curl --fail --silent http://127.0.0.1:3000/ > /dev/null
           npm run runtime:verify -- http://127.0.0.1:3000
+          npm run pages:verify -- http://127.0.0.1:3000
+          npm run assets:verify -- http://127.0.0.1:3000
           npm run schema:verify -- http://127.0.0.1:3000
+          npm run lighthouse:ci
+
+      - name: Retain Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 14
 
   database:
     runs-on: ubuntu-latest

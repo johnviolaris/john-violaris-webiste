@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { requireSeoEditor } from "@/lib/auth";
 
 import { SeoForm } from "@/components/admin/seo-form";
-import { getSeoRow } from "@/lib/cms/admin-queries";
+import { RevisionHistory } from "@/components/admin/revision-history";
+import { getSeoRowForEditor as getSeoRow, listSeoMetadataForEditor as listSeoMetadata } from "@/lib/cms/seo/admin-queries";
 import { getSiteConfig } from "@/lib/cms/queries";
-import { defaultShareImage, titleSuffix } from "@/lib/cms/seo/resolve";
-import { findSeoRoute } from "@/lib/cms/seo/routes";
+import { defaultShareImage, resolvePageText, titleSuffix } from "@/lib/cms/seo/resolve";
+import { listSeoRoutes } from "@/lib/cms/seo/routes";
+import { findEditableSeoRoute as findSeoRoute } from "@/lib/cms/seo/admin-routes";
 import { seoValuesFrom } from "@/lib/cms/seo/schema";
 import { formatUkShortDateTime } from "@/lib/format";
 import { deployment } from "@/lib/site-config";
@@ -28,16 +31,24 @@ export default async function EditSeoPage({
 }) {
   const { path: raw } = await searchParams;
   const path = typeof raw === "string" ? raw : "";
+  const session = await requireSeoEditor();
 
-  const [route, row, config] = await Promise.all([
+  const [route, row, config, routes, rows] = await Promise.all([
     findSeoRoute(path),
     getSeoRow(path),
     getSiteConfig(),
+    listSeoRoutes(),
+    listSeoMetadata(),
   ]);
 
   if (!route) notFound();
 
   const content = row?.content ?? null;
+  const overrides = new Map(rows.map((entry) => [entry.path, entry.content]));
+  const comparisonPages = routes.filter((entry) => entry.path !== path && !overrides.get(entry.path)?.noIndex).map((entry) => {
+    const text = resolvePageText(entry.path, entry.defaults, overrides.get(entry.path) ?? null);
+    return { path: entry.path, title: text.title + titleSuffix(config.name), description: text.description ?? "" };
+  });
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pt-14 pb-12 md:px-8 md:pt-10">
@@ -50,6 +61,7 @@ export default async function EditSeoPage({
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           <span className="font-mono">{route.path}</span>
+          {route.draft ? " · Private saved draft" : null}
           {" · "}
           {row ? (
             <>
@@ -79,7 +91,11 @@ export default async function EditSeoPage({
         customised={Boolean(row)}
         suffix={titleSuffix(config.name)}
         fallbackImage={defaultShareImage(config.name, config.role).url}
+        comparisonPages={comparisonPages}
+        draft={route.draft}
+        canManageMedia={session.role === "admin"}
       />
+      {row ? <RevisionHistory entity="seo_metadata" id={path} /> : null}
     </div>
   );
 }

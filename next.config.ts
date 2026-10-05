@@ -189,8 +189,13 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // The media form allows 4 MiB images; leave room for multipart fields.
+    serverActions: { bodySizeLimit: "5mb" },
+  },
   images: {
     remotePatterns: supabaseImagePattern(),
+    formats: ["image/avif", "image/webp"],
   },
 
   /**
@@ -217,7 +222,7 @@ const nextConfig: NextConfig = {
    * files exist — and `public/` is not traced into a function by default.
    */
   outputFileTracingIncludes: {
-    "/share-image": ["./assets/fonts/**", "./public/Profile 7.png"],
+    "/share-image": ["./assets/fonts/**", "./public/john-violaris-portrait.webp"],
   },
 
   /**
@@ -233,6 +238,12 @@ const nextConfig: NextConfig = {
       // Pages declare /favicon.svg, but browsers still ask for /favicon.ico
       // now and then, and each request was a 404 in the logs.
       { source: "/favicon.ico", destination: "/favicon.svg", permanent: true },
+      // Preserve links and saved CMS values using the original portrait URL.
+      {
+        source: "/Profile%207.png",
+        destination: "/john-violaris-portrait.webp",
+        permanent: true,
+      },
     ];
   },
 
@@ -249,6 +260,13 @@ const nextConfig: NextConfig = {
       {
         source: "/auth/:path*",
         headers: [{ key: "Cache-Control", value: "private, no-store" }],
+      },
+      {
+        source: "/preview/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
       },
     ];
   },

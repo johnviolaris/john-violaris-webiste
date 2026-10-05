@@ -1,11 +1,13 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 import { isIconName } from "@/components/ui/icons";
 import { requireAdmin } from "@/lib/auth";
 import {
   formError,
+  formFailure,
   readCheckbox,
   readFields,
   validateFields,
@@ -28,7 +30,15 @@ import {
   type BlogPostFormState,
 } from "@/lib/cms/blog/schema";
 import type { BlogPostContent } from "@/lib/cms/types";
+import { parseLondonDateTime, publicationStatus } from "@/lib/cms/publication";
+import { hasConfirmedSlugChange } from "@/lib/cms/slug-confirmation";
 import { createClient } from "@/utils/supabase/server";
+import { getMediaAssetForUrl } from "@/lib/cms/media/queries";
+import { mediaPresentation } from "@/lib/cms/media/schema";
+import { uploadMediaImage } from "@/lib/cms/media/actions";
+import { getPublicationSeoWarnings } from "@/lib/cms/seo/publication-check";
+import { articleSeoDefaults } from "@/lib/cms/seo/routes";
+import { readFaqItems, validateFaqItems } from "@/lib/cms/faq";
 
 /**
  * Blog mutations.
@@ -79,14 +89,39 @@ export async function saveBlogPost(
   }
 
   const values = validation.values;
+  let existing: { slug: string; published: boolean; content: BlogPostContent } | null = null;
+  if (postId) {
+    const supabase = await createClient();
+    const { data, error } = await supabase.from("blog_posts").select("slug,published,content")
+      .eq("id", postId).maybeSingle<{ slug: string; published: boolean; content: BlogPostContent }>();
+    if (error || !data) return { ...formFailure(values, "This article could not be loaded. Reload before saving."), sectionErrors: {} };
+    existing = data;
+    if (!hasConfirmedSlugChange(data.slug, values.slug, data.published, formData.get("confirmSlugChange"))) {
+      return { ...formError(values, { slug: "Confirm the URL change before saving. If this article changed in another tab, reload first." }), sectionErrors: {} };
+    }
+  }
+  const faqs = readFaqItems(formData, existing?.content.faqItems);
+  if (!faqs.ok) return { ...formFailure(values, "Check the optional FAQs before saving."), sectionErrors: {}, faqError: faqs.error };
   const fieldErrors: Partial<Record<BlogPostField, string>> = {};
+  const start = parseLondonDateTime(values.publishedAt);
+  const end = parseLondonDateTime(values.unpublishAt);
+  if (!start.ok) fieldErrors.publishedAt = start.error;
+  if (!end.ok) fieldErrors.unpublishAt = end.error;
+  const publishedAt = start.ok
+    ? start.value ?? (published ? new Date().toISOString() : null)
+    : null;
+  const unpublishAt = end.ok ? end.value : null;
+  if (unpublishAt && publishedAt && unpublishAt <= publishedAt) {
+    fieldErrors.unpublishAt = "Unpublishing must be after publication.";
+  }
 
   // Checks a per-field rule cannot express, because they depend on each other.
   if (!isIconName(values.icon)) {
     fieldErrors.icon = "Choose an icon from the list.";
   }
 
-  if (values.featuredImage && !values.featuredImageAlt) {
+  const libraryImage = values.featuredImage ? await getMediaAssetForUrl(values.featuredImage) : null;
+  if (values.featuredImage && !values.featuredImageAlt && !libraryImage) {
     fieldErrors.featuredImageAlt =
       "Describe the image for anyone who cannot see it. An image with no description is invisible to a screen reader.";
   }
@@ -108,23 +143,24 @@ export async function saveBlogPost(
     readTime: values.readTime || estimateReadTime(sections),
     icon: values.icon,
     body: sections,
+    ...(faqs.items.length ? { faqItems: faqs.items } : {}),
     ...(values.relatedService ? { relatedService: values.relatedService } : {}),
     ...(values.featuredImage ? { featuredImage: values.featuredImage } : {}),
     ...(values.featuredImageAlt
       ? { featuredImageAlt: values.featuredImageAlt }
       : {}),
+    ...(values.featuredImage && values.featuredImageTitle
+      ? { featuredImageTitle: values.featuredImageTitle } : {}),
+    ...(values.featuredImage && values.featuredImageCaption
+      ? { featuredImageCaption: values.featuredImageCaption } : {}),
   };
-
-  /**
-   * Publishing with no date set dates the article now. Leaving it null would
-   * put a newly published article at the bottom of an index ordered by date,
-   * which reads as a bug rather than as a decision.
-   */
-  const publishedAt = values.publishedAt
-    ? new Date(`${values.publishedAt}T09:00:00Z`).toISOString()
-    : published
-      ? new Date().toISOString()
-      : null;
+  if (libraryImage) {
+    const image = mediaPresentation(libraryImage);
+    content.featuredImageAlt = image.alt;
+    content.featuredImageTitle = image.title;
+    content.featuredImageCaption = image.caption;
+    content.featuredImageCaptionFormat = image.captionFormat;
+  }
 
   const row = {
     slug: values.slug,
@@ -132,16 +168,16 @@ export async function saveBlogPost(
     category_id: values.categoryId || null,
     published,
     published_at: publishedAt,
+    unpublish_at: unpublishAt,
     content,
   };
 
   // The slug may have changed, so the old URL needs rebuilding too or it stays
   // cached and serving under a name nothing points at any more.
-  const previousSlug = formData.get("previousSlug");
   const paths = [articlePath(values.slug)];
   const renamedFrom =
-    typeof previousSlug === "string" && previousSlug && previousSlug !== values.slug
-      ? previousSlug
+    existing && existing.slug !== values.slug
+      ? existing.slug
       : null;
 
   if (renamedFrom) {
@@ -151,18 +187,24 @@ export async function saveBlogPost(
   const state = await cmsWrite<BlogPostField, { id: string } | null>({
     entity: "blog-posts",
     values,
-    successMessage: published ? "Article saved and published." : "Draft saved.",
+    successMessage: publicationStatus(row) === "scheduled"
+      ? "Article saved. Publication is scheduled in UK local time."
+      : publicationStatus(row) === "expired"
+        ? "Article saved. Its publication window has ended."
+        : published ? "Article saved and published." : "Draft saved.",
     paths,
     run: async (supabase) =>
       postId
         ? supabase.from("blog_posts").update(row).eq("id", postId).select("id").maybeSingle()
         : supabase.from("blog_posts").insert(row).select("id").maybeSingle(),
   });
+  const warnings = state.status === "success" && published ? await getPublicationSeoWarnings(articlePath(values.slug), articleSeoDefaults(values.slug, values.title, values.excerpt, values.featuredImage, values.featuredImageAlt, publishedAt), content, { publishedAt: publishedAt ?? undefined }) : [];
 
   // The article's SEO override follows it to its new address.
   if (state.status === "success" && postId && renamedFrom) {
     await moveSeoOverride(articlePath(renamedFrom), articlePath(values.slug));
   }
+  if (state.status === "success" && postId) revalidatePath(`/admin/blog-posts/${postId}`);
 
   if (state.status === "success" && !postId && state.data?.id) {
     // Straight into the editor for the article that now exists, so the next
@@ -175,7 +217,7 @@ export async function saveBlogPost(
   // the editor gets the form state and nothing else.
   return {
     status: state.status,
-    message: state.message,
+    message: warnings.length ? `${state.message} SEO advisories: ${warnings.join(" ")}` : state.message,
     fieldErrors: state.fieldErrors,
     values: state.values,
     sectionErrors: {},
@@ -192,17 +234,21 @@ export async function saveBlogPost(
 export async function setBlogPostPublished(id: string, published: boolean) {
   await requireAdmin();
 
-  if (typeof id !== "string" || typeof published !== "boolean") return;
+  if (typeof id !== "string" || typeof published !== "boolean") return { ok: false, error: "Reload this article before publishing." };
 
   const supabase = await createClient();
 
   const { data: existing } = await supabase
     .from("blog_posts")
-    .select("slug, published_at")
+    .select("slug,title,content,published_at")
     .eq("id", id)
-    .maybeSingle<{ slug: string; published_at: string | null }>();
+    .maybeSingle<{ slug: string; title: string; content: BlogPostContent; published_at: string | null }>();
 
-  if (!existing) return;
+  if (!existing) return { ok: false, error: "This article could not be loaded." };
+  const faqs = validateFaqItems(existing.content.faqItems);
+  if (published && !faqs.ok) return { ok: false, error: `Check this article's optional FAQs before publishing. ${faqs.error}` };
+  if (published && (!Array.isArray(existing.content.body) || existing.content.body.length === 0)) return { ok: false, error: "Add at least one article section before publishing." };
+  if (published && existing.content.featuredImage && !existing.content.featuredImageAlt && !(await getMediaAssetForUrl(existing.content.featuredImage))) return { ok: false, error: "Add an image description before publishing this article." };
 
   const { error } = await supabase
     .from("blog_posts")
@@ -220,10 +266,12 @@ export async function setBlogPostPublished(id: string, published: boolean) {
   if (error) {
     console.error(`[cms] Failed to change publish state of post ${id}`, error);
 
-    return;
+    return { ok: false, error: "The publication state could not be saved." };
   }
 
   revalidateFor("blog-posts", [articlePath(existing.slug)]);
+  const warnings = published ? await getPublicationSeoWarnings(articlePath(existing.slug), articleSeoDefaults(existing.slug, existing.title, existing.content.excerpt, existing.content.featuredImage, existing.content.featuredImageAlt, existing.published_at), existing.content, { publishedAt: existing.published_at }) : [];
+  return { ok: true, warnings };
 }
 
 export async function deleteBlogPost(formData: FormData) {
@@ -327,21 +375,6 @@ export type ImageUploadResult =
   | { ok: true; url: string }
   | { ok: false; error: string };
 
-const maxImageBytes = 5 * 1024 * 1024;
-
-/**
- * Folders an upload may land in: article images, pages' share images, and
- * images in the site's own sections.
- */
-const imageFolders = ["posts", "share", "site"] as const;
-
-const allowedImageTypes = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/avif",
-]);
-
 /**
  * Upload a featured image and return its public URL.
  *
@@ -349,61 +382,12 @@ const allowedImageTypes = new Set([
  * first so a rejection is a sentence John can read rather than a storage error
  * code, and so nothing is sent over the wire that is going to be refused.
  *
- * Filenames are generated rather than taken from the upload: a name off
- * someone's desktop can collide, can carry characters a URL has to escape, and
- * is one of the classic ways a storage bucket gets an object written where it
- * was not expected.
+ * Filenames use a sanitized descriptive stem and a random suffix. Folder,
+ * extension and allowed characters are controlled here, so the original name
+ * cannot escape its storage folder or silently overwrite an existing image.
  */
 export async function uploadBlogImage(
   formData: FormData,
 ): Promise<ImageUploadResult> {
-  await requireAdmin();
-
-  const file = formData.get("file");
-
-  if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, error: "Choose an image to upload." };
-  }
-
-  if (file.size > maxImageBytes) {
-    return {
-      ok: false,
-      error: "That image is over 5 MB. Please resize it and try again.",
-    };
-  }
-
-  if (!allowedImageTypes.has(file.type)) {
-    return {
-      ok: false,
-      error: "Images must be JPEG, PNG, WebP or AVIF.",
-    };
-  }
-
-  // Which kind of image this is — a featured image, a share image, a section's
-  // image — decides the folder. Taken from an allow-list, never used as given: the
-  // value arrives from the client and ends up in a storage path.
-  const requested = formData.get("folder");
-  const folder = imageFolders.find((known) => known === requested) ?? "posts";
-
-  const extension = file.type.split("/")[1].replace("jpeg", "jpg");
-  const path = `${folder}/${crypto.randomUUID()}.${extension}`;
-
-  const supabase = await createClient();
-
-  const { error } = await supabase.storage
-    .from("blog-images")
-    .upload(path, file, { contentType: file.type, upsert: false });
-
-  if (error) {
-    console.error("[cms] Image upload failed", error);
-
-    return {
-      ok: false,
-      error: "The image could not be uploaded. Please try again.",
-    };
-  }
-
-  const { data } = supabase.storage.from("blog-images").getPublicUrl(path);
-
-  return { ok: true, url: data.publicUrl };
+  return uploadMediaImage(formData);
 }

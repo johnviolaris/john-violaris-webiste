@@ -1,5 +1,7 @@
 import type { Question } from "@/lib/content/pages";
 import { deployment, type SiteConfig } from "@/lib/site-config";
+import { verifiedPracticeFacts } from "@/lib/cms/settings/practice-facts";
+import { faqAnswerText, faqSectionId, resolveFaqItems } from "@/lib/cms/faq";
 
 /**
  * Schema.org markup: what each page tells search engines, as one connected
@@ -87,8 +89,9 @@ export function serializeJsonLd(value: JsonLdGraph): string {
  *
  * The profiles in `sameAs` are split by whose they are: ReviewSolicitors lists
  * the practice, the Law Society and LinkedIn list John. Each is set in Site
- * Settings and left out while blank. Deliberately absent altogether: a postal
- * address, opening hours and a price range, none of which the site states.
+ * Settings and left out while blank. Practice identity, postal address, geo
+ * and hours appear only after review, validation and matching Contact-page
+ * publication. There is no price range under the approved fees scope.
  */
 export function siteNodes({
   config,
@@ -101,6 +104,15 @@ export function siteNodes({
   portrait: string;
 }): Node[] {
   const home = absoluteUrl("/");
+  const facts = verifiedPracticeFacts(config);
+  const address = facts?.addressStreet ? {
+    "@type": "PostalAddress",
+    streetAddress: facts.addressStreet,
+    addressLocality: facts.addressLocality,
+    ...(facts.addressRegion ? { addressRegion: facts.addressRegion } : {}),
+    postalCode: facts.addressPostalCode,
+    addressCountry: facts.addressCountry,
+  } : null;
 
   return [
     {
@@ -125,12 +137,18 @@ export function siteNodes({
       ...(config.phoneE164 ? { telephone: config.phoneE164 } : {}),
       areaServed: { "@type": "AdministrativeArea", name: config.jurisdiction },
       ...sameAs(config.reviewSolicitorsUrl),
-      ...(config.sraNumber
+      ...(facts?.practiceLegalName ? { legalName: facts.practiceLegalName } : {}),
+      ...(address ? { address } : {}),
+      ...(address && facts?.latitude && facts.longitude ? {
+        geo: { "@type": "GeoCoordinates", latitude: Number(facts.latitude), longitude: Number(facts.longitude) },
+      } : {}),
+      ...(facts?.openingHours ? { openingHours: facts.openingHours.split(";").map((entry) => entry.trim()) } : {}),
+      ...(facts?.practiceSraNumber
         ? {
             identifier: {
               "@type": "PropertyValue",
-              propertyID: "SRA number",
-              value: config.sraNumber,
+              propertyID: "SRA practice identifier",
+              value: facts.practiceSraNumber,
             },
           }
         : {}),
@@ -145,6 +163,9 @@ export function siteNodes({
       worksFor: ref(schemaIds.practice),
       ...(practiceAreas.length > 0 ? { knowsAbout: practiceAreas } : {}),
       ...sameAs(config.lawSocietyUrl, config.linkedinUrl),
+      ...(config.sraNumber ? {
+        identifier: { "@type": "PropertyValue", propertyID: "SRA individual number", value: config.sraNumber },
+      } : {}),
       // The qualification the footer states, with the year it states.
       ...(config.qualifiedYear
         ? {
@@ -204,6 +225,7 @@ export function webPageNode({
   type = "WebPage",
   about = schemaIds.practice,
   mainEntity,
+  hasPart,
   hasBreadcrumb,
 }: {
   page: PageFacts;
@@ -214,6 +236,7 @@ export function webPageNode({
    */
   about?: string | null;
   mainEntity?: Node | Node[];
+  hasPart?: Node | Node[];
   hasBreadcrumb: boolean;
 }): Node {
   return {
@@ -226,6 +249,7 @@ export function webPageNode({
     isPartOf: ref(schemaIds.website),
     ...(about ? { about: ref(about) } : {}),
     ...(mainEntity ? { mainEntity } : {}),
+    ...(hasPart ? { hasPart } : {}),
     ...(hasBreadcrumb ? { breadcrumb: ref(`${absoluteUrl(page.path)}#breadcrumb`) } : {}),
   };
 }
@@ -264,6 +288,21 @@ export function questionNodes(questions: Question[]): Node[] {
     name: item.question,
     acceptedAnswer: { "@type": "Answer", text: item.answer },
   }));
+}
+
+/** A visible FAQ section is a distinct part; article/service identity stays intact. */
+export function faqPageNode({ path, items, sectionId = faqSectionId() }: { path: string; items: unknown; sectionId?: string }): Node | null {
+  const questions = resolveFaqItems(items);
+  if (!questions.length) return null;
+  return {
+    "@type": "FAQPage",
+    "@id": `${absoluteUrl(path)}#faq`,
+    url: `${absoluteUrl(path)}#${sectionId}`,
+    name: "Frequently asked questions",
+    inLanguage: "en-GB",
+    isPartOf: ref(webPageId(path)),
+    mainEntity: questionNodes(questions.map((item) => ({ question: item.question, answer: faqAnswerText(item.answer) }))),
+  };
 }
 
 /** The `@id` of the service a `/services/<slug>` page offers. */

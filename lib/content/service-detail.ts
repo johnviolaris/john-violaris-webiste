@@ -24,6 +24,8 @@
  * the statute strings in `services.ts`.
  */
 
+import type { FaqItem } from "@/lib/cms/faq";
+
 export type PenaltyCard = {
   /** The headline consequence, e.g. "12-month minimum ban". */
   label: string;
@@ -45,6 +47,8 @@ export type TableRow = {
 };
 
 export type ServiceDetail = {
+  /** Optional, reviewed questions. Missing legacy data leaves the page unchanged. */
+  faqItems?: FaqItem[];
   /** Hero heading; rendered before the italic `emphasis`. */
   headline: string;
   emphasis: string;

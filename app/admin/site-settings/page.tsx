@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { SiteSettingsForm } from "@/components/admin/site-settings-form";
 import { listSiteSettings } from "@/lib/cms/admin-queries";
 import { settingValuesFrom } from "@/lib/cms/settings/schema";
+import { RevisionHistory } from "@/components/admin/revision-history";
 
 export const metadata: Metadata = {
   title: "Site settings",
@@ -29,6 +30,7 @@ export default async function AdminSiteSettingsPage() {
       </header>
 
       <SiteSettingsForm values={settingValuesFrom(stored)} />
+      <details className="mt-8 rounded-xl border p-4"><summary className="cursor-pointer font-medium">Settings history</summary><RevisionHistory entity="site_settings" id="" /></details>
 
       <p className="mt-6 text-sm text-muted-foreground">
         The website address itself is not set here. It decides every canonical

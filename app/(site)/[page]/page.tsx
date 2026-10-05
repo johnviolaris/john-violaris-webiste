@@ -11,6 +11,7 @@ import { MeetJohn } from "@/components/sections/meet-john";
 import { PoliceStation } from "@/components/sections/police-station";
 import { PoliceStationDetail } from "@/components/sections/police-station-detail";
 import { PrivacyNotice } from "@/components/sections/privacy-notice";
+import { PracticeDetails } from "@/components/sections/practice-details";
 import { ProcessSteps } from "@/components/sections/process-steps";
 import { ServicesGrid } from "@/components/sections/services-grid";
 import { Container } from "@/components/ui/container";
@@ -290,6 +291,7 @@ export default async function InformationPage({
                     values={contact.disclaimer}
                     className="contact-disclaimer"
                   />
+                  <PracticeDetails config={config} />
                 </div>
                 <aside className="contact-note">
                   <p className="eyebrow">{prepare.eyebrow}</p>

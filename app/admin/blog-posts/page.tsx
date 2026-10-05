@@ -9,6 +9,7 @@ import { cn } from "cn";
 import { listBlogPosts } from "@/lib/cms/admin-queries";
 import { setBlogPostPublished } from "@/lib/cms/blog/actions";
 import { formatUkShortDateTime } from "@/lib/format";
+import { publicationStatus } from "@/lib/cms/publication";
 
 export const metadata: Metadata = {
   title: "Blog posts",
@@ -145,6 +146,7 @@ export default async function AdminBlogPostsPage({
                       published={post.published}
                       action={setBlogPostPublished}
                     />
+                    <span className="mt-1 block text-xs capitalize text-muted-foreground">{publicationStatus(post)}</span>
                   </td>
                   <td className="px-4 py-3 align-top">
                     <Link

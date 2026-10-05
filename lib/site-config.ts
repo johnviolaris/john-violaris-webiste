@@ -53,6 +53,18 @@ export type SiteSettings = {
   reviewSolicitorsUrl: string;
   lawSocietyUrl: string;
   linkedinUrl: string;
+  /** Optional verified practice facts; all remain empty until confirmed. */
+  practiceLegalName: string;
+  practiceSraNumber: string;
+  addressStreet: string;
+  addressLocality: string;
+  addressRegion: string;
+  addressPostalCode: string;
+  addressCountry: string;
+  latitude: string;
+  longitude: string;
+  openingHours: string;
+  practiceDetailsReviewedAt: string;
 };
 
 export const siteSettingKeys = [
@@ -71,6 +83,9 @@ export const siteSettingKeys = [
   "reviewSolicitorsUrl",
   "lawSocietyUrl",
   "linkedinUrl",
+  "practiceLegalName", "practiceSraNumber", "addressStreet", "addressLocality",
+  "addressRegion", "addressPostalCode", "addressCountry", "latitude", "longitude",
+  "openingHours", "practiceDetailsReviewedAt",
 ] as const satisfies readonly (keyof SiteSettings)[];
 
 /**
@@ -102,6 +117,9 @@ export const siteSettingsDefaults: SiteSettings = {
     "https://www.reviewsolicitors.co.uk/london/london/ioannis-violaris",
   lawSocietyUrl: "",
   linkedinUrl: "",
+  practiceLegalName: "", practiceSraNumber: "", addressStreet: "", addressLocality: "",
+  addressRegion: "", addressPostalCode: "", addressCountry: "", latitude: "", longitude: "",
+  openingHours: "", practiceDetailsReviewedAt: "",
 };
 
 // ---------------------------------------------------------------------------

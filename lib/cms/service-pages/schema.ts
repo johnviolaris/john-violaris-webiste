@@ -178,7 +178,7 @@ export type ServicePageItemField =
   | "ancillaryOrders";
 
 /** Every field an error can be attached to. */
-export type ServicePageField = ServicePageScalarField | ServicePageItemField;
+export type ServicePageField = ServicePageScalarField | ServicePageItemField | "faqItems";
 
 export type ServicePageValues = Record<ServicePageField, string>;
 
@@ -193,6 +193,7 @@ export const emptyServicePageValues: ServicePageValues = {
   defenceIssues: "",
   outcomes: "",
   ancillaryOrders: "",
+  faqItems: "",
 };
 
 /**

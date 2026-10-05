@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { IntentLink as Link } from "@/components/ui/intent-link";
 import { CookieSettingsButton } from "@/components/layout/analytics";
 import { Container } from "@/components/ui/container";
 import { Logo } from "@/components/layout/logo";
