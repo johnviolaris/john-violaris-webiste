@@ -133,7 +133,10 @@ Forward capture follows these actual render dependencies:
   Related location dates likewise compare the actual selected href/title arrays
   using the existing location ordering and 500-candidate limit. Unchanged
   single-link output receives no date merely because a location's sort name
-  changed. Ambiguous ordering ties are omitted rather than guessed.
+  changed. Article ordering ties within the selected three links or at their
+  cutoff are omitted rather than guessed; ties among older unselected articles
+  do not suppress a deterministic selection. Ambiguous location ties remain
+  conservatively omitted.
 
 The route gate permits the existing published catalogue offence routes that
 render fallback copy even with an unpublished/missing body. It excludes custom
@@ -164,7 +167,7 @@ table. Independent row-backed service/article dates still supply their own
 content timestamps, including their existing no-op limitations. Printed Updated
 dates and article schema dates are unchanged by this sitemap-only feature.
 
-The complementary suite contains 78 pgTAP assertions. The offline verifier also
+The complementary suite contains 83 pgTAP assertions. The offline verifier also
 checks migration source/history/sequence preservation, original/idempotent
 baselines, effective setting values against `resolveSiteConfig`, image values
 against `mediaPresentation`, and catalogue projections against `toService`:

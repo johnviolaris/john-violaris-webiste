@@ -1,5 +1,5 @@
 begin;
-select plan(78);
+select plan(83);
 
 select ok(not has_table_privilege('anon','private.sitemap_change_dates','select'),'anonymous cannot read private watermarks');
 select ok(not has_table_privilege('authenticated','private.sitemap_change_dates','insert,update,delete'),'client cannot manufacture watermarks');
@@ -72,8 +72,28 @@ insert into public.blog_posts(id,slug,title,published,published_at,created_at,co
 ('00000000-0000-4000-8000-000000007524','dependency-d','D fixture',true,now()-interval '4 hours',now()-interval '4 days','{"excerpt":"D"}'),
 ('00000000-0000-4000-8000-000000007525','dependency-e','E fixture',true,now()-interval '5 hours',now()-interval '5 days','{"excerpt":"E"}'),
 ('00000000-0000-4000-8000-000000007526','dependency-future','Future fixture',true,now()+interval '1 day',now(),'{}'),
-('00000000-0000-4000-8000-000000007527','dependency-draft','Draft fixture',false,null,now(),'{}');
+('00000000-0000-4000-8000-000000007527','dependency-draft','Draft fixture',false,null,now(),'{}'),
+-- Seeded older posts can share both ordering timestamps. They must not make
+-- an otherwise deterministic top-three selection ambiguous.
+('00000000-0000-4000-8000-000000007528','dependency-older-one','Older fixture one',true,null,'2020-01-01T00:00:00Z','{}'),
+('00000000-0000-4000-8000-000000007529','dependency-older-two','Older fixture two',true,null,'2020-01-01T00:00:00Z','{}');
 insert into public.blog_posts(slug,title,published,published_at,unpublish_at,content) values('dependency-expired','Expired fixture',true,now()-interval '2 days',now()-interval '1 day','{"featuredImage":"https://example.test/expired.webp"}');
+delete from private.sitemap_change_dates;
+select ok(private.sitemap_article_links('00000000-0000-4000-8000-000000007525',null,null)='[["dependency-a","A fixture"],["dependency-b","B fixture"],["dependency-c","C fixture"]]'::jsonb,'older unselected timestamp ties preserve deterministic More guides output');
+insert into public.blog_posts(id,slug,title,published,published_at,created_at,content)
+select '00000000-0000-4000-8000-000000007530','dependency-selected-tie','Selected tie fixture',true,published_at,created_at,'{}' from public.blog_posts where slug='dependency-a';
+select ok(private.sitemap_article_links('00000000-0000-4000-8000-000000007525',null,null) is null,'ties among selected links remain ambiguous');
+delete from private.sitemap_change_dates;
+update public.blog_posts set title='Changed tied fixture' where slug='dependency-a';
+select ok(exists(select 1 from private.sitemap_change_dates where path='/blog'),'ambiguous peer selection does not suppress a real blog-card change');
+select ok(not exists(select 1 from private.sitemap_change_dates where path='/blog/dependency-e'),'ambiguous selected ordering cannot manufacture a peer change date');
+update public.blog_posts set title='A fixture' where slug='dependency-a';
+delete from public.blog_posts where slug='dependency-selected-tie';
+insert into public.blog_posts(id,slug,title,published,published_at,created_at,content)
+select '00000000-0000-4000-8000-000000007530','dependency-cutoff-tie','Cutoff tie fixture',true,published_at,created_at,'{}' from public.blog_posts where slug='dependency-c';
+select ok(private.sitemap_article_links('00000000-0000-4000-8000-000000007525',null,null) is null,'a tie crossing the third-link cutoff remains ambiguous');
+delete from public.blog_posts where slug='dependency-cutoff-tie';
+
 delete from private.sitemap_change_dates;
 update public.blog_posts set title=title,updated_at=clock_timestamp() where slug='dependency-a';
 select ok(not exists(select 1 from private.sitemap_change_dates),'article timestamp-only save does not change a collection');

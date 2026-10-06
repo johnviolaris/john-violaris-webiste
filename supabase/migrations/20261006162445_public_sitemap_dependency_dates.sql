@@ -146,9 +146,11 @@ create function private.sitemap_article_links(p_peer uuid,p_id uuid,p_replacemen
 returns jsonb language sql stable security invoker set search_path='' as $$
   with candidates as(select b.* from private.sitemap_article_rows(p_id,p_replacement) b where b.id<>p_peer and private.sitemap_article_live(b)),
   selected as(select slug,title,published_at,created_at from candidates order by published_at desc nulls last,created_at desc limit 3)
-  -- The app has no final tie-breaker. Do not pretend to know link selection if
-  -- equal ordering timestamps leave it ambiguous; /blog membership still dates.
-  select case when exists(select 1 from candidates group by published_at,created_at having count(*)>1) then null
+  -- The app has no final tie-breaker. Equal timestamps in the selected links or
+  -- at their cutoff are ambiguous; ties strictly below that selection are not.
+  select case when exists(select 1 from candidates c
+      where exists(select 1 from selected s where c.published_at is not distinct from s.published_at and c.created_at is not distinct from s.created_at)
+      group by c.published_at,c.created_at having count(*)>1) then null
     else coalesce((select jsonb_agg(jsonb_build_array(slug,title) order by published_at desc nulls last,created_at desc) from selected),'[]'::jsonb) end;
 $$;
 revoke all on function private.sitemap_article_links(uuid,uuid,jsonb) from public,anon,authenticated,service_role;
