@@ -151,7 +151,7 @@ how you can help.
 4. The **Standfirst** is the opening paragraph under the headline.
 5. Add the body as **sections**: each has a heading, paragraphs (leave a blank
    line between them) and an optional bulleted list, one item per line.
-6. Optionally add a **Featured image** (JPEG, PNG, WebP or AVIF, up to 5 MB)
+6. Optionally add a **Featured image** (JPEG, PNG, WebP or AVIF, up to 4 MiB)
    with an **Image description** of what it shows.
 7. **Related service** is where the article sends a reader who wants help.
 8. **Read time** fills itself in if left blank. Publication and expiry times are
@@ -278,7 +278,7 @@ practice. The implementation has not populated these optional facts.
 ## Media Library and saved versions
 
 **Media Library** stores reusable image descriptions. Upload a still JPEG, PNG,
-WebP or AVIF up to 4 MB, choose a lowercase hyphenated filename without an
+WebP or AVIF up to 4 MiB, choose a lowercase hyphenated filename without an
 extension, and describe the image or explicitly mark it decorative. The file is
 decoded and its dimensions checked before storage. Small share images trigger
 guidance to use at least 1200×630 pixels. Existing served URLs remain stable;

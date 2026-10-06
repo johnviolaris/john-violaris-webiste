@@ -41,7 +41,8 @@ const sources = {
     export async function requireAdmin(){ if(!f.allowed||f.role!=='admin') throw new Error('Admin required'); }
     export async function createAuthorizedSeoClient(){ if(!f.allowed) throw new Error('Editor required'); return f.client; }
   `,
-  "lib/cms/queries.ts": `export async function getPagesContent(){ return globalThis.__staticPreviewFixture.live; }`,
+  "lib/cms/queries.ts": `export async function getPagesContent(){ return globalThis.__staticPreviewFixture.live; } export async function getServices(){throw new Error('Unexpected service catalogue read in static preview fixture');}`,
+  "lib/cms/locations/admin-queries.ts": `export async function listLocationPagesAdmin(){throw new Error('Unexpected location catalogue read in static preview fixture');}`,
   "lib/cms/media/queries.ts": `export async function getMediaAssetForUrl(url){const f=globalThis.__staticPreviewFixture;f.calls.push({media:url});return f.asset;}`,
   "lib/cms/revisions/queries.ts": `export async function getContentRevision(table,key,id){return (globalThis.__staticPreviewFixture.tables.content_revisions??[]).find(row=>row.entity_table===table&&row.entity_key===key&&row.id===id)?.snapshot??null;}`,
   "lib/cms/seo/routes.ts": `export async function listSeoRoutes(){if(globalThis.__staticPreviewFixture.seoThrows)throw new Error('Advisory outage');return [];}`,

@@ -63,7 +63,8 @@ test("public account creation is absent from both the UI and server actions", as
 const protectedReadModules = [
   {
     path: "lib/cms/locations/admin-queries.ts",
-    exports: ["listLocationPagesAdmin", "getLocationPageAdmin"],
+    exports: ["listLocationPagesAdmin", "getLocationPageAdmin", "getLocationChoicesAdmin"],
+    delegatedReads: { getLocationChoicesAdmin: "listLocationPagesAdmin" },
   },
   {
     path: "lib/cms/admin-queries.ts",
@@ -126,11 +127,18 @@ for (const protectedModule of protectedReadModules) {
       const end = nextStarts.length > 0 ? Math.min(...nextStarts) : contents.length;
       const body = contents.slice(start, end);
 
-      assert.match(
-        body,
-        /await createAuthorizedAdminClient\(\)/,
-        `${name} must authorize before reading Supabase`,
-      );
+      const delegated = protectedModule.delegatedReads?.[name];
+      if (delegated) {
+        assert.match(body, new RegExp(`await ${delegated}\\(\\)`), `${name} must delegate to the checked administrator-only read`);
+        assert.doesNotMatch(body, /\.from\s*\(/, `${name} must not add a direct unguarded database read`);
+        assert.ok(protectedModule.exports.includes(delegated), `${name}'s delegated read must itself have authorization coverage`);
+      } else {
+        assert.match(
+          body,
+          /await createAuthorizedAdminClient\(\)/,
+          `${name} must authorize before reading Supabase`,
+        );
+      }
     }
   });
 }

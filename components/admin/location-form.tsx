@@ -12,6 +12,9 @@ import { deleteLocationPage, saveLocationPage } from "@/lib/cms/locations/action
 import { emptyLocationValues, initialLocationFormState, locationFieldLimits, locationValuesFrom, type LocationField } from "@/lib/cms/locations/schema";
 import type { LocationPageRow } from "@/lib/cms/types";
 import { SlugChangeConfirmation } from "@/components/admin/slug-change-confirmation";
+import { FaqFields } from "@/components/admin/faq-fields";
+import { LocationCourtFields } from "@/components/admin/location-courts";
+import { relationRepairField, validParentService, validRelatedLocations } from "@/lib/cms/locations/structured";
 
 const fields: { key: LocationField; label: string; hint: string; rows?: number }[] = [
   { key: "location", label: "Area name", hint: "The genuine service area. This does not create an office claim." },
@@ -23,12 +26,16 @@ const fields: { key: LocationField; label: string; hint: string; rows?: number }
   { key: "body", label: "Main content", hint: "At least 300 words in two or more paragraphs. Explain useful, accurate advice for this audience. Word count alone does not establish quality. Separate paragraphs with a blank line.", rows: 14 },
 ];
 
-export function LocationForm({ row, services }: { row: LocationPageRow | null; services: { href: string; name: string }[] }) {
+export function LocationForm({ row, services, locations = [] }: { row: LocationPageRow | null; services: { href: string; name: string }[]; locations?: { href: string; location: string; live: boolean }[] }) {
   const values = row ? locationValuesFrom(row) : emptyLocationValues;
   const [state, action] = useActionState(saveLocationPage, { ...initialLocationFormState, values });
   const [published, setPublished] = useState(row?.published ?? false);
   const [slug, setSlug] = useState(values.slug);
   const [selectedServices, setSelectedServices] = useState(values.relatedServices.split("\n").filter(Boolean));
+  const [parentService, setParentService] = useState(values.parentService);
+  const [relatedLocations, setRelatedLocations] = useState(values.relatedLocations.split("\n").filter(Boolean));
+  const [replaceInvalidRelations, setReplaceInvalidRelations] = useState(false);
+  const invalidRelations = !validParentService(row?.content.parentService) || !validRelatedLocations(row?.content.relatedLocations);
   const ref = useRef<HTMLFormElement>(null);
   const alert = useRef<HTMLParagraphElement>(null);
   const formId = useId();
@@ -41,6 +48,7 @@ export function LocationForm({ row, services }: { row: LocationPageRow | null; s
     <form ref={ref} action={action} className="space-y-6">
       {row ? <input type="hidden" name="id" value={row.id} /> : null}
       <input type="hidden" name="relatedServices" value={selectedServices.join("\n")} />
+      <input type="hidden" name="relatedLocations" value={relatedLocations.join("\n")} />
       {state.message ? <p ref={alert} tabIndex={-1} role={state.status === "error" ? "alert" : "status"} className={`rounded-xl border p-4 text-sm ${state.status === "error" ? "text-destructive" : ""}`}>{state.message}</p> : null}
       {fields.map(({ key, label, hint, rows }) => <div key={key} className="space-y-2">
         <Label htmlFor={`${formId}-${key}`}>{label}</Label>
@@ -56,6 +64,14 @@ export function LocationForm({ row, services }: { row: LocationPageRow | null; s
         <p id={`${formId}-services-hint`} className="text-xs text-muted-foreground">Select at least one before publication. Hold Ctrl or Command to select several.</p>
         {state.fieldErrors.relatedServices ? <p id={`${formId}-services-error`} role="alert" className="text-sm text-destructive">{state.fieldErrors.relatedServices}</p> : null}
       </div>
+      <fieldset className="space-y-4 rounded-lg border border-border p-5" aria-invalid={Boolean(state.fieldErrors.parentService || state.fieldErrors.relatedLocations) || (invalidRelations && !replaceInvalidRelations)} tabIndex={-1}>
+        <legend className="px-1 font-display text-lg font-semibold">Optional location relationships</legend>
+        {invalidRelations && <div className="space-y-2 rounded-md border border-destructive p-3"><p className="text-sm text-destructive">Saved location relationships are invalid and omitted publicly. Confirm replacement before clearing or repairing them.</p><label className="flex gap-2 text-sm"><input type="checkbox" name={relationRepairField} checked={replaceInvalidRelations} onChange={(event) => setReplaceInvalidRelations(event.target.checked)} />Replace invalid relationships with the choices below.</label></div>}
+        <div className="space-y-2"><Label htmlFor={`${formId}-parent`}>Parent service</Label><select id={`${formId}-parent`} name="parentService" value={parentService} onChange={(event) => setParentService(event.target.value)} className="w-full rounded-md border border-input bg-background p-3 text-sm" aria-describedby={`${formId}-parent-hint${state.fieldErrors.parentService ? ` ${formId}-parent-error` : ""}`} aria-invalid={Boolean(state.fieldErrors.parentService)}><option value="">No parent service</option>{parentService && !services.some((service) => service.href === parentService) && <option value={parentService}>{parentService} (unavailable; choose another or clear)</option>}{services.map((service) => <option key={service.href} value={service.href}>{service.name}</option>)}</select><p id={`${formId}-parent-hint`} className="text-xs text-muted-foreground">Links this location to one existing published service, separately from the related-services list.</p>{state.fieldErrors.parentService && <p id={`${formId}-parent-error`} role="alert" className="text-sm text-destructive">{state.fieldErrors.parentService}</p>}</div>
+        <div className="space-y-2"><Label htmlFor={`${formId}-locations`}>Related locations</Label><select id={`${formId}-locations`} multiple value={relatedLocations} onChange={(event) => setRelatedLocations([...event.target.selectedOptions].map((option) => option.value))} className="min-h-32 w-full rounded-md border border-input bg-background p-3 text-sm" aria-describedby={`${formId}-locations-hint${state.fieldErrors.relatedLocations ? ` ${formId}-locations-error` : ""}`} aria-invalid={Boolean(state.fieldErrors.relatedLocations)}>{relatedLocations.filter((path) => !locations.some((location) => location.href === path)).map((path) => <option key={path} value={path}>{path} (unavailable; remove or replace)</option>)}{locations.filter((location) => location.href !== `/locations/${values.slug}`).map((location) => <option key={location.href} value={location.href}>{location.location}{location.live ? "" : " (private or scheduled draft)"}</option>)}</select><p id={`${formId}-locations-hint`} className="text-xs text-muted-foreground">Drafts can reference saved draft locations. Only live related pages are linked publicly; publication checks reject unpublished targets and self-links. Hold Ctrl or Command to select several.</p>{state.fieldErrors.relatedLocations && <p id={`${formId}-locations-error`} role="alert" className="text-sm text-destructive">{state.fieldErrors.relatedLocations}</p>}</div>
+      </fieldset>
+      <LocationCourtFields initialItems={row?.content.courts} error={state.fieldErrors.courts} />
+      <FaqFields initialItems={row?.content.faqItems} error={state.fieldErrors.faqItems} />
       {row && <SlugChangeConfirmation prefix="/locations/" previous={row.slug} next={slug} wasPublished={row.published} />}
       <div className="space-y-3 rounded-xl border p-4">
         <p className="text-sm text-muted-foreground">Scheduling uses Europe/London, including BST. Leave the start blank to publish now. The enabled publication checkbox and review gates still apply. Expired pages return 404.</p>

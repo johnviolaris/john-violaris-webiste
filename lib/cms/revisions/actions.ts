@@ -17,6 +17,9 @@ import { validateIntegrationsRevision } from "@/lib/cms/seo/integrations";
 import { isIconName } from "@/components/ui/icons";
 import { validateFaqItems } from "@/lib/cms/faq";
 import { readSectionWorkflow } from "@/lib/cms/sections/drafts";
+import { validateLocationRevision } from "@/lib/cms/locations/revision-validation";
+import { listLocationPagesAdmin } from "@/lib/cms/locations/admin-queries";
+import { getServices } from "@/lib/cms/queries";
 
 export type RestoreState = { status: "idle" | "error" | "success"; message: string };
 
@@ -128,7 +131,11 @@ export async function restoreContentRevision(_previous: RestoreState, form: Form
     if (saveError || !data) return failure("This image could not be restored.");
     revalidatePath("/", "layout"); revalidatePath("/sitemap.xml"); revalidatePath("/admin/media"); revalidatePath(`/admin/media/${revision.entity_id}`);
   } else if (revision.entity_table === "location_pages") {
-    const { data, error: saveError } = await supabase.from("location_pages").update({ title: saved.title, location: saved.location, content: saved.content, published: false, published_at: saved.published_at, unpublish_at: null, reviewed_by: null, reviewed_at: null }).eq("id", revision.entity_id).select("slug").maybeSingle<{ slug: string }>();
+    const [current, services, peers] = await Promise.all([supabase.from("location_pages").select("slug").eq("id", revision.entity_id).maybeSingle<{ slug: string }>(), getServices(), listLocationPagesAdmin()]);
+    if (current.error || !current.data || !peers.available) return failure("Current location relationships could not be checked before restoring.");
+    const checked = validateLocationRevision(saved, current.data.slug, new Set(services.map((service) => service.href)), new Set(peers.rows.map((peer) => `/locations/${peer.slug}`)));
+    if (!checked.ok) return failure(checked.error);
+    const { data, error: saveError } = await supabase.from("location_pages").update({ title: checked.title, location: checked.location, content: checked.content, published: false, published_at: saved.published_at, unpublish_at: null, reviewed_by: null, reviewed_at: null }).eq("id", revision.entity_id).select("slug").maybeSingle<{ slug: string }>();
     if (saveError || !data) return failure("This location draft could not be restored.");
     revalidateFor("location-pages", [`/locations/${data.slug}`]); revalidatePath(`/admin/location-pages/${revision.entity_id}`);
   } else if (revision.entity_table === "services") {

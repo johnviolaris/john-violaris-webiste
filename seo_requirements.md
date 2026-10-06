@@ -943,6 +943,19 @@ For a motoring practice, location-qualified queries ("drink driving solicitor Ma
 - Zero location pages are published at launch.
 - The route is proven with one internal draft, then unpublished.
 
+**Current status: partial.** Optional court details, location FAQ rows, parent
+service and related-location selections now use the existing JSONB content,
+admin editor and shared private/public renderer. Legacy payloads keep empty
+defaults, older forms preserve omitted fields, and revision restore validates
+the current relationships. Visible saved FAQs produce matching linked FAQ
+schema; court addresses never become practice-address claims. Thirteen isolated
+tests pass, including five renderer cases and unchanged legacy body output.
+No location content was seeded or published, and no hosted fixture was written.
+The remaining acceptance is a saved draft exercised through an isolated real
+CMS/Auth/backend and browser, including persistence, preview, history and
+withdrawal. Local context currently uses plain paragraphs rather than a full
+rich-text editor. These limits keep REQ-043 partial.
+
 ### REQ-044 — URL structure decided up front
 
 **P3**

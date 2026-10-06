@@ -27,7 +27,7 @@ export function publicationSeoWarnings(input: PublicationSeoInput): string[] {
     .filter((issue) => issue.path === path && issue.severity !== "info").map((issue) => issue.message);
   const text = resolvePageText(path, defaults, override);
   const isArticle = path.startsWith("/blog/") && defaults.ogType === "article";
-  const supportsFaq = isArticle || path.startsWith("/services/");
+  const supportsFaq = isArticle || path.startsWith("/services/") || path.startsWith("/locations/");
   const content = input.content && typeof input.content === "object" ? input.content as Record<string, unknown> : {};
   const faqs = validateFaqItems(content.faqItems);
   if (supportsFaq && !faqs.ok) warnings.push(`FAQs: ${faqs.error}`);

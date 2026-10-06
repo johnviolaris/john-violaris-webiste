@@ -226,8 +226,9 @@ that the article changed, not that the law in it was re-checked.
 ### Images
 
 `blog-images` is a public Supabase Storage bucket: public read, admin-only
-write, 5 MB per file, JPEG/PNG/WebP/AVIF only, enforced both on the bucket and
-in `uploadBlogImage` so a rejection is a sentence rather than an error code.
+write, with a 5 MiB bucket bound and JPEG/PNG/WebP/AVIF only. The application
+upload limit is 4 MiB, enforced before decoding/storage so a rejection is a
+sentence rather than an error code and fits the deployed request-size limit.
 Filenames are generated rather than taken from the upload.
 
 An image is uploaded as soon as it is chosen, not on save, so the editor
@@ -751,6 +752,9 @@ for the database backup/migration gate, preview checks, production smoke tests
 and rollback sequence on later releases.
 [`docs/cms-guide.md`](docs/cms-guide.md) is the plain-English guide to the
 admin for John.
+[`docs/staging-acceptance.md`](docs/staging-acceptance.md) covers backend isolation,
+the offline `staging:preflight` check and the Auth/Storage/enquiry acceptance still
+needed before using write fixtures.
 
 Outside the repository (launch record from 2026-10-03, checked where possible
 on 2026-10-05):
@@ -900,6 +904,20 @@ local and pending; no city page has been published.
 
 `npm run pages:verify -- <production-server-url>` checks every sitemap page's
 rendered headings, metadata, IDs, image descriptions and internal resources.
+`npm run runtime:verify -- <loopback-server-url> --mode local` checks simulated
+Host routing, security headers, private paths and reset rejection without a
+token. This remains the default mode for existing local/CI commands. Only an
+isolated or unconfigured Auth target may use `--probe-recovery-token` for the
+additional forged-token assertion. For live GET-only acceptance, use
+`npm run runtime:verify -- https://johnviolaris.com --mode hosted --preview-url <actual-https-preview-origin>`.
+Hosted checks request the real alias origins, never invent a preview hostname,
+override Host or submit Auth tokens. An actual preview protected by a 401/403
+or the Vercel sign-in redirect is reported as blocked after production probes
+complete and exits unsuccessfully; leave deployment protection
+enabled and inspect it through an authorised session. The printed coverage
+record distinguishes real routing from local simulation and reports the token
+probe separately. `--help` shows these modes and limits. Neither mode submits
+enquiries or changes CMS content.
 `npm run assets:verify -- <production-server-url>` measures initial first-party
 JavaScript/CSS from actual build files and checks `performance-budgets.json`.
 The baseline and 20% bundle / 10% portrait headroom require deliberate review

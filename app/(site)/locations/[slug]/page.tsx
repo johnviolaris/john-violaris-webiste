@@ -20,6 +20,6 @@ export default async function LocationPage({ params }: { params: Promise<{ slug:
   const path = `/locations/${slug}`;
   const location = await getLocationPage(slug);
   if (!location) { await redirectFromCms(path); notFound(); }
-  const [services, config] = await Promise.all([getServices(), getSiteConfig()]);
-  return <LocationPageContent location={location} services={services} config={config} />;
+  const [services, config, locations] = await Promise.all([getServices(), getSiteConfig(), location.content.relatedLocations?.length ? getLocationPages() : Promise.resolve([])]);
+  return <LocationPageContent location={location} services={services} config={config} locations={locations} />;
 }

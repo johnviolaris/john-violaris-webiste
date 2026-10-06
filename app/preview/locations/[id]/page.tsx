@@ -4,6 +4,7 @@ import { getContentRevision } from "@/lib/cms/revisions/queries";
 import { getServices, getSiteConfig } from "@/lib/cms/queries";
 import { LocationPageContent } from "@/components/pages/location-page-content";
 import type { LocationPageRow } from "@/lib/cms/types";
+import { getLocationPages } from "@/lib/cms/locations/queries";
 
 export default async function PreviewLocation({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ revision?: string }> }) {
   const { id } = await params;
@@ -12,6 +13,6 @@ export default async function PreviewLocation({ params, searchParams }: { params
   const { revision } = await searchParams;
   const location = revision ? await getContentRevision("location_pages", id, revision) as LocationPageRow | null : current;
   if (!location) notFound();
-  const [services, config] = await Promise.all([getServices(), getSiteConfig()]);
-  return <>{revision && <p role="status" className="bg-gold px-4 py-3 text-center text-sm">Historical version preview.</p>}<LocationPageContent location={location} services={services} config={config} preview /></>;
+  const [services, config, locations] = await Promise.all([getServices(), getSiteConfig(), location.content.relatedLocations?.length ? getLocationPages() : Promise.resolve([])]);
+  return <>{revision && <p role="status" className="bg-gold px-4 py-3 text-center text-sm">Historical version preview.</p>}<LocationPageContent location={location} services={services} config={config} locations={locations} preview /></>;
 }

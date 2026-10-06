@@ -217,13 +217,17 @@ export type SeoRow = Timestamps & {
   content: SeoContent;
 };
 
-/** Bespoke service-area content. No office/address fields or seeded locations. */
+/** Bespoke service-area content. Court addresses never describe a practice office. No seeded locations. */
 export type LocationPageContent = {
   description: string;
   intro: string;
   localContext: string[];
   body: string[];
   relatedServices: string[];
+  courts?: import("@/lib/cms/locations/structured").CourtDetail[];
+  faqItems?: import("@/lib/cms/faq").FaqItem[];
+  relatedLocations?: string[];
+  parentService?: string;
 };
 
 export type LocationPageRow = Timestamps & {

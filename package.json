@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --import ./scripts/alias-hook.mjs --test --test-isolation=none \"tests/*.test.mjs\"",
     "runtime:verify": "node scripts/verify-runtime.mjs",
+    "staging:preflight": "node scripts/staging-preflight.mjs",
     "cms:verify": "node --import ./scripts/alias-hook.mjs scripts/verify-cms-seed.mjs",
     "cms:seed": "node --import ./scripts/alias-hook.mjs scripts/generate-cms-seed.mjs",
     "seo:verify": "node --import ./scripts/alias-hook.mjs scripts/verify-seo.mjs",

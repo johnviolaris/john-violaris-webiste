@@ -78,7 +78,7 @@ export function validateCustomJsonLd(
     if (!object(value)) return;
     const type = value["@type"];
     const types = Array.isArray(type) ? type : [type];
-    if ((path.startsWith("/blog/") || path.startsWith("/services/")) && types.some((entry) => entry === "FAQPage" || entry === "https://schema.org/FAQPage")) {
+    if ((path.startsWith("/blog/") || path.startsWith("/services/") || path.startsWith("/locations/")) && types.some((entry) => entry === "FAQPage" || entry === "https://schema.org/FAQPage")) {
       problem = "Manage FAQPage questions in the visible page's optional FAQ editor, rather than custom JSON-LD.";
     }
     if (root && !type) problem = "Every top-level schema object needs an @type.";
