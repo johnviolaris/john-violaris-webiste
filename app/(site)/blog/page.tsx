@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageIntro } from "@/components/pages/page-intro";
+import "@/components/pages/article-pages.css";
 import { Container } from "@/components/ui/container";
 import { Icon } from "@/components/ui/icons";
 import { JsonLd } from "@/components/ui/json-ld";

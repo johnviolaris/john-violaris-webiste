@@ -15,6 +15,8 @@ export type SitemapDateSources = {
   articles: ModifiedRow[];
   /** Defined (even empty) only after the durable public-date RPC succeeds. */
   publicChanges?: { path: string; modified_at: string | null }[];
+  /** Newer schema coverage; old RPC success alone cannot suppress dependency rows. */
+  dependencyChanges?: { path: string; modified_at: string | null }[];
 };
 export type SitemapDatedRoute = { path: string; group: string; lastModified?: string; imageUrl?: string };
 
@@ -37,17 +39,22 @@ export function sitemapModificationDates(routes: readonly SitemapDatedRoute[], s
   }
   for (const route of routes) add(route.path, route.lastModified);
 
-  for (const row of sources.publicChanges ?? []) {
+  const changes = sources.dependencyChanges ?? sources.publicChanges;
+  const dependencyPaths = new Set<string>();
+  for (const row of changes ?? []) {
     const date = timestamp(row.modified_at);
     // Public watermarks are observed changes, never future publication dates.
-    if (date !== null && date <= Date.now()) add(row.path, row.modified_at);
+    if (date !== null && date <= Date.now()) {
+      add(row.path, row.modified_at);
+      if (sources.dependencyChanges !== undefined && paths.has(row.path)) dependencyPaths.add(row.path);
+    }
   }
 
   // Once available, watermarks are authoritative for these two source types.
   // Their row updated_at still changes on equal-content upserts; using it here
   // would undo the trigger's no-op protection. Older schemas retain the former
   // current-row behaviour and the private report flags the unavailable source.
-  for (const row of sources.publicChanges === undefined ? sources.sections : []) {
+  for (const row of changes === undefined ? sources.sections : []) {
     const section = findSection(row.page, row.section);
     if (!section) continue;
     for (const route of routes) {
@@ -57,7 +64,7 @@ export function sitemapModificationDates(routes: readonly SitemapDatedRoute[], s
       if (section.appearsOn.includes(route.path) || wildcard) add(route.path, row.updated_at);
     }
   }
-  for (const row of sources.publicChanges === undefined ? sources.seo : []) add(row.path, row.updated_at);
+  for (const row of changes === undefined ? sources.seo : []) add(row.path, row.updated_at);
   const stored = Object.fromEntries(sources.settings
     .filter((row) => siteSettingKeys.includes(row.key as (typeof siteSettingKeys)[number]) && typeof row.value === "string")
     .map((row) => [row.key, row.value])) as Partial<SiteSettings>;
@@ -80,18 +87,26 @@ export function sitemapModificationDates(routes: readonly SitemapDatedRoute[], s
     if (typeof row.value !== "string") continue;
     // Only settings actually rendered in the shared layout/site JSON-LD date
     // every page. Unverified practice facts and email-only roleLong do not.
-    if (globalKeys.has(row.key)) for (const route of routes) add(route.path, row.updated_at);
-    if (row.key === "initials") add("/", row.updated_at);
+    // Static settings are normalised/no-op protected by the new capture. An
+    // actual per-path watermark baseline is required before suppressing a row;
+    // successful empty/malformed coverage cannot erase surviving evidence.
+    // Env-derived contact/practice facts retain their existing row behaviour.
+    const covered = ["name", "role", "jurisdiction", "email", "responseTime", "sraNumber", "qualifiedYear", "reviewSolicitorsUrl", "lawSocietyUrl", "linkedinUrl"].includes(row.key);
+    if (globalKeys.has(row.key)) for (const route of routes) if (!covered || !dependencyPaths.has(route.path)) add(route.path, row.updated_at);
+    if (row.key === "initials" && !dependencyPaths.has("/")) add("/", row.updated_at);
   }
-  for (const row of sources.services) { add("/", row.updated_at); add("/services", row.updated_at); }
-  for (const row of sources.articles) add("/blog", row.updated_at);
+  for (const row of sources.services) {
+    if (!dependencyPaths.has("/")) add("/", row.updated_at);
+    if (!dependencyPaths.has("/services")) add("/services", row.updated_at);
+  }
+  for (const row of sources.articles) if (!dependencyPaths.has("/blog")) add("/blog", row.updated_at);
 
   const savedPortrait = sources.sections.find((row) => row.page === "home" && row.section === "hero")?.portrait;
   const portrait = savedPortrait ?? heroDefaults.portrait;
   const portraitUrl = portrait === "/Profile 7.png" ? "/john-violaris-portrait.webp" : portrait;
   for (const row of sources.media) {
-    if (row.url === portraitUrl) add("/", row.updated_at);
-    for (const route of routes) if (route.imageUrl === row.url) add(route.path, row.updated_at);
+    if (row.url === portraitUrl && !dependencyPaths.has("/")) add("/", row.updated_at);
+    for (const route of routes) if (route.imageUrl === row.url && !dependencyPaths.has(route.path)) add(route.path, row.updated_at);
   }
   return new Map([...instants].map(([path, value]) => [path, new Date(value).toISOString()]));
 }

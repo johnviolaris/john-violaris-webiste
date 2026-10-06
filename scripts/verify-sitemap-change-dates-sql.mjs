@@ -40,6 +40,9 @@ try {
     const result = await db.query("select private.sitemap_section_paths($1,$2) as paths", [page.key,section.key]);
     assert.deepEqual(result.rows[0].paths, expected, `Actual dependency registry parity: ${page.key}/${section.key}`); extraChecks++;
   }
+  // CI also has the complementary dependency migration; it fixes the live
+  // fallback-service route boundary while retaining stricter hidden SEO reads.
+  await migration("20261006162445_public_sitemap_dependency_dates.sql");
   // Minimal assertion adapters execute the same SQL/role transitions as pgTAP.
   // Any null/false result raises; this does not stand in for pgTAP or Supabase.
   await db.exec(`create table private.sitemap_test_count(passed int not null,expected int); insert into private.sitemap_test_count values(0,null);

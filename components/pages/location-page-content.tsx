@@ -1,3 +1,4 @@
+import "./inner-pages.css";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { ButtonLink } from "@/components/ui/button-link";

@@ -14,11 +14,21 @@ import { registerHooks } from "node:module";
 import { pathToFileURL } from "node:url";
 
 const root = process.cwd();
+const rootUrl = pathToFileURL(`${root}/`).href;
 
 /** Extensionless imports are a bundler convenience; node wants the real file. */
 const candidates = ["", ".ts", ".tsx", ".mts", ".js", "/index.ts", "/index.tsx"];
 
 registerHooks({
+  load(url, context, nextLoad) {
+    // Node-only content/render fixtures cannot execute stylesheet side effects.
+    // Keep resolution/existence checks; actual CSS is checked by the Next build,
+    // asset gate and browser verification, rather than these HTML fixtures.
+    if (url.startsWith(rootUrl) && !url.startsWith(`${rootUrl}node_modules/`) && url.endsWith(".css") && existsSync(new URL(url))) {
+      return { format: "module", shortCircuit: true, source: "" };
+    }
+    return nextLoad(url, context);
+  },
   resolve(specifier, context, nextResolve) {
     if (!specifier.startsWith("@/")) {
       return nextResolve(specifier, context);

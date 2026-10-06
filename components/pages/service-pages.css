@@ -1,0 +1,218 @@
+@import "./inner-pages.css";
+
+.service-detail-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 100px;
+  align-items: start;
+}
+.service-detail-copy {
+  min-width: 0;
+}
+.service-detail-copy > p:not(.eyebrow) {
+  font-size: 15px;
+  line-height: 1.9;
+  margin-top: 25px;
+}
+.service-detail-copy > p.eyebrow {
+  margin-top: 60px;
+}
+.service-detail-copy h3 {
+  font: 400 27px/1.3 var(--font-display);
+  margin: 35px 0 18px;
+  color: var(--color-navy);
+}
+.service-detail-copy ul {
+  list-style: disc;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 2;
+}
+.service-detail-copy .text-link {
+  margin-top: 32px;
+}
+@media (max-width: 1023px) {
+  .service-detail-grid {
+    gap: 40px;
+  }
+}
+@media (max-width: 767px) {
+  .service-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.penalty-strip {
+  background: var(--color-off);
+  border-bottom: 1px solid var(--color-line);
+  padding: 34px 0 38px;
+}
+.penalty-strip-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.penalty-statute {
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--color-quiet);
+}
+.penalty-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.penalty-card {
+  padding: 18px 20px;
+  border-radius: var(--radius-sharp);
+  border: 1px solid;
+}
+.penalty-card strong {
+  display: block;
+  font: 700 16px/1.35 var(--font-display);
+}
+.penalty-card span {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--color-quiet);
+}
+.penalty-card--risk {
+  background: rgb(181 52 28 / 6%);
+  border-color: rgb(181 52 28 / 26%);
+}
+.penalty-card--risk strong {
+  color: var(--color-alert);
+}
+.penalty-card--note {
+  background: rgb(201 168 76 / 10%);
+  border-color: rgb(201 168 76 / 30%);
+}
+.penalty-card--note strong {
+  color: var(--color-gold-ink);
+}
+.penalty-caveat {
+  margin-top: 18px;
+  font-size: 11px;
+  line-height: 1.75;
+  color: var(--color-quiet);
+  max-width: 62ch;
+}
+.issue-list {
+  margin-top: 30px;
+  border-top: 1px solid var(--color-line);
+}
+.issue-list > div {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.issue-list dt {
+  font: 400 20px/1.35 var(--font-display);
+  color: var(--color-navy);
+}
+.issue-list dd {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.85;
+}
+.detail-process {
+  margin-top: 8px;
+}
+.detail-process li {
+  display: flex;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.detail-process-number {
+  font: 400 13px/1 var(--font-display);
+  color: var(--color-gold-ink);
+  padding-top: 5px;
+  flex-shrink: 0;
+}
+.detail-process strong {
+  font: 400 19px/1.35 var(--font-display);
+  color: var(--color-navy);
+}
+.detail-process p {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.85;
+}
+@media (max-width: 767px) {
+  .penalty-cards {
+    grid-template-columns: 1fr;
+  }
+  .penalty-strip {
+    padding: 26px 0 30px;
+  }
+  .detail-process li {
+    gap: 14px;
+  }
+}
+
+.service-outcomes-table-wrap {
+  overflow-x: auto;
+  margin-top: 40px;
+  border: 1px solid var(--color-line);
+}
+.service-outcomes-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  text-align: left;
+}
+.service-outcomes-table caption {
+  padding: 16px 20px;
+  background: var(--color-navy);
+  color: var(--color-cream);
+  font: 400 18px/1.3 var(--font-display);
+  text-align: left;
+}
+.service-outcomes-table th,.service-outcomes-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-line);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.service-outcomes-table thead th {
+  background: var(--color-gold-pale);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-gold-ink);
+}
+.service-outcomes-table tbody th {
+  font-weight: 700;
+  color: var(--color-navy);
+}
+.service-outcomes-table-wrap {
+  margin-top: 22px;
+}
+.service-outcomes-table {
+  min-width: 480px;
+}
+.service-fee-card {
+  padding: 28px;
+  background: var(--color-gold-pale);
+  border-top: 3px solid var(--color-gold);
+}
+.service-fee-card .eyebrow {
+  color: var(--color-gold-ink);
+}
+.service-fee-card h2 {
+  margin: 15px 0;
+  font: 400 24px/1.35 var(--font-display);
+  color: var(--color-navy);
+}
+.service-fee-card p {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.service-fee-card .text-link {
+  margin-top: 20px;
+}

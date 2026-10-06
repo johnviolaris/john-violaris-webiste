@@ -118,9 +118,7 @@
   html {
     scroll-behavior: auto;
   }
-  *,
-  *::before,
-  *::after {
+  *,*::before,*::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     transition-delay: 0ms !important;
@@ -167,8 +165,7 @@
   --sidebar-ring: #c9a84c;
 }
 
-.admin-surface,
-.auth-surface {
+.admin-surface,.auth-surface {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
@@ -706,9 +703,7 @@ body {
 .expertise-section {
   background: var(--color-cream);
 }
-.expertise-section .eyebrow,
-.process-section .eyebrow,
-.questions-section .eyebrow {
+.expertise-section .eyebrow,.process-section .eyebrow,.questions-section .eyebrow {
   color: var(--color-gold-ink);
 }
 .service-explorer {
@@ -1109,11 +1104,7 @@ body {
   transition: opacity 0.3s ease 0.1s;
 }
 @media (prefers-reduced-motion: reduce) {
-  .question-answer,
-  .question[data-open] .question-answer,
-  .question-answer p,
-  .question[data-open] .question-answer p,
-  .question-toggle {
+  .question-answer,.question[data-open] .question-answer,.question-answer p,.question[data-open] .question-answer p,.question-toggle {
     transition: none;
   }
 }
@@ -1185,8 +1176,7 @@ body {
   .service-card {
     padding: 20px;
   }
-  .personal-grid,
-  .questions-grid {
+  .personal-grid,.questions-grid {
     gap: 45px;
   }
   .personal-promises {
@@ -1238,8 +1228,7 @@ body {
     font-size: 10px;
     align-items: center;
   }
-  .personal-grid,
-  .questions-grid {
+  .personal-grid,.questions-grid {
     grid-template-columns: 1fr;
     gap: 36px;
   }
@@ -1382,352 +1371,15 @@ body {
     gap: 18px;
   }
 }
-.page-intro {
-  background: var(--color-navy);
-  color: var(--color-cream);
-  padding: 30px 0 70px;
-}
-.breadcrumb {
-  display: inline-flex;
-  gap: 12px;
-  font-size: 10px;
-  color: rgb(250 250 248 / 70%);
-  margin-bottom: 50px;
-}
-.breadcrumb span {
-  color: var(--color-gold);
-}
-.page-intro .eyebrow {
-  color: var(--color-gold);
-}
-.page-intro h1 {
-  font: 400 clamp(40px, 5vw, 68px)/1.2 var(--font-display);
-  letter-spacing: -2px;
-  margin-top: 22px;
-  max-width: 1000px;
-}
-.page-intro h1 em {
-  color: var(--color-gold);
-}
-.page-intro-description {
-  margin-top: 28px;
-  max-width: 650px;
-  font-size: 15px;
-  line-height: 1.8;
-  color: rgb(250 250 248 / 75%);
-}
-.page-intro-action {
-  margin-top: 32px;
-}
-.information-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 45px;
-}
-.information-grid article {
-  border-top: 1px solid var(--color-line);
-  padding-top: 25px;
-}
-.information-grid .eyebrow {
-  color: var(--color-gold-ink);
-  font-size: 9px;
-}
-.information-grid h2 {
-  font: 400 29px/1.35 var(--font-display);
-  color: var(--color-navy);
-  margin: 20px 0;
-}
-.information-grid p {
-  font-size: 14px;
-  line-height: 1.9;
-}
-.information-grid .text-link {
-  margin-top: 25px;
-}
 /*
   The fees text, set like Meet John: the opening paragraph as a serif lead on
   the left, the rest as reading text on the right, closing on a highlighted
   note about the free first conversation.
 */
-.fees-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-  gap: 90px;
-  border-top: 1px solid var(--color-line);
-  padding-top: 50px;
-}
-.information-grid + .fees-body {
-  margin-top: 80px;
-}
-.fees-body .eyebrow {
-  color: var(--color-gold-ink);
-}
-.fees-body-lead {
-  margin-top: 24px;
-  font: 400 26px/1.45 var(--font-display);
-  letter-spacing: -0.4px;
-  color: var(--color-navy);
-}
-.fees-body-copy {
-  padding-top: 34px;
-}
-.fees-body-copy > p {
-  font-size: 15px;
-  line-height: 1.95;
-}
-.fees-body-copy > p + p {
-  margin-top: 18px;
-}
-.fees-body-copy > .fees-body-closing {
-  margin-top: 32px;
-  padding: 22px 26px;
-  background: var(--color-gold-pale);
-  border-left: 3px solid var(--color-gold);
-  font: italic 400 21px/1.5 var(--font-display);
-  color: var(--color-navy);
-}
-.contact-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 90px;
-}
-.contact-methods {
-  margin-top: 40px;
-}
-.contact-methods a {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  border-top: 1px solid var(--color-line);
-  padding: 23px 0;
-}
-.contact-methods a:last-child {
-  border-bottom: 1px solid var(--color-line);
-}
-.contact-methods span {
-  font-size: 10px;
-  color: var(--color-quiet);
-  grid-column: 1;
-}
-.contact-methods strong {
-  font: 400 clamp(18px, 2.1vw, 27px)/1.4 var(--font-display);
-  color: var(--color-navy);
-  grid-column: 1;
-  margin-top: 8px;
-  overflow-wrap: anywhere;
-}
-.contact-methods svg {
-  grid-column: 2;
-  grid-row: 1/3;
-  align-self: center;
-  color: var(--color-gold-ink);
-  margin-left: 15px;
-}
-.contact-note {
-  background: var(--color-off);
-  padding: 40px;
-}
-.contact-note h2,
-.service-contact-card h2 {
-  font: 400 33px/1.3 var(--font-display);
-  margin: 22px 0;
-}
-.contact-note > p:not(.eyebrow),
-.contact-note li {
-  font-size: 12px;
-  line-height: 1.9;
-}
-.contact-note ul {
-  list-style: disc;
-  padding-left: 16px;
-  margin: 17px 0;
-}
-.contact-note .action-button {
-  margin-top: 25px;
-  font-size: 11px;
-  padding: 16px;
-  width: 100%;
-}
-.contact-urgent {
-  margin-top: 30px;
-  padding-top: 25px;
-  border-top: 1px solid var(--color-line);
-  font-size: 12px;
-}
-.contact-urgent p {
-  margin-top: 8px;
-  line-height: 1.8;
-}
-.service-detail-grid {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 100px;
-  align-items: start;
-}
-.service-detail-copy {
-  min-width: 0;
-}
-.service-detail-copy > p:not(.eyebrow) {
-  font-size: 15px;
-  line-height: 1.9;
-  margin-top: 25px;
-}
 /* The eyebrow opens a new section of the column, so it needs a clear break
    from the paragraph above it rather than the 25px of ordinary copy flow. */
-.service-detail-copy > p.eyebrow {
-  margin-top: 60px;
-}
-.service-detail-copy h3 {
-  font: 400 27px/1.3 var(--font-display);
-  margin: 35px 0 18px;
-  color: var(--color-navy);
-}
-.service-detail-copy ul {
-  list-style: disc;
-  padding-left: 18px;
-  font-size: 14px;
-  line-height: 2;
-}
-.service-detail-copy .text-link {
-  margin-top: 32px;
-}
 /* Stickiness now lives on `.page-rail`, which also carries the contents list. */
-.service-contact-card {
-  background: var(--color-navy);
-  color: var(--color-cream);
-  padding: 35px;
-}
-.service-contact-card .eyebrow {
-  color: var(--color-gold);
-  font-size: 8px;
-}
-.service-contact-card h2 em {
-  color: var(--color-gold);
-}
-.service-contact-card > p {
-  font-size: 13px;
-  line-height: 1.85;
-  color: rgb(250 250 248 / 75%);
-}
-.service-contact-card .action-button {
-  width: 100%;
-  padding: 16px;
-  margin-top: 25px;
-  font-size: 11px;
-}
 /* Secondary route out of the service card; sits under the booking CTA. */
-.service-contact-whatsapp {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  width: 100%;
-  min-height: 48px;
-  margin-top: 10px;
-  padding: 14px;
-  border: 1px solid rgb(250 250 248 / 25%);
-  color: var(--color-cream);
-  font-size: 11px;
-  font-weight: 600;
-  transition:
-    background 0.2s,
-    border-color 0.2s;
-}
-.service-contact-whatsapp:hover {
-  background: rgb(250 250 248 / 8%);
-  border-color: rgb(250 250 248 / 45%);
-}
-.service-contact-whatsapp svg {
-  flex-shrink: 0;
-  color: var(--color-gold);
-}
-.service-contact-caption {
-  display: block;
-  border-top: 1px solid #ffffff26;
-  margin-top: 25px;
-  padding-top: 20px;
-  font-size: 9px;
-  line-height: 1.9;
-  color: rgb(250 250 248 / 75%);
-}
-.related-services {
-  margin-top: 70px;
-  border-top: 1px solid var(--color-line);
-  padding-top: 25px;
-}
-.related-services a {
-  display: flex;
-  justify-content: space-between;
-  padding: 17px 0;
-  border-bottom: 1px solid var(--color-line);
-  font: 400 22px/1.4 var(--font-display);
-  color: var(--color-navy);
-}
-@media (max-width: 1023px) {
-  .contact-grid,
-  .service-detail-grid {
-    gap: 40px;
-  }
-  .contact-note {
-    padding: 25px;
-  }
-  .information-grid {
-    gap: 25px;
-  }
-  .fees-body {
-    gap: 45px;
-  }
-  .fees-body-lead {
-    font-size: 22px;
-  }
-}
-@media (max-width: 767px) {
-  .contact-grid,
-  .service-detail-grid,
-  .information-grid,
-  .fees-body {
-    grid-template-columns: 1fr;
-  }
-  .fees-body {
-    gap: 0;
-  }
-  .fees-body-copy {
-    padding-top: 26px;
-  }
-  .service-contact-card {
-    position: static;
-  }
-}
-@media (max-width: 639px) {
-  .page-intro {
-    padding-bottom: 50px;
-  }
-  .breadcrumb {
-    margin-bottom: 35px;
-  }
-  .page-intro h1 {
-    font-size: 39px;
-    letter-spacing: -1.2px;
-  }
-  .page-intro-description {
-    font-size: 13px;
-  }
-  .fees-body {
-    padding-top: 36px;
-  }
-  .information-grid + .fees-body {
-    margin-top: 55px;
-  }
-  .fees-body-lead {
-    font-size: 22px;
-  }
-  .fees-body-copy > p {
-    font-size: 14px;
-  }
-  .fees-body-copy > .fees-body-closing {
-    padding: 18px 20px;
-    font-size: 19px;
-  }
-}
 .editorial-footer {
   background: var(--color-navy-deep);
   color: rgb(250 250 248 / 70%);
@@ -1802,8 +1454,7 @@ body {
 .footer-bottom-links button {
   cursor: pointer;
 }
-.footer-bottom-links a:hover,
-.footer-bottom-links button:hover {
+.footer-bottom-links a:hover,.footer-bottom-links button:hover {
   color: var(--color-gold);
 }
 .footer-legal {
@@ -1825,8 +1476,7 @@ body {
   .footer-grid {
     gap: 30px 23px;
   }
-  .footer-identity,
-  .footer-services {
+  .footer-identity,.footer-services {
     grid-column: 1/-1;
   }
   .footer-contact {
@@ -2097,226 +1747,20 @@ body {
 }
 
 /* Plain-language note that making contact is not yet instructing John. */
-.contact-disclaimer {
-  margin-top: 30px;
-  padding-top: 18px;
-  border-top: 1px solid var(--color-line);
-  font-size: 12px;
-  line-height: 1.8;
-  color: var(--color-quiet);
-  max-width: 46ch;
-}
 
 /* ══════════════════════════════════════════════════════════
    SERVICE PAGE — "at a glance" penalty strip
    Replaces the three penalty cards that sat beside the heading in the demo's
    service-page template (pen1 / pen2 / pen3).
    ══════════════════════════════════════════════════════════ */
-.penalty-strip {
-  background: var(--color-off);
-  border-bottom: 1px solid var(--color-line);
-  padding: 34px 0 38px;
-}
-.penalty-strip-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-bottom: 22px;
-}
-.penalty-statute {
-  font-size: 10px;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: var(--color-quiet);
-}
-.penalty-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-.penalty-card {
-  padding: 18px 20px;
-  border-radius: var(--radius-sharp);
-  border: 1px solid;
-}
-.penalty-card strong {
-  display: block;
-  font: 700 16px/1.35 var(--font-display);
-}
-.penalty-card span {
-  display: block;
-  margin-top: 6px;
-  font-size: 11px;
-  line-height: 1.6;
-  color: var(--color-quiet);
-}
-.penalty-card--risk {
-  background: rgb(181 52 28 / 6%);
-  border-color: rgb(181 52 28 / 26%);
-}
-.penalty-card--risk strong {
-  color: var(--color-alert);
-}
-.penalty-card--note {
-  background: rgb(201 168 76 / 10%);
-  border-color: rgb(201 168 76 / 30%);
-}
-.penalty-card--note strong {
-  color: var(--color-gold-ink);
-}
-.penalty-caveat {
-  margin-top: 18px;
-  font-size: 11px;
-  line-height: 1.75;
-  color: var(--color-quiet);
-  max-width: 62ch;
-}
 
 /* The points John examines, as a ruled definition list. */
-.issue-list {
-  margin-top: 30px;
-  border-top: 1px solid var(--color-line);
-}
-.issue-list > div {
-  padding: 20px 0;
-  border-bottom: 1px solid var(--color-line);
-}
-.issue-list dt {
-  font: 400 20px/1.35 var(--font-display);
-  color: var(--color-navy);
-}
-.issue-list dd {
-  margin-top: 8px;
-  font-size: 14px;
-  line-height: 1.85;
-}
 
 /* Numbered "how the case proceeds" steps. */
-.detail-process {
-  margin-top: 8px;
-}
-.detail-process li {
-  display: flex;
-  gap: 20px;
-  padding: 18px 0;
-  border-bottom: 1px solid var(--color-line);
-}
-.detail-process-number {
-  font: 400 13px/1 var(--font-display);
-  color: var(--color-gold-ink);
-  padding-top: 5px;
-  flex-shrink: 0;
-}
-.detail-process strong {
-  font: 400 19px/1.35 var(--font-display);
-  color: var(--color-navy);
-}
-.detail-process p {
-  margin-top: 6px;
-  font-size: 14px;
-  line-height: 1.85;
-}
 
 /* ══════════════════════════════════════════════════════════
    BLOG — index cards and article pages
    ══════════════════════════════════════════════════════════ */
-.article-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
-}
-.article-card {
-  border: 1px solid var(--color-line);
-  border-top: 3px solid var(--color-gold);
-  background: var(--color-cream);
-  transition: border-color 0.2s, transform 0.2s;
-}
-.article-card:hover {
-  border-color: var(--color-sand);
-  border-top-color: var(--color-gold);
-  transform: translateY(-2px);
-}
-.article-card a {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 26px;
-}
-.article-card-category {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-  color: var(--color-gold-ink);
-}
-.article-card h2 {
-  margin-top: 16px;
-  font: 400 21px/1.35 var(--font-display);
-  color: var(--color-navy);
-}
-.article-card p {
-  margin-top: 12px;
-  font-size: 13px;
-  line-height: 1.8;
-  color: var(--color-body);
-}
-.article-card-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: auto;
-  padding-top: 20px;
-  font-size: 10px;
-  color: var(--color-quiet);
-}
-
-.article-intro {
-  background: var(--color-navy);
-  color: var(--color-cream);
-  padding: 30px 0 60px;
-}
-.article-intro .eyebrow {
-  color: var(--color-gold);
-}
-.article-intro h1 {
-  font: 400 clamp(32px, 4vw, 52px)/1.2 var(--font-display);
-  letter-spacing: -1.2px;
-  margin-top: 22px;
-  max-width: 22ch;
-}
-.article-standfirst {
-  margin-top: 26px;
-  max-width: 620px;
-  font-size: 15px;
-  line-height: 1.85;
-  color: rgb(250 250 248 / 75%);
-}
-.article-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 22px;
-  margin-top: 32px;
-  padding-top: 20px;
-  border-top: 1px solid #ffffff26;
-  font-size: 10px;
-  letter-spacing: 1.1px;
-  text-transform: uppercase;
-  color: rgb(250 250 248 / 60%);
-}
-.article-byline {
-  color: var(--color-cream);
-  text-decoration: underline;
-  text-decoration-color: rgb(201 168 76 / 60%);
-  text-underline-offset: 4px;
-}
-.article-byline:hover {
-  color: var(--color-gold-light);
-}
 
 /*
  * Optional featured image, set per article in the CMS.
@@ -2325,107 +1769,9 @@ body {
  * an article with an image and one without still open the same way. The gold
  * hairline echoes the portrait frame rather than introducing a new treatment.
  */
-.article-hero-image {
-  position: relative;
-  margin-top: 34px;
-  aspect-ratio: 16 / 9;
-  max-width: 760px;
-  overflow: hidden;
-  border: 1px solid rgb(201 168 76 / 25%);
-  border-radius: 2px;
-}
-.article-hero-image img {
-  object-fit: cover;
-}
 
 /* Same proportions as the service pages, so the sticky card behaves alike. */
-.article-layout {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 100px;
-  align-items: start;
-}
-.article-body > section + section {
-  margin-top: 40px;
-}
-.article-body h2 {
-  font: 400 27px/1.3 var(--font-display);
-  color: var(--color-navy);
-  margin-bottom: 16px;
-}
-.article-body p {
-  font-size: 15px;
-  line-height: 1.9;
-}
-.article-body p + p {
-  margin-top: 16px;
-}
-.article-body ul {
-  list-style: disc;
-  padding-left: 18px;
-  margin-top: 16px;
-  font-size: 14px;
-  line-height: 2;
-}
-.article-body .text-link {
-  margin-top: 32px;
-}
-.policy-body {
-  max-width: 860px;
-}
-.policy-body code {
-  font-size: 11px;
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  word-break: break-all;
-}
-.policy-body .policy-settings {
-  margin-top: 24px;
-  border: 0;
-  cursor: pointer;
-}
 /* Inline links in the policy pages and the enquiry form's small print. */
-.policy-body a:not(.action-button),
-.enquiry-preview-note a {
-  text-decoration: underline;
-  text-decoration-color: var(--color-gold);
-  text-underline-offset: 3px;
-}
-.policy-body a:not(.action-button):hover,
-.enquiry-preview-note a:hover {
-  color: var(--color-navy);
-}
-.article-disclaimer {
-  margin-top: 44px;
-  padding: 20px 22px;
-  background: var(--color-off);
-  border-left: 2px solid var(--color-gold);
-  font-size: 12px !important;
-  line-height: 1.8 !important;
-  color: var(--color-quiet);
-}
-
-@media (max-width: 1023px) {
-  .article-layout {
-    gap: 40px;
-  }
-  .article-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-}
-@media (max-width: 767px) {
-  .article-layout,
-  .article-grid,
-  .penalty-cards {
-    grid-template-columns: 1fr;
-  }
-  .penalty-strip {
-    padding: 26px 0 30px;
-  }
-  .detail-process li {
-    gap: 14px;
-  }
-}
 
 /* ══════════════════════════════════════════════════════════
    OFFENCE RAIL — closes the dark hero above the stats band
@@ -2686,41 +2032,6 @@ body {
 /* ══════════════════════════════════════════════════════════
    CONTENTS RAIL — scroll-spy for the long article/service pages
    ══════════════════════════════════════════════════════════ */
-.page-rail {
-  position: sticky;
-  top: 115px;
-  display: grid;
-  gap: 22px;
-}
-.toc {
-  border-top: 1px solid var(--color-line);
-  padding-top: 18px;
-}
-.toc .eyebrow {
-  color: var(--color-gold-ink);
-}
-.toc ol {
-  margin-top: 14px;
-  display: grid;
-}
-.toc a {
-  display: block;
-  padding: 7px 0 7px 15px;
-  border-left: 1px solid var(--color-line);
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--color-quiet);
-  transition:
-    color 0.2s,
-    border-color 0.2s;
-}
-.toc a:hover {
-  color: var(--color-navy);
-}
-.toc a.toc-active {
-  border-left-color: var(--color-gold);
-  color: var(--color-navy);
-}
 
 /* ══════════════════════════════════════════════════════════
    SCROLL REVEAL
@@ -2755,12 +2066,6 @@ body {
     gap: 20px;
   }
   /* The rail sits above the article once the columns stack. */
-  .page-rail {
-    position: static;
-  }
-  .toc {
-    display: none;
-  }
 }
 @media (max-width: 767px) {
   .offence-strip-inner {
@@ -2835,400 +2140,9 @@ body {
    REFERENCE CONTENT COMPLETION
    About, police station and enquiry preview
    ══════════════════════════════════════════════════════════ */
-.about-background {
-  background: var(--color-off);
-}
-.about-background-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  border-top: 1px solid var(--color-line);
-}
-.about-background-grid article {
-  padding: 34px 38px 38px 0;
-  border-bottom: 1px solid var(--color-line);
-}
-.about-background-grid article:nth-child(even) {
-  padding-right: 0;
-  padding-left: 38px;
-  border-left: 1px solid var(--color-line);
-}
-.about-background-grid article > span {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: var(--color-gold-ink);
-}
-.about-background-grid h3 {
-  margin: 15px 0;
-  font: 400 28px/1.25 var(--font-display);
-  color: var(--color-navy);
-}
-.about-background-grid p {
-  max-width: 620px;
-  font-size: 14px;
-  line-height: 1.9;
-}
-.about-background-grid p + p {
-  margin-top: 12px;
-}
-
-.police-detail {
-  background: var(--color-off);
-}
-.police-detail-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
-  gap: 90px;
-  align-items: start;
-}
-.police-detail-copy > section {
-  padding: 30px 0;
-  border-bottom: 1px solid var(--color-line);
-}
-.police-detail-copy h3,
-.legal-aid-note h3,
-.police-urgent-card h3 {
-  font: 400 27px/1.3 var(--font-display);
-  color: var(--color-navy);
-}
-.police-detail-copy section p,
-.police-detail-copy li {
-  margin-top: 13px;
-  font-size: 14px;
-  line-height: 1.9;
-}
-.police-detail-copy ul {
-  list-style: disc;
-  padding-left: 20px;
-}
-.police-detail-rail {
-  display: grid;
-  gap: 18px;
-}
-.legal-aid-note,
-.police-urgent-card {
-  padding: 32px;
-}
-.legal-aid-note {
-  background: var(--color-gold-pale);
-  border-top: 3px solid var(--color-gold);
-}
-.legal-aid-note .eyebrow,
-.police-urgent-card .eyebrow {
-  color: var(--color-gold-ink);
-}
-.legal-aid-note h3,
-.police-urgent-card h3 {
-  margin: 16px 0;
-}
-.legal-aid-note > p:last-child,
-.police-urgent-card > p:not(.eyebrow) {
-  font-size: 13px;
-  line-height: 1.85;
-}
-.police-urgent-card {
-  background: var(--color-cream);
-  border: 1px solid var(--color-line);
-}
-.police-urgent-card > div {
-  display: grid;
-  gap: 15px;
-  margin-top: 24px;
-}
-.police-urgent-card .action-button {
-  justify-content: center;
-}
-.police-detail-prep {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 25px;
-  padding-top: 18px;
-  border-top: 1px solid var(--color-line);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--color-navy);
-}
-
-.service-outcomes-table-wrap {
-  overflow-x: auto;
-  margin-top: 40px;
-  border: 1px solid var(--color-line);
-}
-.service-outcomes-table {
-  width: 100%;
-  min-width: 620px;
-  border-collapse: collapse;
-  text-align: left;
-}
-.service-outcomes-table caption {
-  padding: 16px 20px;
-  background: var(--color-navy);
-  color: var(--color-cream);
-  font: 400 18px/1.3 var(--font-display);
-  text-align: left;
-}
-.service-outcomes-table th,
-.service-outcomes-table td {
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--color-line);
-  font-size: 12px;
-  line-height: 1.6;
-}
-.service-outcomes-table thead th {
-  background: var(--color-gold-pale);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-gold-ink);
-}
-.service-outcomes-table tbody th {
-  font-weight: 700;
-  color: var(--color-navy);
-}
-
-.enquiry-section {
-  background: var(--color-off);
-}
-.enquiry-layout {
-  display: grid;
-  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
-  gap: 80px;
-  align-items: start;
-}
-.enquiry-intro {
-  max-width: 480px;
-  margin-top: 24px;
-  font-size: 14px;
-  line-height: 1.9;
-}
-.enquiry-form {
-  padding: 36px;
-  background: var(--color-cream);
-  border: 1px solid var(--color-line);
-}
-.enquiry-form fieldset {
-  display: grid;
-  gap: 18px;
-  border: 0;
-}
-.enquiry-form-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-.enquiry-form label {
-  display: grid;
-  gap: 8px;
-}
-.enquiry-form label > span {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-navy);
-}
-.enquiry-form input,
-.enquiry-form select,
-.enquiry-form textarea {
-  width: 100%;
-  min-height: 48px;
-  padding: 12px 13px;
-  border: 1px solid var(--color-line);
-  background: var(--color-off);
-  color: var(--color-body);
-  font: inherit;
-  font-size: 14px;
-}
-.enquiry-form textarea {
-  min-height: 130px;
-  resize: vertical;
-}
-.enquiry-form input:focus-visible,
-.enquiry-form select:focus-visible,
-.enquiry-form textarea:focus-visible {
-  border-color: var(--color-navy);
-  outline: 2px solid var(--color-gold);
-  outline-offset: 1px;
-}
-.enquiry-form [aria-invalid="true"] {
-  border-color: var(--color-alert);
-  background: color-mix(in srgb, var(--color-alert) 4%, var(--color-off));
-}
-.enquiry-form button {
-  justify-self: start;
-  padding: 14px 22px;
-  border: 0;
-  background: var(--color-navy);
-  color: var(--color-cream);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-.enquiry-form button:hover {
-  background: var(--color-navy-light);
-  color: var(--color-gold-light);
-}
-.enquiry-form fieldset:disabled button {
-  cursor: progress;
-  opacity: 0.55;
-}
 /* Bot trap: out of sight, out of the tab order, never announced. */
-.enquiry-honeypot {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-.enquiry-alert {
-  padding: 12px 14px;
-  background: color-mix(in srgb, var(--color-alert) 7%, var(--color-off));
-  border-left: 3px solid var(--color-alert);
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--color-alert);
-}
-.enquiry-alert:focus-visible {
-  outline: 2px solid var(--color-alert);
-  outline-offset: 2px;
-}
 /* Specific enough to beat `.enquiry-form label > span`, which would otherwise
    render the message as a small-caps field label rather than a sentence. */
-.enquiry-form label > span.enquiry-error {
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0;
-  text-transform: none;
-  line-height: 1.6;
-  color: var(--color-alert);
-}
-.enquiry-direct {
-  display: grid;
-  gap: 10px;
-  margin-top: 28px;
-}
-.enquiry-direct a {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  color: var(--color-navy);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  justify-self: start;
-}
-.enquiry-direct a:hover {
-  border-bottom-color: var(--color-gold);
-}
-.enquiry-direct svg {
-  color: var(--color-gold-ink);
-  flex-shrink: 0;
-}
-.enquiry-success {
-  padding: 40px 36px;
-  background: var(--color-cream);
-  border: 1px solid var(--color-line);
-  border-top: 3px solid var(--color-gold);
-}
-.enquiry-success h3 {
-  margin: 18px 0 20px;
-  font: 400 30px/1.25 var(--font-display);
-  color: var(--color-navy);
-}
-.enquiry-success p {
-  margin-bottom: 16px;
-  font-size: 14px;
-  line-height: 1.9;
-}
-.enquiry-success-note {
-  margin: 24px 0 0;
-  padding-left: 12px;
-  border-left: 2px solid var(--color-line);
-  font-size: 11.5px;
-  line-height: 1.7;
-  color: var(--color-quiet);
-}
-.enquiry-preview-note {
-  margin-top: 18px;
-  padding-left: 12px;
-  border-left: 2px solid var(--color-gold);
-  font-size: 11px;
-  line-height: 1.7;
-  color: var(--color-quiet);
-}
-
-.service-section-heading {
-  margin: 0 0 18px;
-  font: 400 31px/1.3 var(--font-display);
-  color: var(--color-navy);
-}
-.service-outcomes-table-wrap {
-  margin-top: 22px;
-}
-.service-outcomes-table {
-  min-width: 480px;
-}
-.service-fee-card {
-  padding: 28px;
-  background: var(--color-gold-pale);
-  border-top: 3px solid var(--color-gold);
-}
-.service-fee-card .eyebrow {
-  color: var(--color-gold-ink);
-}
-.service-fee-card h2 {
-  margin: 15px 0;
-  font: 400 24px/1.35 var(--font-display);
-  color: var(--color-navy);
-}
-.service-fee-card p {
-  font-size: 12px;
-  line-height: 1.8;
-}
-.service-fee-card .text-link {
-  margin-top: 20px;
-}
-
-@media (max-width: 1023px) {
-  .police-detail-grid,
-  .enquiry-layout {
-    gap: 45px;
-  }
-}
-
-@media (max-width: 767px) {
-  .about-background-grid,
-  .police-detail-grid,
-  .enquiry-layout {
-    grid-template-columns: 1fr;
-  }
-  .about-background-grid article,
-  .about-background-grid article:nth-child(even) {
-    padding: 28px 0;
-    border-left: 0;
-  }
-}
-
-@media (max-width: 639px) {
-  .enquiry-form,
-  .enquiry-success,
-  .legal-aid-note,
-  .police-urgent-card {
-    padding: 24px;
-  }
-  .enquiry-success h3 {
-    font-size: 25px;
-  }
-  .enquiry-form-row {
-    grid-template-columns: 1fr;
-  }
-}
 
 
 .dark {

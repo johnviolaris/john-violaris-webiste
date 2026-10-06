@@ -1,5 +1,6 @@
 import { CtaBanner } from "@/components/layout/cta-banner";
 import { PageIntro } from "@/components/pages/page-intro";
+import "./information-pages.css";
 import { AboutBackground } from "@/components/sections/about-background";
 import { CareerBand } from "@/components/sections/career-band";
 import { ContactEnquiryForm } from "@/components/sections/contact-enquiry-form";

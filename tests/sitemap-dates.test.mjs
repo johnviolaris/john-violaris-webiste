@@ -130,3 +130,26 @@ test("durable evidence cannot add URLs or use malformed/future change dates", ()
   assert.equal(entries.some(({ url }) => url.endsWith("/about")), false);
   assert.equal(entries.some((entry) => Object.hasOwn(entry, "lastModified")), false);
 });
+
+test("new dependency capability keeps retained dates authoritative for supported sources with a valid baseline", () => {
+  const mixed = [...routes, { path: "/blog/article", group: "Articles", lastModified: first, imageUrl: "https://example.com/image.webp" }];
+  const sources = { ...empty(), dependencyChanges: mixed.map(({ path }) => ({ path, modified_at: second })),
+    settings: [{ key: "name", value: "Recorded fixture", updated_at: third }],
+    media: [{ url: "/john-violaris-portrait.webp", updated_at: third }, { url: "https://example.com/image.webp", updated_at: third }],
+    services: [{ updated_at: third }], articles: [{ updated_at: third }],
+  };
+  assert.ok([...sitemapModificationDates(mixed, sources).values()].every((date) => date === second));
+  const olderSchema = { ...sources, dependencyChanges: undefined, publicChanges: [{ path: "/privacy", modified_at: second }] };
+  assert.equal(sitemapModificationDates(mixed, olderSchema).get("/privacy"), third, "Old RPC success retains older shared-row behavior.");
+  assert.equal(sitemapModificationDates(mixed, { ...sources, settings: [], media: [], services: [], articles: [] }).get("/privacy"), second, "Deleted source rows retain their dated reset.");
+});
+
+test("missing or invalid dependency baselines preserve surviving source timestamps and independent content dates", () => {
+  const article = { path: "/blog/article", group: "Articles", lastModified: third, imageUrl: "https://example.com/image.webp" };
+  const sources = { ...empty(), dependencyChanges: [], settings: [{ key: "name", value: "Recorded fixture", updated_at: second }], services: [{ updated_at: first }], articles: [{ updated_at: second }] };
+  assert.equal(sitemapModificationDates([...routes, article], sources).get("/privacy"), second);
+  assert.equal(sitemapModificationDates([...routes, article], sources).get("/blog/article"), third);
+  assert.equal(sitemapModificationDates(routes, { ...sources, dependencyChanges: [{ path: "/privacy", modified_at: "9999-01-01T00:00:00Z" }] }).get("/privacy"), second, "Invalid/future coverage cannot suppress surviving row dates.");
+  const rowBacked = { ...sources, dependencyChanges: [{ path: "/privacy", modified_at: first }], settings: [{ key: "phoneE164", value: "+447700900123", updated_at: third }] };
+  assert.equal(sitemapModificationDates(routes, rowBacked).get("/privacy"), third, "Env-derived fields deliberately retain their previous row evidence.");
+});

@@ -70,7 +70,7 @@ insert into public.seo_metadata(path,content) values
 ('/services/sitemap-parent-fixture','{}'),('/services/sitemap-private-parent','{}'),('/services/sitemap-private-body','{}'),('/services/sitemap-custom-href','{}');
 select ok(exists(select 1 from public.get_sitemap_change_dates() where path='/services/sitemap-parent-fixture'),'live service metadata date available');
 select ok(not exists(select 1 from private.sitemap_change_dates where path='/services/sitemap-private-parent'),'private service catalogue parent excluded');
-select ok(not exists(select 1 from private.sitemap_change_dates where path='/services/sitemap-private-body'),'private service body excluded');
+select ok(exists(select 1 from public.get_sitemap_change_dates() where path='/services/sitemap-private-body'),'published catalogue fallback route remains public while private body SEO source is excluded');
 select ok(not exists(select 1 from private.sitemap_change_dates where path='/services/sitemap-custom-href'),'custom catalogue href never invents service URL');
 insert into public.location_pages(slug,location,title,published,reviewed_by,reviewed_at,published_at,content) values
 ('sitemap-location-fixture','Synthetic fixture','Synthetic fixture',true,'00000000-0000-4000-8000-000000007301',now(),now()-interval '1 hour',

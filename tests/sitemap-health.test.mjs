@@ -65,16 +65,26 @@ test("actual public source reader keeps surviving dates and distinguishes empty 
     assert.equal(result.sources.sections[0].updated_at, "2026-10-02T09:00:00Z");
     assert.equal(JSON.stringify(result).includes("private"), false);
   }
-  assert.deepEqual(good.sources.publicChanges, [], "A successful empty RPC is available, not a failure.");
+  assert.deepEqual(good.sources.dependencyChanges, [], "A successful empty new RPC is available, not a failure.");
+  assert.deepEqual(good.rpcCalls, ["get_sitemap_dependency_dates"], "Normal coverage takes one RPC read.");
   const dated = run("rpc-dates");
   assert.deepEqual(dated.snapshot.unavailableSources, []);
   assert.equal(datedSitemapEntries(routes, {}, siteUrl, dated.sources)[1].lastModified, "2026-10-03T09:00:00.000Z");
   for (const mode of ["rpc-failure", "rpc-null", "rpc-throws", "rpc-malformed"]) {
     const result = run(mode);
-    assert.deepEqual(result.snapshot.unavailableSources, ["public-changes"]);
+    assert.deepEqual(result.snapshot.unavailableSources, ["public-changes", "dependency-changes"]);
     assert.equal(Object.hasOwn(result.sources, "publicChanges"), false);
     assert.equal(datedSitemapEntries(routes, {}, siteUrl, result.sources)[1].lastModified, "2026-10-02T09:00:00.000Z", "Legacy surviving section dates remain usable.");
     assert.equal(JSON.stringify(result).includes("private"), false);
     assert.match(analyse(result.sources, {}, result.snapshot.unavailableSources)[0].message, /durable public section\/SEO dates/);
+  }
+  for (const mode of ["legacy-empty", "legacy-dates"]) {
+    const result = run(mode);
+    assert.deepEqual(result.rpcCalls, ["get_sitemap_dependency_dates", "get_sitemap_change_dates"]);
+    assert.deepEqual(result.snapshot.unavailableSources, ["dependency-changes"]);
+    assert.equal(Object.hasOwn(result.sources, "dependencyChanges"), false, "An older successful RPC cannot claim new source coverage.");
+    assert.ok(Array.isArray(result.sources.publicChanges));
+    if (mode === "legacy-dates") assert.equal(datedSitemapEntries(routes, {}, siteUrl, result.sources)[1].lastModified, "2026-10-03T09:00:00.000Z");
+    assert.match(analyse(result.sources, {}, result.snapshot.unavailableSources)[0].message, /durable shared dependency dates/);
   }
 });

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageIntro } from "@/components/pages/page-intro";
+import "./service-pages.css";
 import { Container } from "@/components/ui/container";
 import { OnThisPage } from "@/components/ui/on-this-page";
 import { Icon } from "@/components/ui/icons";

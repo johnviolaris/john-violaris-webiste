@@ -12,12 +12,17 @@ export const getSitemapDateSnapshot = cache(async function getSitemapDateSnapsho
   try {
     const client = publicClient();
     // A missing/failed new RPC must not discard the older surviving sources.
-    const durableDates = async (): Promise<{ data: NonNullable<SitemapDateSources["publicChanges"]> | null; error: boolean }> => {
+    const readDates = async (name: string): Promise<{ data: NonNullable<SitemapDateSources["publicChanges"]> | null; error: boolean }> => {
       try {
-        const { data, error } = await client.rpc("get_sitemap_change_dates");
+        const { data, error } = await client.rpc(name);
         if (error || !Array.isArray(data) || data.some((row) => !row || typeof row.path !== "string" || typeof row.modified_at !== "string")) return { data: null, error: true };
         return { data: data.map((row) => ({ path: row.path, modified_at: row.modified_at })), error: false };
       } catch { return { data: null, error: true }; }
+    };
+    const durableDates = async () => {
+      const dependencies = await readDates("get_sitemap_dependency_dates");
+      if (!dependencies.error && dependencies.data !== null) return { ...dependencies, dependencies: true, dependencyUnavailable: false };
+      return { ...await readDates("get_sitemap_change_dates"), dependencies: false, dependencyUnavailable: true };
     };
     const [sections, seo, settings, media, index, changes] = await Promise.all([
       client.from("page_sections").select("page,section,updated_at,portrait:content->>portrait").returns<SitemapDateSources["sections"]>(),
@@ -35,6 +40,7 @@ export const getSitemapDateSnapshot = cache(async function getSitemapDateSnapsho
     }
     if (!index.sourceAvailable) unavailableSources.push("collections");
     if (changes.error || changes.data === null) unavailableSources.push("public-changes");
+    if (changes.dependencyUnavailable) unavailableSources.push("dependency-changes");
     return { sources: {
       sections: sections.error ? [] : sections.data ?? [],
       seo: seo.error ? [] : seo.data ?? [],
@@ -42,7 +48,7 @@ export const getSitemapDateSnapshot = cache(async function getSitemapDateSnapsho
       media: media.error ? [] : media.data ?? [],
       services: index.services.map(({ updated_at }) => ({ updated_at })),
       articles: index.articles.map(({ updated_at }) => ({ updated_at })),
-      ...(!changes.error && changes.data !== null ? { publicChanges: changes.data } : {}),
+      ...(!changes.error && changes.data !== null ? changes.dependencies ? { dependencyChanges: changes.data } : { publicChanges: changes.data } : {}),
     }, unavailableSources };
   } catch { return { sources: emptySources(), unavailableSources: ["source-read"] }; }
 });
