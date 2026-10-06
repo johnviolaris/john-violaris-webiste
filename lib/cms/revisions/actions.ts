@@ -16,6 +16,7 @@ import { validateSeoRevision, validateRobotsRevision } from "@/lib/cms/seo/revis
 import { validateIntegrationsRevision } from "@/lib/cms/seo/integrations";
 import { isIconName } from "@/components/ui/icons";
 import { validateFaqItems } from "@/lib/cms/faq";
+import { readSectionWorkflow } from "@/lib/cms/sections/drafts";
 
 export type RestoreState = { status: "idle" | "error" | "success"; message: string };
 
@@ -69,13 +70,21 @@ export async function restoreContentRevision(_previous: RestoreState, form: Form
       .eq("id", data.service_id).maybeSingle<{ slug: string }>();
     revalidateFor("service-pages", service ? [`/services/${service.slug}`] : []);
     revalidatePath(`/admin/service-pages/${data.service_id}`);
-  } else if (revision.entity_table === "page_sections") {
+  } else if (revision.entity_table === "page_sections" || revision.entity_table === "page_section_drafts") {
     if (typeof saved.page !== "string" || typeof saved.section !== "string" || !findSection(saved.page, saved.section)) return failure("This section is no longer editable.");
-    const invalid = validateSectionRevision(findSection(saved.page, saved.section)!, saved.content, isIconName);
+    if (!saved.content || typeof saved.content !== "object" || Array.isArray(saved.content)) return failure("This section version is invalid.");
+    const invalid = validateSectionRevision(findSection(saved.page, saved.section)!, { ...findSection(saved.page, saved.section)!.defaults, ...saved.content }, isIconName);
     if (invalid) return failure(invalid);
-    const { error: saveError } = await supabase.from("page_sections").upsert({ page: saved.page, section: saved.section, content: saved.content }, { onConflict: "page,section" });
+    const workflow = readSectionWorkflow(form);
+    if (!workflow.ok || workflow.intent !== "draft") return failure(workflow.ok ? "Restore section versions as a private draft." : workflow.error);
+    const { error: saveError } = await supabase.rpc("save_page_section_content", {
+      p_page: saved.page, p_section: saved.section, p_content: saved.content, p_intent: "draft",
+      p_expected_live_content: workflow.expectedLiveContent,
+      p_expected_draft_id: workflow.expectedDraftId,
+      p_expected_draft_version: workflow.expectedDraftVersion,
+    });
     if (saveError) return failure(describeDatabaseError(saveError));
-    revalidatePath("/", "layout"); revalidatePath("/sitemap.xml"); revalidatePath(`/admin/website-content/${saved.page}`);
+    revalidatePath(`/admin/website-content/${saved.page}`);
   } else if (revision.entity_table === "site_settings") {
     if (typeof saved.key !== "string" || (!["robots", "scripts"].includes(saved.key) && !siteSettingKeys.includes(saved.key as (typeof siteSettingKeys)[number]))) return failure("This setting is no longer editable.");
     if (saved.key === "robots") {
@@ -137,6 +146,6 @@ export async function restoreContentRevision(_previous: RestoreState, form: Form
   } else {
     return { status: "error", message: "This content type cannot be restored." };
   }
-  const asDraft = ["blog_posts", "service_pages", "location_pages", "services"].includes(revision.entity_table);
+  const asDraft = ["blog_posts", "service_pages", "location_pages", "services", "page_sections", "page_section_drafts"].includes(revision.entity_table);
   return { status: "success", message: asDraft ? "Revision restored as a draft. Review it in the editor, then publish when ready." : "Saved fields restored. The live website will refresh, and the previous values remain in history." };
 }

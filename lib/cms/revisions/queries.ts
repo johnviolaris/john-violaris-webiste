@@ -1,7 +1,7 @@
 import "server-only";
 import { createAuthorizedAdminClient, createAuthorizedSeoClient } from "@/lib/auth";
 
-export type RevisionEntity = "blog_posts" | "service_pages" | "page_sections" | "site_settings" | "seo_metadata" | "location_pages" | "media_assets" | "services" | "service_groups" | "blog_categories" | "testimonials";
+export type RevisionEntity = "blog_posts" | "service_pages" | "page_sections" | "page_section_drafts" | "site_settings" | "seo_metadata" | "location_pages" | "media_assets" | "services" | "service_groups" | "blog_categories" | "testimonials";
 export type ContentRevision = {
   id: string;
   revision_number: number;

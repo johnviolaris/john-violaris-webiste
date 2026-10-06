@@ -28,6 +28,7 @@ export function validateSectionRevision(definition: SectionDefinition, content: 
         if (!row || typeof row !== "object" || Array.isArray(row)) return "This saved list contains an invalid row.";
         for (const sub of field.item?.fields ?? []) {
           const entry = (row as Record<string, unknown>)[sub.key];
+          if (entry === undefined && !sub.required) continue;
           const strings = sub.kind === "prose" ? entry : [entry];
           if (!Array.isArray(strings) || strings.some((text) => typeof text !== "string" || (sub.maxLength && text.length > sub.maxLength)) || (sub.required && !strings.some((text) => typeof text === "string" && text.trim()))) return `Review the saved ${sub.label.toLowerCase()} in the editor.`;
           if (sub.kind === "icon" && (!isIconName || !isIconName(entry))) return "Choose a supported icon in the editor before restoring this row.";

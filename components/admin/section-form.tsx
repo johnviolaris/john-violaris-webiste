@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "cn";
 import { useControlledAfterReset } from "@/hooks/use-controlled-after-reset";
 import { savePageSection } from "@/lib/cms/sections/actions";
+import { sectionEditorConflict, sectionPreviewPaths, type SectionDraft } from "@/lib/cms/sections/drafts";
 import {
   fieldName,
   initialSectionFormState,
@@ -50,6 +51,8 @@ export type SectionFormProps = {
   definition: SectionDefinition;
   /** What is stored, or undefined when the section has never been edited. */
   stored: SectionContent | undefined;
+  draft?: SectionDraft;
+  available: boolean;
 };
 
 /** Rows for every repeating field of a section, from the given content. */
@@ -70,10 +73,11 @@ function imagesFrom(definition: SectionDefinition, content: SectionContent) {
   );
 }
 
-export function SectionForm({ page, definition, stored }: SectionFormProps) {
+export function SectionForm({ page, definition, stored, draft, available }: SectionFormProps) {
   // The defaults underneath are what the site renders today, so an untouched
   // section opens showing the live copy rather than an empty form.
-  const content: SectionContent = { ...definition.defaults, ...(stored ?? {}) };
+  const content: SectionContent = { ...definition.defaults, ...(draft?.content ?? stored ?? {}) };
+  const [initialContext] = useState(() => ({ draft: draft ?? null, live: stored ?? null }));
 
   const [state, formAction] = useActionState(savePageSection, {
     ...initialSectionFormState,
@@ -84,17 +88,20 @@ export function SectionForm({ page, definition, stored }: SectionFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   useControlledAfterReset(formRef);
   const alertRef = useRef<HTMLParagraphElement>(null);
+  const savedDraft = state.savedDraft !== undefined ? state.savedDraft : initialContext.draft;
+  const savedLive = state.savedLiveContent !== undefined ? state.savedLiveContent : initialContext.live;
+  const expectedLive = savedDraft ? savedDraft.base_content : savedLive;
+  const conflict = sectionEditorConflict({ liveContent: expectedLive, draftId: savedDraft?.id ?? null, draftVersion: savedDraft?.version ?? null }, stored ?? null, draft ?? null);
 
   const { rowsFor, resetRows } = useItemRows(rowsFrom(definition, content));
   const [images, setImages] = useState(() => imagesFrom(definition, content));
 
   /*
-   * After "Revert to original" the section is back to its defaults, but the
-   * rows and images here still hold the edits — and saving again would put
-   * them straight back. So a revert puts them back too, adjusted during
+   * A deliberate discard or original-wording reset replaces the rows and
+   * images with the returned live content or source defaults, adjusted during
    * render as the new state arrives rather than in an effect, which would
    * paint the stale values first. The plain text fields need nothing: their
-   * `defaultValue` is the reverted `state.values`.
+   * `defaultValue` is the returned `state.values`.
    */
   const [seenState, setSeenState] = useState(state);
 
@@ -102,8 +109,9 @@ export function SectionForm({ page, definition, stored }: SectionFormProps) {
     setSeenState(state);
 
     if (state.reset) {
-      resetRows(rowsFrom(definition, definition.defaults));
-      setImages(imagesFrom(definition, definition.defaults));
+      const restored = { ...definition.defaults, ...(state.savedLiveContent ?? {}) };
+      resetRows(rowsFrom(definition, restored));
+      setImages(imagesFrom(definition, restored));
     }
   }
 
@@ -124,6 +132,20 @@ export function SectionForm({ page, definition, stored }: SectionFormProps) {
     <form ref={formRef} action={formAction} className="space-y-5">
       <input type="hidden" name="page" value={page} />
       <input type="hidden" name="section" value={definition.key} />
+      <input type="hidden" name="workflowVersion" value="1" />
+      <input type="hidden" name="expectedLiveContent" value={JSON.stringify(expectedLive)} />
+      <input type="hidden" name="expectedDraftId" value={savedDraft?.id ?? ""} />
+      <input type="hidden" name="expectedDraftVersion" value={savedDraft?.version ?? ""} />
+      {!available && <p role="status" className="rounded-xl border p-3 text-sm">Private drafts become available after the reviewed static-draft migration is installed. Reload before saving or publishing.</p>}
+      {conflict && <div role="status" className="rounded-xl border p-3 text-sm">
+        <p>{conflict === "draft-changed" ? "The saved draft changed, including any history restore. These fields and their original save tokens are retained until you reload." : "The live section changed after this draft was started. Compare the versions, or discard the draft and reload before making a new one."}</p>
+        <button type="button" className="mt-2 underline underline-offset-4" onClick={() => window.location.reload()}>Reload editor (discard unsaved edits)</button>
+      </div>}
+      {savedDraft && <div className="rounded-xl border border-primary/30 p-3 text-sm">
+        <p>A private draft is saved. The live section changes only when you publish.</p>
+        <div className="mt-2 flex flex-wrap gap-3">{sectionPreviewPaths(definition).map((path) => <a key={path}
+          href={`/preview/pages/${savedDraft.id}?path=${encodeURIComponent(path)}`} target="_blank" rel="noopener" className="underline underline-offset-4">Preview on {path}</a>)}</div>
+      </div>}
 
       {state.message ? (
         <p
@@ -175,43 +197,40 @@ export function SectionForm({ page, definition, stored }: SectionFormProps) {
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-        <SaveButton />
+        <div className="flex flex-wrap gap-3"><SaveButton available={available && !conflict} />
+          <ActionButton intent="publish" available={available && !conflict}>Publish changes</ActionButton>
+          {savedDraft && <ActionButton intent="discard" available={available && conflict !== "draft-changed"} formNoValidate>Discard draft</ActionButton>}
+        </div>
         {/* Only once a section has been edited: there is nothing to undo
             otherwise, and a button that always does nothing is worse than no
             button. A second submit button of this same form, told apart by
             its `intent`, so the revert's answer arrives in this form's state. */}
         {stored ? (
-          <Button
-            type="submit"
-            name="intent"
-            value="reset"
-            variant="ghost"
-            size="sm"
-            onClick={(event) => {
-              const confirmed = window.confirm(
-                `Discard your edits to "${definition.label}" and go back to the original wording?`,
-              );
-
-              if (!confirmed) event.preventDefault();
-            }}
-          >
+          <ActionButton intent="reset" available={available && !conflict} formNoValidate
+            confirmation={`Publish the original wording for "${definition.label}" immediately and discard its saved draft? Current live values remain in history.`}>
             <RotateCcw aria-hidden="true" />
-            Revert to original
-          </Button>
+            Publish original wording
+          </ActionButton>
         ) : null}
       </div>
     </form>
   );
 }
 
-function SaveButton() {
+function SaveButton({ available }: { available: boolean }) {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" disabled={pending}>
-      {pending ? "Saving…" : "Save section"}
+    <Button type="submit" name="intent" value="draft" disabled={pending || !available}>
+      {pending ? "Saving…" : "Save draft"}
     </Button>
   );
+}
+
+function ActionButton({ intent, available, formNoValidate, confirmation, children }: { intent: "publish" | "discard" | "reset"; available: boolean; formNoValidate?: boolean; confirmation?: string; children: React.ReactNode }) {
+  const { pending } = useFormStatus();
+  return <Button type="submit" name="intent" value={intent} variant={intent === "reset" ? "ghost" : "outline"} disabled={pending || !available} formNoValidate={formNoValidate}
+    onClick={(event) => { if (!window.confirm(confirmation ?? (intent === "publish" ? "Publish these section changes to the live website now?" : "Discard this saved draft and unsaved edits? Live content stays unchanged."))) event.preventDefault(); }}>{children}</Button>;
 }
 
 // ---------------------------------------------------------------------------

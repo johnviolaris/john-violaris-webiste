@@ -307,14 +307,27 @@ bytes, down from 2,013,504). Saved legacy portrait URLs are mapped to the new
 asset, and the original public image URL redirects. The default share card
 (`/share-image`) keeps the bundled portrait whatever the hero shows.
 
-### Reverting
+### Section drafts and reverting
 
-"Revert to original" is a second submit button of the section's own form
-(`name="intent" value="reset"`), not a form of its own. The editor's rows,
-images and text are its own state; as a separate form the revert deleted the
-row but left the editor showing the discarded edits, and the next save put
-them back. Now the answer returns through the editor's state and it resets
-itself. The SEO editor's "Reset to defaults" works the same way.
+Website Content saves sections to administrator-only `page_section_drafts`.
+The public site continues reading `page_sections`. Save draft, Publish changes
+and Discard draft are explicit actions; publishing and discarding ask for
+confirmation. The transaction compares the draft UUID/version and original
+live content, so another session's changes require reloading and comparing.
+Old forms without the new workflow fields cannot silently publish.
+
+Saved section and historical revision previews use the same Home/information
+page renderers as the public site. Each preview overlays one saved section on
+current live surroundings. They require an administrator, exclude analytics
+and schema, and use noindex/no-store protections. The Contact preview disables
+its enquiry form. The fixed blog-index introduction has no section editor.
+SEO overrides and site settings remain separate live configuration controls.
+
+"Publish original wording" is the section form's reset action, with explicit
+confirmation that it changes the live section and discards its draft. Previous
+live/draft values remain in history. The result resets the editor's text, rows
+and images together. Historical section restores create private drafts for
+review; the SEO editor's "Reset to defaults" still updates its live override.
 
 ## Fees
 
@@ -709,8 +722,9 @@ history events". That is what counts page views after client-side navigation.
   fields are copied into this payload. GA4 still attaches its existing
   consented page context. There is no new recipient, persistent identifier,
   key-event registration or monetary value. The cookie policy follows both
-  configuration and the integration switch. Field reporting is local/unreleased;
-  it does not establish a Core Web Vitals pass or populate Vercel Speed Insights.
+  configuration and the integration switch. Field reporting was released on
+  2026-10-05; a consented 2026-10-06 Realtime check observed `LCP` receipts.
+  These receipts do not establish a Core Web Vitals pass or populate Vercel Speed Insights.
   See the [official measurement library](https://github.com/GoogleChrome/web-vitals).
 - **Local testing.** Put the ID in `.env.development.local`. On `localhost`
   everything runs except the request to Google, so the banner, the consent
@@ -845,10 +859,11 @@ for public website imagery. The file limit is 4 MiB to fit Vercel's 4.5 MB reque
 ceiling with form overhead; a larger Next action limit does not override that
 hosting limit.
 
-Append-only history now captures eleven content/configuration sources, including
+Append-only history now captures twelve content/configuration sources, including
 SEO, page sections, media, catalogue and location changes. Field comparisons and
 confirmed restores are available. Draft-capable entities restore as drafts;
-settings/static sections/categories/groups restore live. Review history is
+settings/categories/groups restore live. Static section restores create private
+drafts. Review history is
 read-only. Restores apply current validation and crawl-block/practice-fact
 confirmation rather than bypassing the editors' guards. Authenticated acceptance
 against the migrated Supabase stack is still a release check.

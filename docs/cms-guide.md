@@ -21,8 +21,9 @@ Log out when you are using a shared computer.
 
 ## How changes reach the website
 
-- **Saving publishes.** When you save something that is published, the pages it
-  appears on are rebuilt within a few seconds. Refresh the page to see it.
+- **Publication is explicit in Website Content.** Save a private section draft,
+  preview it, then press **Publish changes**. Other published editors and settings
+  still update their live uses when saved.
 - **Drafts are private.** Anything not ticked **Published** is invisible to
   visitors, so you can save a half-written article as often as you like.
 - **Unpublishing is safe.** It takes something off the site without deleting
@@ -59,14 +60,37 @@ Fees, Reviews, Contact, the cookie policy and the privacy notice, plus **Shared
 sections** for wording that appears on more than one page. Open a page to see
 its sections: headings, introductions, cards, steps and questions.
 
-- Each field shows the current wording. Change it and press **Save section**.
-- A section you have changed is marked **Edited**. **Revert to original** puts
-  back the wording the site was built with.
+- Each field shows its saved draft, if one exists, otherwise the live wording.
+  Change it and press **Save draft**. Visitors continue to see the live section.
+- **Preview on…** opens the last saved draft in a private, administrator-only
+  preview. It shows that one section against the current live page, using current
+  image-library descriptions and captions. Other saved drafts and unsaved fields
+  are not included. A shared section offers the static pages it appears on.
+- Press **Publish changes** and confirm when the displayed fields are ready.
+  This updates the live section and removes its saved draft. **Discard draft**
+  removes the draft and returns the editor to the current live section.
+- A saved draft is marked **Private draft saved**. History can compare previous
+  live and private versions. Restoring either creates a private draft; review it
+  before publishing. Historical preview links also work after a draft is removed.
+- If another session or a history restore changes the saved version, your
+  displayed fields stay in place and stale publication is blocked. **Reload
+  editor (discard unsaved edits)** deliberately loads the new version. Review
+  its headings, rows and images before publishing. A changed live baseline may
+  require discarding the older draft and starting again.
+- **Publish original wording** immediately removes that section's live override
+  and saved draft after confirmation. Its previous values remain in history.
 - The home page **Hero** section includes the **Portrait**. Upload a new photo
   there and describe it in the image description, for screen-reader users.
 - The cookie policy and privacy notice describe what the website actually does
   with people's information. Only their opening paragraph is editable here; the
   rest changes when the website does.
+
+Contact previews disable the enquiry form, so reviewing a draft cannot send a
+real message. Preview pages are private, excluded from the sitemap and marked
+not to be indexed. Section previews use the current site settings and surrounding
+live content; they do not preview unsaved SEO metadata or a whole historical site.
+These controls require the reviewed static-draft migration; an unavailable
+workflow disables saving rather than silently publishing.
 
 Services and articles have their own sections, below.
 
@@ -273,8 +297,10 @@ per-page descriptions until they are registered in the library.
 
 **Saved versions** records the editor, UK time and field snapshot across content,
 settings, SEO and media. Compare a version with the latest, then review the
-confirmation before restoring. Article, service and location restores create
-drafts. Settings, page sections, image descriptions and category/group fields
+confirmation before restoring. Article, service, location and Website Content
+section restores create drafts. After a section restore, deliberately reload its
+editor to review the restored fields; the reload discards unsaved editor changes.
+Settings, image descriptions and category/group fields
 restore directly to the live configuration; their previous values remain in
 history. Reviews can be inspected in history but cannot be restored through
 this tool, preserving the external verified-review source.

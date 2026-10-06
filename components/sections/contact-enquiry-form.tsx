@@ -34,7 +34,7 @@ import { useSiteConfig } from "@/components/layout/site-config-provider";
  * empties the form — retyping a case summary is exactly the moment a visitor
  * gives up and leaves.
  */
-export function ContactEnquiryForm() {
+export function ContactEnquiryForm({ readOnly = false }: { readOnly?: boolean } = {}) {
   const config = useSiteConfig();
   const [state, formAction, pending] = useActionState(
     submitEnquiry,
@@ -53,6 +53,7 @@ export function ContactEnquiryForm() {
   // this form. Listen as well as reading immediately so effect ordering and
   // client-side navigation cannot leave the hidden values stale.
   useEffect(() => {
+    if (readOnly) return;
     const sync = () => setAttribution(readStoredEnquiryAttribution());
 
     sync();
@@ -60,7 +61,7 @@ export function ContactEnquiryForm() {
 
     return () =>
       window.removeEventListener(enquiryAttributionUpdatedEvent, sync);
-  }, []);
+  }, [readOnly]);
 
   /**
    * React resets the form once an action settles, but its value tracker is not
@@ -164,7 +165,8 @@ export function ContactEnquiryForm() {
               </p>
             </div>
           ) : (
-            <form ref={formRef} className="enquiry-form" action={formAction}>
+            <form ref={formRef} className="enquiry-form" action={readOnly ? undefined : formAction}
+              onSubmit={readOnly ? (event) => event.preventDefault() : undefined}>
               <input type="hidden" name="sourcePath" value={pathname} />
               {enquiryAttributionFields.map((field) => (
                 <input
@@ -188,7 +190,7 @@ export function ContactEnquiryForm() {
                 />
               </div>
 
-              <fieldset disabled={pending}>
+              <fieldset disabled={pending || readOnly}>
                 <legend className="sr-only">Case enquiry details</legend>
 
                 {state.status === "error" && state.message ? (

@@ -10,6 +10,76 @@ TidyCal and public fee figures are not launch tasks. Consultation CTAs lead to
 the contact journey, and the Fees page intentionally publishes no prices or fee
 schedule.
 
+## Recorded release status (2026-10-06)
+
+The reviewed 2026-10-05 release is live. Seven migrations were applied, and all
+24 local/hosted versions matched. All 33 production page/schema checks and 239
+comparison checks passed; service-page wording remained unchanged. Those checks
+do not complete the approval, inbox delivery, field performance or manual
+accessibility tasks below.
+
+The 2026-10-06 CI repair commit `735300a` is deployed. GitHub run
+`37441870515` passed both jobs, including 187 PostgreSQL assertions on a fresh
+database, Linux dependency installation and the application verification suite.
+The earlier run failed to obtain a hosted runner; its retry exposed the
+lockfile/test defects corrected in this commit. The runbook boxes below remain
+per-release instructions, not a claim that every acceptance check is complete.
+
+Read-only production configuration checks established the From identity
+`John Violaris <enquiries@alert.johnviolaris.com>` and notification mailbox
+`contact@johnviolaris.com`; public sending DNS is present. Existing GA4 Realtime
+received Home/Contact page views, `booking_click` and `LCP` during a consented
+navigation check. No test enquiry or email was sent; inbox receipt, accepted-form
+conversion, DebugView and custom Auth SMTP remain unverified.
+
+The section-draft follow-up uses the additive migration
+`20261006091709_private_static_page_drafts.sql`. Apply it only after the final
+commit's fresh-database tests pass. It creates an empty administrator-only draft
+relation and extends revision capture; it does not copy or rewrite live content.
+Record before/after live-table digests and verify drafts remain empty. Hosted
+acceptance is read-only; use an isolated database for draft/publish/restore tests,
+and do not consume the production revision sequence with disposable fixtures.
+SEO overrides and site settings remain immediate live configuration controls.
+
+### Schema and keyboard follow-up (2026-10-06)
+
+All 12 currently live template representatives were submitted by public URL to
+Schema.org Validator and Google Rich Results Test. Schema.org reported zero
+errors and zero warnings for each; Google detected valid items with no invalid
+items. Recorded Google results:
+
+| Representative | Google valid items |
+| --- | --- |
+| Home | [2](https://search.google.com/test/rich-results/result?id=Iu2JDaxcIsgwhW873HkINw) |
+| About | [3](https://search.google.com/test/rich-results/result?id=R2jo4SVjhP--tWCPORQQCg) |
+| Services index | [3](https://search.google.com/test/rich-results/result?id=k6tF25u5aR9m5iWZhPo51w) |
+| Police Station | [3](https://search.google.com/test/rich-results/result?id=kt-hBibRm5znG0Wpdfp_xg) |
+| Fees | [3](https://search.google.com/test/rich-results/result?id=ohbpS_8hmEr6KVsLOuH1UQ) |
+| Reviews | [3](https://search.google.com/test/rich-results/result?id=AR0DneuruYdlImrfJB7--w) |
+| Contact | [3](https://search.google.com/test/rich-results/result?id=ysvfqU7cJW9A7XJfjg0_yw) |
+| Cookie Policy | [3](https://search.google.com/test/rich-results/result?id=0OePBo7voo4q6USNpsc3ew) |
+| Privacy | [3](https://search.google.com/test/rich-results/result?id=mOL_lyDmLGukC4RmTEP3Nw) |
+| Resources index | [3](https://search.google.com/test/rich-results/result?id=lqV5e65ubC_lKHRIulmJiQ) |
+| Drink-driving arrest article | [4](https://search.google.com/test/rich-results/result?id=2YL1xgHH_Ru-2gmnwTiD9Q) |
+| Drink-driving service | [3](https://search.google.com/test/rich-results/result?id=xcRxfh4v4kaHDoNGhtIk2g) |
+
+Google's non-critical advisories include optional business address/price range
+and the article's optional image. These need confirmed content; none was
+invented. Passing validation does not guarantee indexing or rich-result display.
+Location pages remain intentionally unpublished, outside current live-template
+acceptance. Private detail is recorded in
+`seo-external-accessibility-20261006.json` outside this repository.
+
+Live Chrome desktop keyboard checks passed for the skip link, services menu and
+tabs, FAQ controls, article contents links, cookie controls and all eight contact
+fields plus the submit button. No enquiry or email was sent. Core gold/navy and
+cream/navy contrast ratios are 7.61:1 and 16.64:1. The local 404 returns HTTP 404
+and server-renders home, services, contact and urgent-call routes; services and
+contact were followed with the keyboard. Next's automatic 404 noindex is retained.
+Full manual accessibility acceptance remains open: NVDA/VoiceOver was not
+available, Chrome's viewport override did not apply, and the IAB fallback was
+unavailable. This does not claim a new mobile or exhaustive keyboard pass.
+
 ## Operating rules
 
 - Nominate one launch owner and one person authorised to call a rollback.
@@ -92,10 +162,10 @@ npm run lighthouse:ci
 - [ ] Review Lighthouse CI's two runs each of home, service and article. Its
       performance/LCP/CLS/TBT assertions are warnings; record unresolved target
       failures. Field INP needs separate measurement.
-- [ ] Review and apply the seven pending publishing/history, portrait-only,
+- [ ] Review any pending migrations in a non-production database first.
+      The seven publishing/history, portrait-only,
       location, SEO-role, media/history, rich-caption and private-redirect-note
-      migrations in a non-production database first.
-      The 2026-10-05 implementation has not applied them to production.
+      migrations from 2026-10-05 are already applied to production.
       `20261005131025_optimize_portrait.sql` changes only the legacy portrait
       URL and must leave existing legal wording unchanged.
 - [x] Final FAQ/notes/CSS/field-collector source
@@ -284,7 +354,7 @@ enquiry. Do not use a real client's details.
       visible in GA4 DebugView.
 - [x] `generate_lead` is registered as a key event in the existing John Violaris
       GA4 property without a default monetary value (2026-10-05). Its accepted-form
-      trigger is local/unreleased; this is configuration evidence only.
+      trigger is released; registration alone is configuration evidence only.
 - [ ] After release, verify one accepted enquiry produces `generate_lead` once,
       rejected forms produce none, and consent withdrawal suppresses events
       across tabs. No test enquiry was sent during local implementation.

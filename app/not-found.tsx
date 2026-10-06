@@ -23,7 +23,7 @@ export default function NotFound() {
             urgent — a court hearing tomorrow or a police interview today —
             please call rather than email.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
             <ButtonLink href="/" size="lg">
               Back to home
             </ButtonLink>
@@ -36,6 +36,12 @@ export default function NotFound() {
               {fallbackSiteConfig.phoneE164
                 ? `Call ${fallbackSiteConfig.phoneDisplay}`
                 : "Urgent? Contact John"}
+            </ButtonLink>
+            <ButtonLink href="/services" variant="outline" size="lg">
+              Explore services
+            </ButtonLink>
+            <ButtonLink href="/contact" variant="outline" size="lg">
+              Contact John
             </ButtonLink>
           </div>
         </div>

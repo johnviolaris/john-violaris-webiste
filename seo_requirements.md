@@ -35,9 +35,25 @@ These were settled before this document was written. They are assumptions baked 
 | **Consultations**    | No TidyCal or other booking calendar. Consultation CTAs lead to the contact journey: form, phone, email, or WhatsApp.       | §6, §10 |
 | **Fees**             | No public fee figures and no fee-schedule admin. `/fees` explains how scope and fees are discussed privately.              | §8, §9, §12 |
 
-### Local implementation update (2026-10-05, not deployed)
+### Implementation and release status (updated 2026-10-06)
 
-The current working tree adds editable Open Graph type, X/Twitter overrides, validated custom
+The reviewed 2026-10-05 implementation is live on `johnviolaris.com`. All seven
+associated migrations were applied and all 24 local/hosted versions matched.
+Production checks passed for all 33 public pages and schema graphs; the 17
+service pages retained their existing wording. The 2026-10-06 follow-up commit
+`735300a` repairs Linux lockfile completeness and PostgreSQL test syntax/counts.
+GitHub CI run `37441870515` passes both jobs, including 187 database assertions
+against a fresh database. Earlier local measurements below retain their original
+source/date boundaries rather than representing a new performance audit.
+
+On 2026-10-06, the existing GA4 property received Home/Contact page views,
+`booking_click` and `LCP` in Realtime during a consented navigation check. No
+enquiry or email was sent. The production sender is configured on
+`alert.johnviolaris.com`, with sending DNS records present. Inbox delivery,
+accepted-form conversion, DebugView, custom Auth SMTP, Search Console ownership,
+field performance and John's content/regulatory approval remain incomplete.
+
+The reviewed implementation provides editable Open Graph type, X/Twitter overrides, validated custom
 JSON-LD, duplicate metadata warnings and the SEO health dashboard. Production
 build checks now enforce rendered heading/metadata quality and initial asset
 budgets. The portrait uses WebP. Service-page body copy, headings and search wording remain
@@ -63,14 +79,17 @@ request. Optional internal notes now use a separate administrator-only table;
 rules and notes save atomically, without exposing notes in public routing rows.
 The literal proxy-wide lookup remains outside the implementation.
 
-Saved article/service-page drafts and historical versions have authenticated
-previews. Append-only revision history supports restoring either as a draft.
+Saved article/service/location drafts and historical versions have authenticated
+previews. Website Content also has private section drafts, explicit publication,
+stale-form protection and historical previews using the actual Home/information
+page renderers. Contact previews disable enquiry submission. Static section
+restores create private drafts; SEO/settings controls remain live configuration.
 Article scheduling uses Europe/London time with start/expiry enforcement in RLS,
 public queries and sitemap selection, plus 60-second ISR. Expired URLs return
 404; whole-CMS scheduling and 410 tombstones remain partial. Append-only history
-now captures eleven content/configuration sources with field comparisons and
-validated restores. Draft-capable entities restore as drafts; settings/static
-sections restore live after confirmation. Reviews retain read-only history.
+now captures twelve content/configuration sources with field comparisons and
+validated restores. Draft-capable entities restore as drafts; settings restore
+live after confirmation. Reviews retain read-only history.
 The reusable media library supports filename choice at upload, decoded image
 checks, editable alt/decorative metadata and titles/captions applied to public
 hero/article images. URLs stay immutable. Captions default to plain text; an
@@ -95,14 +114,16 @@ LegalService schema. An individual's SRA number is separate from a practice ID;
 no unknown business facts were filled in. Consent withdrawal now disables an
 already-loaded analytics tag across tabs and every event rechecks consent.
 `generate_lead` fires only after an accepted enquiry and is registered as a GA4
-key event without a monetary value; its website code is still local. This GA4
-configuration is the only external write in this pass. No enquiry was sent.
+key event without a monetary value; its website code was released on 2026-10-05.
+The initial configuration check alone did not verify the accepted-form trigger.
+No enquiry was sent.
 
 Optional article/service FAQs now share validated rich answers, public/draft
 rendering and one connected FAQPage section, with no defaults or invented
 answers. Invalid stored data requires explicit repair/clear acknowledgment.
 Private redirect notes use an admin-only relation and atomic invoker save;
-public routing rows stay unchanged. The additional migration is local.
+public routing rows stay unchanged. The additional migration was applied with
+the reviewed 2026-10-05 release.
 Consent-gated numeric LCP/INP/CLS collection is prepared for the existing GA4
 property; every callback checks current consent and integration state. No
 entries, selectors, URLs or enquiry fields are added to these event parameters,
@@ -147,8 +168,8 @@ these lab results do not establish field INP or complete WCAG acceptance.
 Future location pages have an empty-table architecture at `/locations/[slug]`,
 admin editing, publication quality/review gates, private drafts and sitemap
 integration. No city pages or office claims have been published. The seven new
-migrations are local and must be reviewed/applied before the corresponding app
-is deployed. See README and the production launch checklist for operational gaps
+migrations were applied with the 2026-10-05 application release. See README and
+the production launch checklist for operational gaps
 and current tests. Hosted signup is verified disabled; custom Auth SMTP,
 Search Console, Resend delivery, GA acceptance and John's regulatory information
 remain outstanding. Pre-copy-revert Lighthouse CI median mobile LCP was 3.742
@@ -719,7 +740,7 @@ John should be able to retire or rename a page without a developer.
 - Lookup is cached, so the table does not add a database round-trip to every request.
 - A new redirect takes effect within 60 seconds without a deploy.
 
-**Local status (2026-10-05): partial.** The table (migration `20260927215019`, applied to production 2026-10-03) stores redirects with a `permanent` boolean, `source_kind` and entity id, rejects loops and flattens chains. The new admin UI manages manual and generated rules. A generic missing-path server route uses 60-second ISR; saves invalidate dependent aliases. Working routes cannot be overridden. A notes field and the specified proxy-wide lookup remain absent. Host and lowercase redirects run in `proxy.ts` before session refresh; its matcher excludes Next assets and image files.
+**Released status (2026-10-06): partial.** The table (migration `20260927215019`, applied to production 2026-10-03) stores redirects with a `permanent` boolean, `source_kind` and entity id, rejects loops and flattens chains. The admin UI manages manual and generated rules. A generic missing-path server route uses 60-second ISR; saves invalidate dependent aliases. Working routes cannot be overridden. Private notes are stored in a separate admin-only relation and saved atomically; the specified proxy-wide lookup remains absent. Host and lowercase redirects run in `proxy.ts` before session refresh; its matcher excludes Next assets and image files.
 
 ### REQ-030 — Slug changes auto-create redirects
 
@@ -731,7 +752,7 @@ John should be able to retire or rename a page without a developer.
 - The auto-created entry is flagged in the CMS as system-generated, and is editable.
 - The operator sees a confirmation naming both URLs before the change is applied.
 
-**Local status (2026-10-05): implemented for editable published blog and ordinary service URLs.** Renames are captured transactionally and marked by `source_kind`; service renames also update related article links. Generated rules are editable in Redirects. Confirmation names both URLs and is checked server-side against the stored slug. The pending scheduling migration also excludes never-live future and expired articles from automatic slug redirects.
+**Released status (2026-10-06): implemented for editable published blog and ordinary service URLs.** Renames are captured transactionally and marked by `source_kind`; service renames also update related article links. Generated rules are editable in Redirects. Confirmation names both URLs and is checked server-side against the stored slug. The applied scheduling migration excludes never-live future and expired articles from automatic slug redirects.
 
 ### REQ-031 — 404 handling with correct status code
 
@@ -1160,7 +1181,7 @@ Every path to John is tracked, so it is possible to tell which pages actually pr
 - The admin enquiry view shows the source, so John can see which channel produced the matter.
 - Captured parameters never appear in a URL that could be shared or indexed.
 
-**Current status (2026-09-27): implemented locally, pending migration and end-to-end verification.** External referrer origin/path, all five UTM fields and `gclid` use first-touch session storage only after analytics acceptance, are normalized again by the Server Action, and appear in the admin detail view. They are not included in enquiry emails or GA events.
+**Current status (2026-10-06): implementation and migration released; accepted-enquiry verification remains pending.** External referrer origin/path, all five UTM fields and `gclid` use first-touch session storage only after analytics acceptance, are normalized again by the Server Action, and appear in the admin detail view. They are not included in enquiry emails or GA events.
 
 ### REQ-057 — Search Console and Bing Webmaster Tools
 

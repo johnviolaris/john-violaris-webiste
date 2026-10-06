@@ -1,4 +1,5 @@
 import { initialCmsFormState, type CmsFormState } from "@/lib/cms/form";
+import type { SectionDraftToken } from "@/lib/cms/sections/drafts";
 import { seoTips } from "@/lib/cms/seo-tips";
 import {
   aboutBackgroundDefaults,
@@ -1285,7 +1286,7 @@ export const initialSectionFormState: SectionFormState =
  * hold the edits that were just discarded, and have to go back to the
  * defaults too.
  */
-export type SectionFormState = CmsFormState & { reset?: boolean };
+export type SectionFormState = CmsFormState & { reset?: boolean; savedDraft?: SectionDraftToken | null; savedLiveContent?: SectionContent | null };
 
 // ---------------------------------------------------------------------------
 // Lookups

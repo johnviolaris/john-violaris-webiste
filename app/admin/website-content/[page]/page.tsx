@@ -6,7 +6,7 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 import { SectionForm } from "@/components/admin/section-form";
 import { SeoTip } from "@/components/admin/seo-tip";
 import { SeoPanel } from "@/components/admin/seo-panel";
-import { getPageSections } from "@/lib/cms/admin-queries";
+import { getSectionEditorData } from "@/lib/cms/sections/draft-queries";
 import { findGroup, pageGroups } from "@/lib/cms/sections/schema";
 import { seoTips } from "@/lib/cms/seo-tips";
 import { RevisionHistory } from "@/components/admin/revision-history";
@@ -36,7 +36,7 @@ export default async function AdminPageContentPage({
 
   if (!group) notFound();
 
-  const stored = await getPageSections(page);
+  const { live: stored, drafts, available } = await getSectionEditorData(page);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pt-14 pb-12 md:px-8 md:pt-10">
@@ -50,8 +50,8 @@ export default async function AdminPageContentPage({
         </Link>
         <h1 className="font-display text-2xl font-semibold">{group.label}</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          {group.description} Each section saves on its own, and the site
-          updates as soon as it does.
+          {group.description} Save each section as a private draft, preview it,
+          then publish explicitly when ready.
         </p>
         {group.seo ? (
           <SeoTip variant="section" className="mt-4">
@@ -95,7 +95,7 @@ export default async function AdminPageContentPage({
                   </span>
                 </span>
                 <span className="shrink-0 text-xs text-muted-foreground">
-                  {edited ? "Edited" : "Original wording"}
+                  {drafts[section.key] ? "Private draft saved" : edited ? "Live edited wording" : "Original wording"}
                 </span>
               </summary>
 
@@ -132,8 +132,11 @@ export default async function AdminPageContentPage({
                   page={page}
                   definition={section}
                   stored={stored[section.key]}
+                  draft={drafts[section.key]}
+                  available={available}
                 />
-                <RevisionHistory entity="page_sections" id={`${page}/${section.key}`} />
+                <RevisionHistory entity="page_sections" id={`${page}/${section.key}`} sectionWorkflow={{ liveContent: drafts[section.key] ? drafts[section.key].base_content : stored[section.key] ?? null, draftId: drafts[section.key]?.id ?? null, draftVersion: drafts[section.key]?.version ?? null }} />
+                {available && <RevisionHistory entity="page_section_drafts" id={`${page}/${section.key}`} sectionWorkflow={{ liveContent: drafts[section.key] ? drafts[section.key].base_content : stored[section.key] ?? null, draftId: drafts[section.key]?.id ?? null, draftVersion: drafts[section.key]?.version ?? null }} />}
               </div>
             </details>
           );
