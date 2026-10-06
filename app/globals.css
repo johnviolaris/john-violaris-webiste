@@ -1995,6 +1995,15 @@ body {
   min-height: 700px;
 }
 
+/* Hide the floating side instance on narrow screens, including its offscreen
+   panel controls. The separate Reviews page and existing links stay available.
+   The provider moves this site-owned container to body but preserves its ID. */
+@media (max-width: 767px) {
+  #rswidget_35c26 {
+    display: none !important;
+  }
+}
+
 /* ══════════════════════════════════════════════════════════
    CAREER BAND — milestones, on the about page
    ══════════════════════════════════════════════════════════ */
