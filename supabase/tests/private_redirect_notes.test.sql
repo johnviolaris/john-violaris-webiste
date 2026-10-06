@@ -23,7 +23,7 @@ reset role;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000006702',true);
 set local role authenticated;
 select is((select count(*)::int from public.redirect_admin_notes),0,'SEO editors cannot read private notes');
-select is((with changed as(update public.redirect_admin_notes set notes='Blocked' returning source_path) select count(*)::int from changed),0,'SEO editors cannot update notes');
+with changed as(update public.redirect_admin_notes set notes='Blocked' returning source_path) select is((select count(*)::int from changed),0,'SEO editors cannot update notes');
 select throws_ok($$select public.save_redirect_with_admin_notes('/notes-test','/fees',true,true,'Blocked')$$,'42501',null,'SEO editors cannot save through the RPC');
 reset role;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000006701',true);

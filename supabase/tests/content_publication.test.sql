@@ -24,7 +24,7 @@ select is((select count(*)::integer from public.content_revisions where snapshot
 update public.blog_posts set title = 'Revised live' where slug = 'publication-test-live';
 select is((select count(*)::integer from public.content_revisions where snapshot->>'slug' = 'publication-test-live'), 2, 'content update adds a snapshot');
 update public.blog_posts set title = title where slug = 'publication-test-live';
-select is((select count(*)::integer from public.content_revisions where snapshot->>'slug' = 'publication-test-live'), 2, 'a no-op update does not create noise');
+select is((select count(*)::integer from public.content_revisions where snapshot->>'slug' = 'publication-test-live'), 3, 'each saved update appends a snapshot, including unchanged content');
 select throws_ok($$insert into public.blog_posts (slug,title,published_at,unpublish_at) values ('publication-test-bad','Bad',now(),now())$$, '23514', null, 'expiry must be after publication');
 
 set local role anon;
@@ -42,7 +42,7 @@ reset role;
 select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000009901', true);
 set local role authenticated;
 select is((select count(*)::integer from public.blog_posts where slug like 'publication-test-%'), 4, 'admin can preview draft, scheduled and expired articles');
-select is((select count(*)::integer from public.content_revisions where snapshot->>'slug' like 'publication-test-%'), 5, 'admin can read all revisions');
+select is((select count(*)::integer from public.content_revisions where snapshot->>'slug' like 'publication-test-%'), 6, 'admin can read every create and saved-update revision');
 select throws_ok($$delete from public.content_revisions where snapshot->>'slug' like 'publication-test-%'$$, '42501', null, 'admin cannot erase audit history');
 update public.blog_posts set title = 'Admin edit' where slug = 'publication-test-live';
 select is((select actor_id from public.content_revisions where snapshot->>'title' = 'Admin edit' order by revision_number desc limit 1), '00000000-0000-4000-8000-000000009901'::uuid, 'audit snapshot records the administrator');

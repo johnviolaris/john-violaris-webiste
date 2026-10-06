@@ -23,8 +23,8 @@ select is((select count(*)::int from public.blog_posts where slug='role-draft-fi
   'SEO editor cannot read private article bodies');
 select is((select count(*)::int from public.enquiries),0,
   'SEO editor cannot read enquiries');
-select is((with changed as (update public.blog_posts set title='Blocked' where slug='role-live-fixture'
-  returning id) select count(*)::int from changed),0,'SEO editor cannot update public body copy');
+with changed as (update public.blog_posts set title='Blocked' where slug='role-live-fixture'
+  returning id) select is((select count(*)::int from changed),0,'SEO editor cannot update public body copy');
 select throws_ok($$insert into public.blog_posts(slug,title) values('role-blocked','Blocked')$$,
   '42501',null,'SEO editor cannot create articles');
 select throws_ok($$update public.profiles set role='admin' where id=auth.uid()$$,

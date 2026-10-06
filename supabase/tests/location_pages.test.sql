@@ -22,8 +22,8 @@ select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000009952'
 set local role authenticated;
 select is((select count(*)::integer from public.location_pages where slug like 'location-test-%'),1,'ordinary user cannot read location drafts');
 select throws_ok($$insert into public.location_pages(slug,location,title) values('location-test-user','Area','Title')$$,'42501',null,'ordinary user cannot create a location');
-select is((with changed as (update public.location_pages set title='Unauthorized' where slug='location-test-live' returning *) select count(*)::integer from changed),0,'ordinary user cannot edit published locations');
-select is((with removed as (delete from public.location_pages where slug='location-test-live' returning *) select count(*)::integer from removed),0,'ordinary user cannot delete published locations');
+with changed as (update public.location_pages set title='Unauthorized' where slug='location-test-live' returning *) select is((select count(*)::integer from changed),0,'ordinary user cannot edit published locations');
+with removed as (delete from public.location_pages where slug='location-test-live' returning *) select is((select count(*)::integer from removed),0,'ordinary user cannot delete published locations');
 reset role;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000009951',true);
 set local role authenticated;

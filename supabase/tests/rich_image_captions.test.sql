@@ -21,7 +21,7 @@ select is((select count(*)::int from public.media_assets where id='00000000-0000
 reset role;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000008602',true);
 set local role authenticated;
-select is((with changed as(update public.media_assets set caption_format='plain' returning id) select count(*)::int from changed),0,'SEO-only editors cannot alter caption formats');
+with changed as(update public.media_assets set caption_format='plain' returning id) select is((select count(*)::int from changed),0,'SEO-only editors cannot alter caption formats');
 select is((select count(*)::int from public.content_revisions where entity_table='media_assets' and entity_id='00000000-0000-4000-8000-000000008603'),0,'SEO-only editors cannot inspect draft image history');
 reset role;
 select * from finish();
