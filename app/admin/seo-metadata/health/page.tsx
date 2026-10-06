@@ -17,6 +17,7 @@ export default async function SeoHealthPage() {
         <h1 className="mt-2 font-display text-2xl font-semibold">SEO health</h1>
         <p className="mt-2 max-w-3xl text-sm text-muted-foreground">Checks the current published content and effective metadata for {routes.length} pages. Use this to spot missing or repeated search copy, image descriptions, invalid custom schema, links to unpublished pages and possible outcome promises.</p>
         <p className="mt-2 max-w-3xl text-sm text-muted-foreground">These are CMS checks. They do not crawl external sites, test image dimensions, confirm rankings or replace review of legal accuracy and search engine structured-data eligibility. A warning needs review; deliberate noindex and alternate canonicals are informational.</p>
+        <p className="mt-2 max-w-3xl text-sm text-muted-foreground">Sitemap dates use surviving public content timestamps. Unknown dates are omitted, and failed date-source reads are flagged here. Deleting or resetting a row can remove its date evidence; this check cannot reconstruct that history or date code-only edits.</p>
       </header>
       <dl className="mb-8 grid gap-3 sm:grid-cols-3">
         {(["error", "warning", "info"] as const).map((severity) => <div key={severity} className="rounded-xl border p-4"><dt className="text-sm capitalize text-muted-foreground">{severity === "info" ? "Information" : `${severity}s`}</dt><dd className="mt-1 text-3xl font-semibold tabular-nums">{counts[severity]}</dd></div>)}

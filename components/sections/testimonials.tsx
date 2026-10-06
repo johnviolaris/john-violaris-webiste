@@ -95,6 +95,9 @@ export function Testimonials({
               secondsPerCard={secondsPerCard[index]}
               start={starts[index]}
               className={`voices-column-split voices-column-${index + 1}`}
+              // A short list appears in every split column. The first exposes
+              // all real reviews; the other columns are visual repetitions.
+              ariaHidden={testimonials.length < COLUMNS * 2 && index > 0}
             />
           ))}
         </div>

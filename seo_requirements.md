@@ -790,6 +790,13 @@ A custom 404 already exists at `app/not-found.tsx`. The requirement is that it b
 
 **Local follow-up (2026-10-05):** fixed-page dates now use recorded timestamps for the CMS sections, shared public settings, route metadata and image descriptions which those pages render. Published collection changes also date their indexes. Save/restore paths explicitly refresh the sitemap. This does not change an article's printed Updated date, introduce another URL or use build time as an edit. A page without a genuine recorded source date still omits `lastModified`; resets/deletions cannot manufacture a missing timestamp. The literal every-entry criterion therefore remains partial.
 
+**Diagnostic follow-up (2026-10-06):** private SEO health now flags missing valid
+date evidence and failed source reads, including a collection-index fallback.
+Empty successful reads are distinguished from unavailable reads. Reset/deletion
+and source-failure fixtures preserve the public sitemap's date/route behaviour.
+This does not reconstruct deleted history or date code-only edits; REQ-032 remains
+partial. See `docs/sitemap-date-evidence.md`.
+
 ### REQ-033 — Sitemap index
 
 **P3**
@@ -943,18 +950,24 @@ For a motoring practice, location-qualified queries ("drink driving solicitor Ma
 - Zero location pages are published at launch.
 - The route is proven with one internal draft, then unpublished.
 
-**Current status: partial.** Optional court details, location FAQ rows, parent
-service and related-location selections now use the existing JSONB content,
+**Current status: partial.** Optional court details, location FAQ rows, safe rich
+local context, parent service and related-location selections use the existing JSONB content,
 admin editor and shared private/public renderer. Legacy payloads keep empty
 defaults, older forms preserve omitted fields, and revision restore validates
 the current relationships. Visible saved FAQs produce matching linked FAQ
-schema; court addresses never become practice-address claims. Thirteen isolated
-tests pass, including five renderer cases and unchanged legacy body output.
+schema; court addresses never become practice-address claims. Optional
+`localContextRich` supports paragraphs, emphasis and safe links, with escaped
+literal HTML and explicit repair for malformed saved data. Empty or absent rich
+text preserves the plain paragraphs. Publication quality, duplicate-context and
+outcome checks use the actual visible text, excluding hidden link URLs and
+inactive fallback content. Seventeen isolated tests pass, including nine
+renderer cases and byte-equivalent legacy body output.
 No location content was seeded or published, and no hosted fixture was written.
 The remaining acceptance is a saved draft exercised through an isolated real
 CMS/Auth/backend and browser, including persistence, preview, history and
-withdrawal. Local context currently uses plain paragraphs rather than a full
-rich-text editor. These limits keep REQ-043 partial.
+withdrawal. Rich context deliberately uses this small Markdown subset rather
+than arbitrary HTML, image embeds or a full document editor. Real saved-draft
+acceptance remains outstanding, so REQ-043 stays partial.
 
 ### REQ-044 — URL structure decided up front
 

@@ -436,11 +436,14 @@ type PageEmbed = { intro: string | null; updated_at: string };
  * The fallback has no dates, and the sitemap then leaves `lastmod` out rather
  * than stating the build time as though it were an edit.
  */
-export const getRouteIndex = cache(async function getRouteIndex(): Promise<{
+type RouteIndex = {
   services: IndexedService[];
   articles: IndexedArticle[];
-}> {
-  return safely(
+  sourceAvailable: boolean;
+};
+
+export const getRouteIndex = cache(async function getRouteIndex(): Promise<RouteIndex> {
+  return safely<RouteIndex>(
     "Route index",
     async () => {
       const [services, articles] = await Promise.all([
@@ -471,6 +474,7 @@ export const getRouteIndex = cache(async function getRouteIndex(): Promise<{
       if (articles.error) throw articles.error;
 
       return {
+        sourceAvailable: true,
         services: (services.data ?? []).map(
           ({ service_pages, ...service }): IndexedService => ({
             ...service,
@@ -485,6 +489,7 @@ export const getRouteIndex = cache(async function getRouteIndex(): Promise<{
       };
     },
     () => ({
+      sourceAvailable: false,
       services: seedServices.map((service) => {
         const page = seedServicePages.find(
           (row) => row.serviceSlug === service.slug,

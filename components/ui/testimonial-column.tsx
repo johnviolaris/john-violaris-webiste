@@ -55,6 +55,7 @@ export function TestimonialColumn({
   secondsPerCard = 6,
   start = 0,
   className = "",
+  ariaHidden = false,
 }: {
   testimonials: Testimonial[];
   /** Seconds for one card to scroll past. Vary it per column so they drift apart. */
@@ -66,6 +67,8 @@ export function TestimonialColumn({
    */
   start?: number;
   className?: string;
+  /** Other visible columns may repeat the same short list for visual balance. */
+  ariaHidden?: boolean;
 }) {
   const scope = useRef<HTMLDivElement>(null);
   const column = useRef<HTMLDivElement>(null);
@@ -111,6 +114,7 @@ export function TestimonialColumn({
     <div
       ref={column}
       className={`voices-column ${className}`}
+      aria-hidden={ariaHidden || undefined}
       onMouseEnter={() => { hovered.current = true; synchronizePlayback(); }}
       onMouseLeave={() => { hovered.current = false; synchronizePlayback(); }}
       /* Capture, so focus landing on a card inside also pauses the column. */
@@ -128,7 +132,7 @@ export function TestimonialColumn({
             <figure
               key={`${pass}-${index}`}
               className="voice-card"
-              aria-hidden={pass === 1 || undefined}
+              aria-hidden={pass === 1 || index >= testimonials.length || undefined}
               data-clone={pass === 1 ? "true" : undefined}
             >
               <span className="voice-mark" aria-hidden="true">

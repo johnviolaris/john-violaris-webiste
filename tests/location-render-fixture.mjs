@@ -32,6 +32,7 @@ try {
   const { LocationPageContent } = await import("../components/pages/location-page-content.tsx");
   const { LocationPageContent: LegacyContent } = await import("./location-legacy-renderer.tsx");
   const { LocationCourtFields } = await import("../components/admin/location-courts.tsx");
+  const { LocationRichContextField } = await import("../components/admin/location-context.tsx");
   const config = resolveSiteConfig({});
   const services = [{ name: "Service rendering fixture", href: "/services/speeding" }];
   const locations = [{ slug: "neighbour-fixture", location: "Neighbour fixture", title: "Neighbour rendering fixture" }];
@@ -39,7 +40,8 @@ try {
   const courts = [{ name: "Court rendering fixture", details: "Private fixture details, not a real court statement.", address: "Fixture address, not a real court address", officialUrl: "https://www.gov.uk/find-court-tribunal" }];
   const faqItems = [{ question: "How does this fixture work?", answer: "Read **the fixture** and [contact details](/contact)." }];
   const optional = { courts, faqItems, parentService: "/services/speeding", relatedLocations: ["/locations/neighbour-fixture", "/locations/withdrawn-fixture", "/locations/location-fixture"] };
-  const variants = [undefined, {}, optional, { courts: null, faqItems: null, parentService: "javascript:bad", relatedLocations: ["/admin"] }, { courts: [{ ...courts[0], name: "<script>fixture</script>", details: "<img src=x onerror=fixture>" }], faqItems: [{ question: "<script>fixture</script>", answer: "</script><script>fixture</script>" }] }];
+  const rich = { ...optional, localContextRich: "**Rich fixture** with [contact details](/contact).\n\nSecond *fixture* paragraph." };
+  const variants = [undefined, {}, optional, { courts: null, faqItems: null, parentService: "javascript:bad", relatedLocations: ["/admin"] }, { courts: [{ ...courts[0], name: "<script>fixture</script>", details: "<img src=x onerror=fixture>" }], faqItems: [{ question: "<script>fixture</script>", answer: "</script><script>fixture</script>" }] }, rich, { localContextRich: "[bad](javascript:fixture)" }, { localContextRich: "<script>fixture</script><img src=x onerror=fixture>" }, { localContextRich: "" }];
   let count = 0;
   for (const additions of variants) {
     const location = { ...base, content: { ...base.content, ...additions } };
@@ -69,6 +71,14 @@ try {
       assert.equal(nodes.find((node) => node["@type"] === "BreadcrumbList").itemListElement[1].item, "https://johnviolaris.com/services/speeding");
     }
     if (additions === undefined) assert.equal(previewHtml, renderToStaticMarkup(await LegacyContent({ ...props, preview: true })), "All legacy body/H1 wording and markup match the fixed a36e0b2 baseline.");
+    if (additions === rich) {
+      assert.match(previewHtml, /<strong>Rich fixture<\/strong>/);
+      assert.match(previewHtml, /<em>fixture<\/em>/);
+      assert.match(previewHtml, /href="\/contact"/);
+      assert.doesNotMatch(previewHtml, /Local fixture paragraph/);
+    }
+    if (count === 6 || count === 8) assert.equal(previewHtml, renderToStaticMarkup(await LegacyContent({ ...props, preview: true })), "Malformed or cleared optional rich context falls back to the byte-equivalent legacy body.");
+    if (count === 7) { assert.match(previewHtml, /&lt;script&gt;fixture&lt;\/script&gt;/); assert.doesNotMatch(previewHtml, /<script|<img src=x/); }
     if (count === 4) { assert.match(previewHtml, /&lt;script&gt;/); assert.doesNotMatch(previewHtml, /<script|<img src=x/); }
     count++;
   }
@@ -76,5 +86,11 @@ try {
   assert.match(invalidEditor, /name="replaceInvalidCourts"/);
   assert.match(invalidEditor, /Saved court details cannot be read safely/);
   assert.doesNotMatch(renderToStaticMarkup(createElement(LocationCourtFields)), /Saved court details cannot be read safely/);
+  const invalidContext = renderToStaticMarkup(createElement(LocationRichContextField, { initialValue: null }));
+  assert.match(invalidContext, /name="replaceInvalidLocalContext"/);
+  assert.match(invalidContext, /Saved rich local context cannot be read safely/);
+  assert.doesNotMatch(renderToStaticMarkup(createElement(LocationRichContextField)), /Saved rich local context cannot be read safely/);
+  const richEditor = renderToStaticMarkup(createElement(LocationRichContextField, { initialValue: rich.localContextRich }));
+  assert.match(richEditor, /<strong>Rich fixture<\/strong>/);
   console.log(`Location renderer: ${count} isolated cases passed; preview/FAQ/schema/court-address/link safety agree. Legacy body equals fixed a36e0b2 baseline. No DB or HTTP calls.`);
 } finally { hook.deregister(); }

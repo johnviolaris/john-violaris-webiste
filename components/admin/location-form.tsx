@@ -14,6 +14,7 @@ import type { LocationPageRow } from "@/lib/cms/types";
 import { SlugChangeConfirmation } from "@/components/admin/slug-change-confirmation";
 import { FaqFields } from "@/components/admin/faq-fields";
 import { LocationCourtFields } from "@/components/admin/location-courts";
+import { LocationRichContextField } from "@/components/admin/location-context";
 import { relationRepairField, validParentService, validRelatedLocations } from "@/lib/cms/locations/structured";
 
 const fields: { key: LocationField; label: string; hint: string; rows?: number }[] = [
@@ -56,6 +57,7 @@ export function LocationForm({ row, services, locations = [] }: { row: LocationP
         <p id={`${formId}-${key}-hint`} className="text-xs text-muted-foreground">{hint}</p>
         {state.fieldErrors[key] ? <p id={`${formId}-${key}-error`} className="text-sm text-destructive" role="alert">{state.fieldErrors[key]}</p> : null}
       </div>)}
+      <LocationRichContextField initialValue={row?.content.localContextRich} error={state.fieldErrors.localContextRich} />
       <div className="space-y-2">
         <Label htmlFor={`${formId}-services`}>Relevant services</Label>
         <select id={`${formId}-services`} multiple value={selectedServices} onChange={(event) => setSelectedServices([...event.target.selectedOptions].map((option) => option.value))} className="min-h-40 w-full rounded-md border border-input bg-background p-3 text-sm" aria-invalid={Boolean(state.fieldErrors.relatedServices) || undefined} aria-describedby={`${formId}-services-hint ${state.fieldErrors.relatedServices ? `${formId}-services-error` : ""}`}>

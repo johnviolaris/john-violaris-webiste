@@ -9,11 +9,13 @@ import { deployment } from "@/lib/site-config";
 import { getLocationPages } from "@/lib/cms/locations/queries";
 import { validateCustomJsonLd } from "@/lib/cms/seo/custom-json-ld";
 import { automaticSchemaIds, validateSchemaNodes } from "@/lib/cms/seo/schema-validation";
+import { getSitemapDateSnapshot } from "@/lib/cms/seo/sitemap-queries";
+import { analyseSitemapDates } from "@/lib/cms/seo/sitemap-health";
 
 export async function getSeoHealthReport() {
   await requireSeoEditor();
-  const [routes, overrides, articles, sections, config, locations] = await Promise.all([
-    listSeoRoutes(), getSeoOverrides(), getArticles(), getPagesContent(...pageGroups.map((group) => group.key)), getSiteConfig(), getLocationPages(),
+  const [routes, overrides, articles, sections, config, locations, sitemapDates] = await Promise.all([
+    listSeoRoutes(), getSeoOverrides(), getArticles(), getPagesContent(...pageGroups.map((group) => group.key)), getSiteConfig(), getLocationPages(), getSitemapDateSnapshot(),
   ]);
   const contents: SeoHealthContent[] = articles.map((article) => ({ path: `/blog/${article.slug}`, content: article }));
   const serviceContents = await Promise.all(routes.filter((route) => route.group === "Services").map(async (route) => ({
@@ -27,6 +29,7 @@ export async function getSeoHealthReport() {
     for (const path of paths) contents.push({ path, content });
   }
   const issues = analyseSeoHealth({ routes, overrides, contents, siteName: config.name, siteUrl: deployment.url });
+  issues.push(...analyseSitemapDates(routes.map((route) => ({ ...route, ...(route.group === "Articles" ? { imageUrl: route.defaults.image?.url } : {}) })), overrides, deployment.url, sitemapDates));
   for (const route of routes) {
     const custom = validateCustomJsonLd(overrides[route.path]?.customJsonLd, route.path, deployment.url);
     if (custom.ok) for (const warning of validateSchemaNodes(custom.nodes, automaticSchemaIds(route.path, deployment.url))) {

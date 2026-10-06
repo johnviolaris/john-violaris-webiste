@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { duplicateLocationContext, emptyLocationValues, locationContentFrom, validateLocation } from "../lib/cms/locations/schema.ts";
 import { execFileSync } from "node:child_process";
-import { courtCountField, courtField, courtFields, courtRepairField, readCourtDetails, readLocationStructuredContent, relationRepairField, resolveLocationStructuredContent, safeCourtUrl, validateCourtDetails, validateLocationStructuredContent } from "../lib/cms/locations/structured.ts";
+import { contextRepairField, courtCountField, courtField, courtFields, courtRepairField, localContextRichLimit, locationContextText, readCourtDetails, readLocationStructuredContent, readLocationRichContext, relationRepairField, resolveLocationStructuredContent, safeCourtUrl, validateCourtDetails, validateLocationRichContext, validateLocationStructuredContent } from "../lib/cms/locations/structured.ts";
 import { validateLocationRevision } from "../lib/cms/locations/revision-validation.ts";
 import { faqCountField, faqRepairField } from "../lib/cms/faq.ts";
 import { publicationSeoWarnings } from "../lib/cms/seo/publication-warnings.ts";
@@ -43,6 +43,53 @@ test("changing only a city name does not create publishable bespoke local contex
 // Explicitly isolated content fixtures. These do not name or publish a real court/office.
 const courtFixture = { name: "Court rendering fixture", details: "Fixture-only details used to verify this private renderer.", address: "Fixture address, not a real court address", officialUrl: "https://www.gov.uk/find-court-tribunal", directionsUrl: "https://maps.google.com/" };
 const optionalFixture = { courts: [courtFixture], faqItems: [{ question: "How does this fixture work?", answer: "Read **the fixture** and [contact details](/contact)." }], parentService: "/services/speeding", relatedLocations: ["/locations/neighbour-fixture"] };
+
+test("rich location context is optional, bounded safe Markdown with explicit saved-data repair", () => {
+  assert.deepEqual(validateLocationRichContext(undefined), { ok: true });
+  assert.deepEqual(validateLocationRichContext("  "), { ok: true });
+  const rich = "**Fixture** details with [a source](https://www.gov.uk/find-court-tribunal).\n\nSecond *fixture* paragraph.";
+  assert.equal(validateLocationRichContext(rich).content, rich);
+  for (const value of [null, {}, [rich], 123, "x".repeat(localContextRichLimit + 1), "[bad](javascript:fixture)", "[bad](https://user:password@example.com)", "[bad](//example.com)"]) assert.equal(validateLocationRichContext(value).ok, false);
+  const saved = { ...optionalFixture, localContextRich: rich };
+  assert.deepEqual(readLocationStructuredContent(new FormData(), saved).content, saved, "Old clients preserve omitted rich context.");
+  const clear = new FormData(); clear.set("localContextRich", "");
+  assert.deepEqual(readLocationStructuredContent(clear, saved).content, optionalFixture, "Explicit clearing keeps the other optional fields.");
+  assert.equal(readLocationRichContext(clear, null).ok, false);
+  clear.set(contextRepairField, "on");
+  assert.deepEqual(readLocationRichContext(clear, null), { ok: true });
+  assert.equal(readLocationRichContext(new FormData(), null).ok, false, "Malformed saved data cannot disappear on an unrelated save.");
+  assert.deepEqual(resolveLocationStructuredContent({ ...saved, localContextRich: null }), optionalFixture, "Public rich-block omission preserves valid sibling blocks.");
+  assert.equal(locationContextText({ localContext: ["Legacy fallback."], localContextRich: "[bad](javascript:fixture)" }), "Legacy fallback.");
+  const content = locationContentFrom({ ...publishable, localContextRich: rich }, validateLocationStructuredContent(saved).content);
+  assert.equal(content.localContextRich, rich);
+  assert.deepEqual(content.localContext, locationContentFrom(publishable).localContext, "Rich mode keeps the legacy fallback data.");
+});
+
+test("publication quality and outcome checks use visible rich context instead of hidden fallback or link URLs", () => {
+  const rich = { ...publishable, localContext: "Short inactive fallback.", localContextRich: `**Verifiable** ${publishable.localContext}` };
+  const validate = (values) => validateLocation(values, true, true, services, new Set(), validateLocationStructuredContent({ localContextRich: values.localContextRich }).content);
+  assert.deepEqual(validate(rich), {}, "Substantial visible rich context can replace short legacy paragraphs.");
+  const thin = { ...publishable, localContextRich: `[short](https://example.com/${"a".repeat(5000)})` };
+  assert.ok(validate(thin).localContextRich, "Long hidden URLs cannot satisfy visible word/character gates.");
+  assert.ok(validate({ ...rich, localContextRich: `Guaranteed **success**. ${rich.localContextRich}` }).body);
+  assert.deepEqual(validate({ ...rich, localContext: `Guaranteed success. ${publishable.localContext}` }), {}, "Inactive plain copy is not rendered or used by the blocking visible-content check.");
+});
+
+test("duplicate location checks compare visible rich context across markup and area substitutions", () => {
+  const text = "residents can confirm court directions and the listed hearing date from their summons before travelling. ".repeat(8);
+  const proposed = { ...draft, location: "Alpha", localContext: "Unrelated hidden plain paragraph.", localContextRich: `**Alpha** ${text}[Check the source](/contact).` };
+  const peer = { slug: "beta", location: "Beta", content: { localContext: ["Another hidden plain paragraph."], localContextRich: `*Beta* ${text}[Check the source](https://example.com/).` } };
+  assert.equal(duplicateLocationContext(proposed, [peer]), "beta", "Formatting and hidden URL destinations cannot hide duplicate visible text.");
+  assert.equal(duplicateLocationContext(proposed, [{ ...peer, content: { ...peer.content, localContextRich: "Different verified context about a separate travel route and entrance, without these duplicated instructions." } }]), null);
+});
+
+test("location rich-context history rejects malformed payloads and retains validated content on restore", () => {
+  const content = locationContentFrom(publishable);
+  const rich = `**Verifiable** ${publishable.localContext}`.trim();
+  const snapshot = { title: draft.title, location: draft.location, content: { ...content, localContextRich: rich } };
+  assert.equal(validateLocationRevision(snapshot, draft.slug, services, new Set()).content.localContextRich, rich);
+  for (const value of [null, {}, "[bad](javascript:fixture)", "x".repeat(localContextRichLimit + 1)]) assert.equal(validateLocationRevision({ ...snapshot, content: { ...content, localContextRich: value } }, draft.slug, services, new Set()).ok, false);
+});
 
 test("location publication blocks guarantees in every visible optional court and FAQ field", () => {
   const legacy = readLocationStructuredContent(new FormData(), locationContentFrom(publishable));
@@ -131,6 +178,6 @@ test("location publishing warns for invalid FAQ schema and custom FAQ graphs can
 
 test("actual location public and private preview renderers share optional data, escape content and match FAQ schema", () => {
   const output = execFileSync(process.execPath, ["--import", "./scripts/alias-hook.mjs", "tests/location-render-fixture.mjs"], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-  assert.match(output, /Location renderer: 5 isolated cases passed/);
+  assert.match(output, /Location renderer: 9 isolated cases passed/);
   assert.match(output, /Legacy body equals fixed a36e0b2 baseline/);
 });

@@ -1,9 +1,10 @@
-import { readFaqItems, validateFaqItems, type FaqItem } from "@/lib/cms/faq";
-import { safeCaptionHref } from "@/lib/cms/media/caption";
+import { faqAnswerText, readFaqItems, validateFaqItems, type FaqItem } from "@/lib/cms/faq";
+import { parseImageCaption, safeCaptionHref } from "@/lib/cms/media/caption";
+import { readParagraphs } from "@/lib/cms/form";
 
 /** Court facts belong to the court, never to the solicitor's office/practice. */
 export type CourtDetail = { name: string; details: string; address?: string; officialUrl?: string; directionsUrl?: string };
-export type LocationStructuredContent = { courts: CourtDetail[]; faqItems: FaqItem[]; parentService: string; relatedLocations: string[] };
+export type LocationStructuredContent = { courts: CourtDetail[]; faqItems: FaqItem[]; parentService: string; relatedLocations: string[]; localContextRich?: string };
 export type LocationStructuredField = keyof LocationStructuredContent;
 export type LocationStructuredResult = { ok: true; content: LocationStructuredContent } | { ok: false; errors: Partial<Record<LocationStructuredField, string>> };
 export const courtFields = ["name", "details", "address", "officialUrl", "directionsUrl"] as const;
@@ -11,8 +12,35 @@ export const courtLimits = { items: 12, name: 180, details: 4000, address: 500, 
 export const courtCountField = "courtCount";
 export const courtRepairField = "replaceInvalidCourts";
 export const relationRepairField = "replaceInvalidLocationRelations";
+export const contextRepairField = "replaceInvalidLocalContext";
+export const localContextRichLimit = 8000;
 export const courtField = (index: number, field: (typeof courtFields)[number]) => `court.${index}.${field}`;
 type CourtResult = { ok: true; items: CourtDetail[] } | { ok: false; error: string };
+type RichContextResult = { ok: true; content?: string } | { ok: false; error: string };
+
+/** Paragraphs, emphasis and safe links only. HTML remains escaped text. */
+export function validateLocationRichContext(value: unknown): RichContextResult {
+  if (value === undefined) return { ok: true };
+  if (typeof value !== "string") return { ok: false, error: "Rich local context must be ordinary Markdown text." };
+  if (value.length > localContextRichLimit) return { ok: false, error: `Keep rich local context within ${localContextRichLimit.toLocaleString("en-GB")} characters.` };
+  const content = value.trim();
+  if (!content) return { ok: true };
+  if (parseImageCaption(content, "markdown").invalidLinks) return { ok: false, error: "Rich local-context links must use an ordinary http/https URL, site path or anchor without credentials, spaces or script content." };
+  if (!faqAnswerText(content).trim()) return { ok: false, error: "Rich local context needs visible text beyond formatting." };
+  return { ok: true, content };
+}
+
+export function readLocationRichContext(form: FormData, previous?: unknown): RichContextResult {
+  const saved = validateLocationRichContext(previous);
+  if (!saved.ok && form.get(contextRepairField) !== "on") return { ok: false, error: "Saved rich local context is invalid. Confirm replacement before repairing or clearing it." };
+  return form.has("localContextRich") ? validateLocationRichContext(form.get("localContextRich")) : saved;
+}
+
+/** Quality and duplicate checks use exactly the visible rich text, or legacy paragraphs. */
+export function locationContextText(content: { localContext: string[]; localContextRich?: unknown }): string {
+  const rich = validateLocationRichContext(content.localContextRich);
+  return rich.ok && rich.content ? readParagraphs(rich.content).map(faqAnswerText).join("\n\n") : content.localContext.join("\n\n");
+}
 
 /** No protocol-relative, credentialled, insecure or script links. No URL is fetched. */
 export function safeCourtUrl(value: string): string | null {
@@ -82,19 +110,21 @@ export function validateLocationStructuredContent(value: unknown): LocationStruc
   const errors: Partial<Record<LocationStructuredField, string>> = {};
   const courts = validateCourtDetails(source.courts);
   const faqs = validateFaqItems(source.faqItems);
+  const rich = validateLocationRichContext(source.localContextRich);
   if (!courts.ok) errors.courts = courts.error;
   if (!faqs.ok) errors.faqItems = faqs.error;
+  if (!rich.ok) errors.localContextRich = rich.error;
   if (!validParentService(source.parentService)) errors.parentService = "Choose a service path from the catalogue, or leave the parent service empty.";
   if (!validRelatedLocations(source.relatedLocations)) errors.relatedLocations = "Use up to 20 location paths, without external, private, query or anchor URLs.";
   if (Object.keys(errors).length) return { ok: false, errors };
-  return { ok: true, content: { courts: courts.ok ? courts.items : [], faqItems: faqs.ok ? faqs.items : [], parentService: typeof source.parentService === "string" ? source.parentService : "", relatedLocations: [...new Set((source.relatedLocations as string[] | undefined) ?? [])] } };
+  return { ok: true, content: { courts: courts.ok ? courts.items : [], faqItems: faqs.ok ? faqs.items : [], parentService: typeof source.parentService === "string" ? source.parentService : "", relatedLocations: [...new Set((source.relatedLocations as string[] | undefined) ?? [])], ...(rich.ok && rich.content ? { localContextRich: rich.content } : {}) } };
 }
 
 /** Each optional public block fails closed independently; valid sibling blocks remain visible. */
 export function resolveLocationStructuredContent(value: unknown): LocationStructuredContent {
   const source = value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
-  const courts = validateCourtDetails(source.courts); const faqs = validateFaqItems(source.faqItems);
-  return { courts: courts.ok ? courts.items : [], faqItems: faqs.ok ? faqs.items : [], parentService: validParentService(source.parentService) && typeof source.parentService === "string" ? source.parentService : "", relatedLocations: validRelatedLocations(source.relatedLocations) ? [...new Set((source.relatedLocations as string[] | undefined) ?? [])] : [] };
+  const courts = validateCourtDetails(source.courts); const faqs = validateFaqItems(source.faqItems); const rich = validateLocationRichContext(source.localContextRich);
+  return { courts: courts.ok ? courts.items : [], faqItems: faqs.ok ? faqs.items : [], parentService: validParentService(source.parentService) && typeof source.parentService === "string" ? source.parentService : "", relatedLocations: validRelatedLocations(source.relatedLocations) ? [...new Set((source.relatedLocations as string[] | undefined) ?? [])] : [], ...(rich.ok && rich.content ? { localContextRich: rich.content } : {}) };
 }
 
 /** Old clients preserve optional fields; repairing malformed saved relations is explicit. */
@@ -102,10 +132,12 @@ export function readLocationStructuredContent(form: FormData, previous?: unknown
   const source = previous && typeof previous === "object" ? previous as Record<string, unknown> : {};
   const errors: Partial<Record<LocationStructuredField, string>> = {};
   const courts = readCourtDetails(form, source.courts); const faqs = readFaqItems(form, source.faqItems);
+  const rich = readLocationRichContext(form, source.localContextRich);
   if (!courts.ok) errors.courts = courts.error;
   if (!faqs.ok) errors.faqItems = faqs.error;
+  if (!rich.ok) errors.localContextRich = rich.error;
   if ((!validParentService(source.parentService) || !validRelatedLocations(source.relatedLocations)) && form.get(relationRepairField) !== "on") errors.relatedLocations = "Saved relation data is invalid. Confirm its replacement before repairing or clearing it.";
-  const proposed = validateLocationStructuredContent({ courts: courts.ok ? courts.items : [], faqItems: faqs.ok ? faqs.items : [], parentService: form.has("parentService") ? form.get("parentService") : source.parentService, relatedLocations: form.has("relatedLocations") ? String(form.get("relatedLocations") ?? "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean) : source.relatedLocations });
+  const proposed = validateLocationStructuredContent({ courts: courts.ok ? courts.items : [], faqItems: faqs.ok ? faqs.items : [], localContextRich: rich.ok ? rich.content : undefined, parentService: form.has("parentService") ? form.get("parentService") : source.parentService, relatedLocations: form.has("relatedLocations") ? String(form.get("relatedLocations") ?? "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean) : source.relatedLocations });
   if (!proposed.ok) Object.assign(errors, proposed.errors);
   return Object.keys(errors).length ? { ok: false, errors } : proposed;
 }

@@ -12,7 +12,8 @@ export function validateLocationRevision(snapshot: unknown, currentSlug: string,
   const optional = validateLocationStructuredContent(content);
   if (!optional.ok) return { ok: false, error: Object.values(optional.errors).join(" ") };
   const values = { ...emptyLocationValues, slug: currentSlug, location: saved.location, title: saved.title, description: content.description as string, intro: content.intro as string, localContext: (content.localContext as string[]).join("\n\n"), body: (content.body as string[]).join("\n\n"), relatedServices: (content.relatedServices as string[]).join("\n"), parentService: optional.content.parentService, relatedLocations: optional.content.relatedLocations.join("\n") };
-  const errors = validateLocation(values, false, false, servicePaths, locationPaths);
+  values.localContextRich = optional.content.localContextRich ?? "";
+  const errors = validateLocation(values, false, false, servicePaths, locationPaths, optional.content);
   if (Object.keys(errors).length) return { ok: false, error: Object.values(errors).join(" ") };
   return { ok: true, title: saved.title, location: saved.location, content: locationContentFrom(values, optional.content, content as LocationPageContent) };
 }

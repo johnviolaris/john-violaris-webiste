@@ -3,11 +3,12 @@ import { cache } from "react";
 import { getRouteIndex } from "@/lib/cms/queries";
 import { publicClient } from "@/utils/supabase/public";
 import type { SitemapDateSources } from "@/lib/cms/seo/sitemap-dates";
+import type { SitemapDateSnapshot, SitemapUnavailableSource } from "@/lib/cms/seo/sitemap-health";
 
 const emptySources = (): SitemapDateSources => ({ sections: [], seo: [], settings: [], media: [], services: [], articles: [] });
 
 /** Timestamp-only public reads under anon RLS, without draft or audit access. */
-export const getSitemapDateSources = cache(async function getSitemapDateSources(): Promise<SitemapDateSources> {
+export const getSitemapDateSnapshot = cache(async function getSitemapDateSnapshot(): Promise<SitemapDateSnapshot> {
   try {
     const client = publicClient();
     const [sections, seo, settings, media, index] = await Promise.all([
@@ -19,13 +20,23 @@ export const getSitemapDateSources = cache(async function getSitemapDateSources(
     ]);
     // A failed source supplies no evidence. Other dated sources still work;
     // an older database without the local media migration is supported too.
-    return {
+    const unavailableSources: SitemapUnavailableSource[] = [];
+    for (const [name, result] of [["sections", sections], ["seo", seo], ["settings", settings], ["media", media]] as const) {
+      if (result.error || result.data === null) unavailableSources.push(name);
+    }
+    if (!index.sourceAvailable) unavailableSources.push("collections");
+    return { sources: {
       sections: sections.error ? [] : sections.data ?? [],
       seo: seo.error ? [] : seo.data ?? [],
       settings: settings.error ? [] : settings.data ?? [],
       media: media.error ? [] : media.data ?? [],
       services: index.services.map(({ updated_at }) => ({ updated_at })),
       articles: index.articles.map(({ updated_at }) => ({ updated_at })),
-    };
-  } catch { return emptySources(); }
+    }, unavailableSources };
+  } catch { return { sources: emptySources(), unavailableSources: ["source-read"] }; }
+});
+
+/** Keep the public sitemap's source-only API and failure behaviour unchanged. */
+export const getSitemapDateSources = cache(async function getSitemapDateSources(): Promise<SitemapDateSources> {
+  return (await getSitemapDateSnapshot()).sources;
 });

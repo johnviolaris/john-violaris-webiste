@@ -86,3 +86,39 @@ accepted enquiry check; staging evidence cannot substitute for that.
 Remove fixtures and temporary accounts/objects, revoke temporary credentials and
 record the final state. Keep secrets and client data out of screenshots, logs,
 Git and acceptance reports.
+
+## Reusable location workflow preparation
+
+Run the local module fixtures without starting Next.js or selecting a backend:
+
+```bash
+node scripts/verify-location-acceptance.mjs --mode fixtures
+```
+
+This invokes the actual location save/delete actions, admin/public reads,
+revision reads/restoration, private saved/historical preview, public renderer,
+route registry and sitemap. It checks fresh review, London scheduling, start/end
+boundaries, related-link withdrawal and schema consistency. Fetch, HTTP(S),
+TCP/TLS, DNS and UDP entry points are blocked before importing app modules. Only
+owned in-memory fixtures are removed; an unrelated fixture row must remain intact.
+
+These are module integration fixtures. Storage, audit capture and publication/RLS
+filtering are simulated. They do not establish real Auth/RLS/Storage, browser
+sessions, private HTTP headers, ISR freshness, email or hosted write acceptance.
+
+The following command performs offline preparation and deliberately exits
+nonzero. It is **not** a runnable real-browser adapter:
+
+```bash
+node scripts/verify-location-acceptance.mjs --mode backend --env-file .env.staging.local --supabase-url http://127.0.0.1:54321 --app-url http://127.0.0.1:3999
+```
+
+The existing preflight cannot prove that a running app's server-side credentials
+point at the selected backend. A reviewed identity verifier and browser adapter
+are still required; this command cannot submit tokens, call a network endpoint
+or write a fixture even when the file passes preflight. Once isolation is proven,
+perform the real browser checks above with synthetic accounts and record saved
+draft, historical preview, publication, scheduling/expiry, withdrawal and cleanup
+evidence. Verify sitemap and related-link removal after the actual cache boundary,
+and visible FAQ/schema parity. A frontend bundle or unchecked manifest alone is
+insufficient proof of server-side backend isolation.

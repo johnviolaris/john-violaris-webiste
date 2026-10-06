@@ -222,6 +222,8 @@ export type LocationPageContent = {
   description: string;
   intro: string;
   localContext: string[];
+  /** Optional safe Markdown paragraphs/emphasis/links; absent keeps literal legacy paragraphs. */
+  localContextRich?: string;
   body: string[];
   relatedServices: string[];
   courts?: import("@/lib/cms/locations/structured").CourtDetail[];

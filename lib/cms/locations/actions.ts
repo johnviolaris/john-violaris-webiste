@@ -32,6 +32,7 @@ export async function saveLocationPage(_previous: LocationFormState, formData: F
   if (!optional.ok) return formError<LocationField>(values, optional.errors);
   values.parentService = optional.content.parentService;
   values.relatedLocations = optional.content.relatedLocations.join("\n");
+  values.localContextRich = optional.content.localContextRich ?? "";
   const peerList = published || optional.content.relatedLocations.length ? await listLocationPagesAdmin() : { available: true, rows: [] };
   if (!peerList.available) return formFailure(values, "The other location drafts could not be checked. Reload before saving relationships or publishing.");
   const relationTargets = published ? peerList.rows.filter((peer) => publicationStatus({ published: peer.published, published_at: peer.published_at ?? null, unpublish_at: peer.unpublish_at ?? null }) === "live" && peer.reviewed_at) : peerList.rows;
@@ -45,8 +46,8 @@ export async function saveLocationPage(_previous: LocationFormState, formData: F
   if (publishedAt && unpublishAt && unpublishAt <= publishedAt) errors.unpublishAt = "Unpublishing must be after publication.";
   if (published) {
     const peers = peerList.rows.filter((peer) => peer.published && peer.slug !== previous?.slug);
-    const duplicate = duplicateLocationContext(values, peers);
-    if (duplicate) errors.localContext = `Local context is substantially the same as /locations/${duplicate}. Add useful, verifiable content specific to this area before publishing.`;
+    const duplicate = duplicateLocationContext(values, peers, optional.content);
+    if (duplicate) errors[optional.content.localContextRich ? "localContextRich" : "localContext"] = `Local context is substantially the same as /locations/${duplicate}. Add useful, verifiable content specific to this area before publishing.`;
   }
   if (Object.keys(errors).length > 0) return formError(values, errors);
   const row = {

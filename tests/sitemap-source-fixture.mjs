@@ -1,0 +1,31 @@
+import { registerHooks } from "node:module";
+
+const mode = process.argv[2];
+if (mode.startsWith("route-")) {
+  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://isolated.fixture.test";
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "fixture-public-key";
+}
+globalThis.fetch = () => { throw new Error("Network is forbidden in this fixture"); };
+const source = (code) => ({ url: `data:text/javascript,${encodeURIComponent(code)}`, shortCircuit: true });
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (specifier === "server-only") return source("export {};");
+    if (specifier === "@/lib/cms/media/queries") return source("export async function getPublicMedia() { throw new Error('Unrelated media read forbidden'); }");
+    if (specifier === "@/lib/cms/queries" && !mode.startsWith("route-")) return source("export async function getRouteIndex() { return { services: [], articles: [], sourceAvailable: true }; }");
+    if (specifier === "@/utils/supabase/public") return source(`
+      export function publicClient() {
+        ${mode === "throws" ? "throw new Error('private transport details must not escape');" : ""}
+        return { from(table) { const chain = { select() { return chain; }, order() { return chain; }, eq() { return chain; }, or() { return chain; }, returns() {
+          if (${JSON.stringify(mode)} === 'route-throws' && table === 'services') throw new Error('private collection transport details');
+          if (${JSON.stringify(mode)} === 'route-failure' && table === 'services') return Promise.resolve({ data: null, error: { message: 'private collection query details' } });
+          if (${JSON.stringify(mode)} === 'failure' && table === 'media_assets') return Promise.resolve({ data: null, error: { message: 'private query details' } });
+          if (${JSON.stringify(mode)} === 'null' && table === 'seo_metadata') return Promise.resolve({ data: null, error: null });
+          return Promise.resolve({ data: table === 'page_sections' ? [{ page: 'fees', section: 'body', portrait: null, updated_at: '2026-10-02T09:00:00Z' }] : [], error: null });
+        } }; return chain; } };
+      }
+    `);
+    return nextResolve(specifier, context);
+  },
+});
+const { getSitemapDateSnapshot, getSitemapDateSources } = await import("../lib/cms/seo/sitemap-queries.ts");
+process.stdout.write(JSON.stringify({ snapshot: await getSitemapDateSnapshot(), sources: await getSitemapDateSources() }));
