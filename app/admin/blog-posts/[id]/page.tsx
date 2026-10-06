@@ -12,6 +12,7 @@ import { formatUkShortDateTime } from "@/lib/format";
 import { publicationStatus } from "@/lib/cms/publication";
 import { RevisionHistory } from "@/components/admin/revision-history";
 import { SeoPanel } from "@/components/admin/seo-panel";
+import { ArticleReviewPlanPanel } from "@/components/admin/article-review-plan-panel";
 
 export const metadata: Metadata = {
   title: "Edit article",
@@ -64,6 +65,7 @@ export default async function EditBlogPostPage({
         categories={categories}
         services={services}
       />
+      <ArticleReviewPlanPanel postId={post.id} />
       <RevisionHistory entity="blog_posts" id={post.id} previewPath={`/preview/blog/${post.id}`} />
       <SeoPanel path={`/blog/${post.slug}`} />
     </div>

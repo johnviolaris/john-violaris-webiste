@@ -797,6 +797,16 @@ and source-failure fixtures preserve the public sitemap's date/route behaviour.
 This does not reconstruct deleted history or date code-only edits; REQ-032 remains
 partial. See `docs/sitemap-date-evidence.md`.
 
+**Durable-date follow-up (2026-10-06):** an additive migration retains actual
+live section and SEO change dates, including subsequent resets/deletions. It
+backfills original live row dates and provably public recorded deletion events;
+it never uses migration time as an edit date. The anonymous projection contains
+only currently public paths and timestamps. Section drafts, no-op writes and
+private routes do not contribute. Collection withdrawals, settings/media
+deletions and code-only changes still lack complete provenance, so REQ-032
+remains partial. The migration and focused SQL tests are described in
+`docs/sitemap-date-evidence.md`.
+
 ### REQ-033 — Sitemap index
 
 **P3**
@@ -1322,6 +1332,15 @@ Legal advice is "Your Money or Your Life" content in Google's terms, held to the
 - Statutory references in article content are accurate and dated — legal content that cites a superseded provision is worse than no content.
 - A documented review cycle exists for keeping content current, with the interval recorded in the CMS per article.
 - Articles state clearly that they are general information, not advice on the reader's specific matter.
+
+**Private planning follow-up (2026-10-06):** saved articles now support an optional
+administrator-only interval and next review due date, stored separately from
+public article content. Saving or clearing a plan does not change the article,
+its Updated date, SEO or revision history. Overdue/due/upcoming summaries use the
+London calendar. No plans, reviewer identities or completed reviews are seeded.
+The CMS guide documents the process. Actual review scheduling and legal/factual
+review still need an owner; named review evidence, statutory accuracy and the
+remaining public editorial requirements keep REQ-063 partial.
 
 ### REQ-064 — No guaranteed outcomes
 

@@ -13,6 +13,19 @@ npm test
 
 ## Current implementation
 
+The 2026-10-06 follow-up adds two independent technical controls. Sitemap dates
+retain recorded live section/SEO changes after resets and deletions, through a
+private watermark and a public path/date-only projection. Private article
+review planning records an optional interval and London-calendar due date,
+with administrator-only access and stale-save protection. It does not record
+completed legal review or change article content, SEO, Updated dates or history.
+Neither feature changes service-page wording or populates business facts.
+See `docs/sitemap-date-evidence.md` and the article section of `docs/cms-guide.md`.
+
+The CSS graph-chunking trial on this same source produced identical CSS/font
+assets across all 33 public routes and was reverted. It provides no performance
+gain; existing LCP and field-performance acceptance remain outstanding.
+
 An editorial redesign using the exact reference HTML navy, gold and warm whites, with large
 serif typography and a typographic JV identity. The design intentionally works
 without stock portraits or invented client reviews.

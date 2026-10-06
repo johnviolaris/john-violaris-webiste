@@ -10,6 +10,8 @@ import { listBlogPosts } from "@/lib/cms/admin-queries";
 import { setBlogPostPublished } from "@/lib/cms/blog/actions";
 import { formatUkShortDateTime } from "@/lib/format";
 import { publicationStatus } from "@/lib/cms/publication";
+import { listArticleReviewPlans } from "@/lib/cms/blog/review-plans/queries";
+import { londonCalendarDate, reviewPlanStatus, reviewPlansUnavailable } from "@/lib/cms/blog/review-plans/schema";
 
 export const metadata: Metadata = {
   title: "Blog posts",
@@ -37,7 +39,11 @@ export default async function AdminBlogPostsPage({
 
   // Filtered here rather than in the query: the whole list is one small read,
   // and the counts on the tabs need every row anyway.
-  const all = await listBlogPosts();
+  const [all, reviewPlans] = await Promise.all([listBlogPosts(), listArticleReviewPlans()]);
+  const plans = new Map(reviewPlans.plans.map((plan) => [plan.blog_post_id, plan]));
+  const articlesById = new Map(all.map((post) => [post.id, post]));
+  const today = londonCalendarDate();
+  const due = reviewPlans.plans.filter((plan) => plan.next_due_on <= today);
   const posts = all.filter((post) =>
     filter === "all" ? true : filter === "published" ? post.published : !post.published,
   );
@@ -67,6 +73,17 @@ export default async function AdminBlogPostsPage({
           New article
         </Link>
       </header>
+
+      <section className="mb-5 rounded-xl border p-4" aria-labelledby="review-planning-summary">
+        <h2 id="review-planning-summary" className="font-medium">Private review planning</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{reviewPlans.available ? `${due.length} planned reviews are due or overdue; ${reviewPlans.plans.length - due.length} are upcoming. Dates follow Europe/London. A plan is not evidence of a completed legal review.` : reviewPlansUnavailable}</p>
+        {reviewPlans.available && reviewPlans.plans.length > 0 && <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          {reviewPlans.plans.map((plan) => {
+            const article = articlesById.get(plan.blog_post_id);
+            return article ? <li key={plan.id}><Link className="underline underline-offset-4" href={`/admin/blog-posts/${article.id}`}>{article.title}</Link>{" — "}<time dateTime={plan.next_due_on}>{plan.next_due_on}</time>{" "}({reviewPlanStatus(plan, today)})</li> : null;
+          })}
+        </ul>}
+      </section>
 
       <nav className="mb-5 flex flex-wrap gap-1.5" aria-label="Filter articles">
         {filters.map((item) => {
@@ -134,10 +151,13 @@ export default async function AdminBlogPostsPage({
                 <th scope="col" className="px-4 py-2.5 font-medium">
                   Last edited
                 </th>
+                <th scope="col" className="px-4 py-2.5 font-medium">Review plan</th>
               </tr>
             </thead>
             <tbody>
-              {posts.map((post) => (
+              {posts.map((post) => {
+                const plan = plans.get(post.id);
+                return (
                 <ClickableRow key={post.id} href={`/admin/blog-posts/${post.id}`}>
                   <td className="px-4 py-3 align-top">
                     <PublishToggle
@@ -167,8 +187,16 @@ export default async function AdminBlogPostsPage({
                       {formatUkShortDateTime(post.updated_at)}
                     </time>
                   </td>
+                  <td className="px-4 py-3 align-top text-muted-foreground">
+                    {!reviewPlans.available ? "Unavailable" : !plan ? "Not planned" : <>
+                      <span className="capitalize">{reviewPlanStatus(plan, today)}</span>
+                      <time className="block whitespace-nowrap" dateTime={plan.next_due_on}>{plan.next_due_on}</time>
+                      <span className="block text-xs">Every {plan.interval_months} months</span>
+                    </>}
+                  </td>
                 </ClickableRow>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

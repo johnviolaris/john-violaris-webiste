@@ -105,3 +105,28 @@ test("dated sitemap preserves registry-only publication, noindex and canonical e
   assert.equal(entries.length, routes.length - 2);
   assert.ok(entries.every((entry) => !Object.hasOwn(entry, "lastModified")));
 });
+
+test("durable section/SEO dates survive deleted rows and ignore date-only current-row upserts", () => {
+  const sources = { ...empty(), publicChanges: [{ path: "/fees", modified_at: second }],
+    sections: [{ page: "fees", section: "body", portrait: null, updated_at: third }],
+    seo: [{ path: "/fees", updated_at: third }],
+  };
+  assert.equal(sitemapModificationDates(routes, sources).get("/fees"), second);
+  assert.equal(sitemapModificationDates(routes, { ...sources, sections: [], seo: [] }).get("/fees"), second);
+  assert.equal(sitemapModificationDates(routes, { ...sources, settings: [{ key: "name", value: "Existing fixture name", updated_at: third }] }).get("/fees"), third, "An independently newer shared public change still wins.");
+  assert.equal(sitemapModificationDates(routes, { ...sources, publicChanges: [] }).has("/fees"), false, "A successful empty durable source supplies no fabricated fallback.");
+});
+
+test("durable evidence cannot add URLs or use malformed/future change dates", () => {
+  const sources = { ...empty(), publicChanges: [
+    { path: "/draft-secret", modified_at: third },
+    { path: "/fees", modified_at: "2026-02-30T00:00:00Z" },
+    { path: "/fees", modified_at: "9999-01-01T00:00:00Z" },
+    { path: "/fees", modified_at: null },
+    { path: "/about", modified_at: second },
+  ] };
+  const entries = datedSitemapEntries(routes, { "/about": { noIndex: true } }, "https://example.com", sources);
+  assert.equal(entries.some(({ url }) => url.includes("draft-secret")), false);
+  assert.equal(entries.some(({ url }) => url.endsWith("/about")), false);
+  assert.equal(entries.some((entry) => Object.hasOwn(entry, "lastModified")), false);
+});

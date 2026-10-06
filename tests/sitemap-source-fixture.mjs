@@ -15,7 +15,11 @@ registerHooks({
     if (specifier === "@/utils/supabase/public") return source(`
       export function publicClient() {
         ${mode === "throws" ? "throw new Error('private transport details must not escape');" : ""}
-        return { from(table) { const chain = { select() { return chain; }, order() { return chain; }, eq() { return chain; }, or() { return chain; }, returns() {
+        return { rpc(name) {
+          if(name!=='get_sitemap_change_dates') throw new Error('Unexpected RPC');
+          if (${JSON.stringify(mode)} === 'rpc-throws') throw new Error('private RPC transport details');
+          return Promise.resolve({ data: ${JSON.stringify(mode)} === 'rpc-null' || ${JSON.stringify(mode)} === 'rpc-failure' ? null : ${JSON.stringify(mode)} === 'rpc-dates' ? [{path:'/fees',modified_at:'2026-10-03T09:00:00Z'}] : ${JSON.stringify(mode)} === 'rpc-malformed' ? [{path:{secret:'private'},modified_at:null}] : [], error: ${JSON.stringify(mode)} === 'rpc-failure' ? {message:'private RPC query details'} : null });
+        }, from(table) { const chain = { select() { return chain; }, order() { return chain; }, eq() { return chain; }, or() { return chain; }, returns() {
           if (${JSON.stringify(mode)} === 'route-throws' && table === 'services') throw new Error('private collection transport details');
           if (${JSON.stringify(mode)} === 'route-failure' && table === 'services') return Promise.resolve({ data: null, error: { message: 'private collection query details' } });
           if (${JSON.stringify(mode)} === 'failure' && table === 'media_assets') return Promise.resolve({ data: null, error: { message: 'private query details' } });

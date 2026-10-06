@@ -65,4 +65,16 @@ test("actual public source reader keeps surviving dates and distinguishes empty 
     assert.equal(result.sources.sections[0].updated_at, "2026-10-02T09:00:00Z");
     assert.equal(JSON.stringify(result).includes("private"), false);
   }
+  assert.deepEqual(good.sources.publicChanges, [], "A successful empty RPC is available, not a failure.");
+  const dated = run("rpc-dates");
+  assert.deepEqual(dated.snapshot.unavailableSources, []);
+  assert.equal(datedSitemapEntries(routes, {}, siteUrl, dated.sources)[1].lastModified, "2026-10-03T09:00:00.000Z");
+  for (const mode of ["rpc-failure", "rpc-null", "rpc-throws", "rpc-malformed"]) {
+    const result = run(mode);
+    assert.deepEqual(result.snapshot.unavailableSources, ["public-changes"]);
+    assert.equal(Object.hasOwn(result.sources, "publicChanges"), false);
+    assert.equal(datedSitemapEntries(routes, {}, siteUrl, result.sources)[1].lastModified, "2026-10-02T09:00:00.000Z", "Legacy surviving section dates remain usable.");
+    assert.equal(JSON.stringify(result).includes("private"), false);
+    assert.match(analyse(result.sources, {}, result.snapshot.unavailableSources)[0].message, /durable public section\/SEO dates/);
+  }
 });

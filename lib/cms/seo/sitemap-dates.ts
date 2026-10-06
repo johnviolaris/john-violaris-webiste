@@ -13,6 +13,8 @@ export type SitemapDateSources = {
   media: (ModifiedRow & { url: string })[];
   services: ModifiedRow[];
   articles: ModifiedRow[];
+  /** Defined (even empty) only after the durable public-date RPC succeeds. */
+  publicChanges?: { path: string; modified_at: string | null }[];
 };
 export type SitemapDatedRoute = { path: string; group: string; lastModified?: string; imageUrl?: string };
 
@@ -35,7 +37,17 @@ export function sitemapModificationDates(routes: readonly SitemapDatedRoute[], s
   }
   for (const route of routes) add(route.path, route.lastModified);
 
-  for (const row of sources.sections) {
+  for (const row of sources.publicChanges ?? []) {
+    const date = timestamp(row.modified_at);
+    // Public watermarks are observed changes, never future publication dates.
+    if (date !== null && date <= Date.now()) add(row.path, row.modified_at);
+  }
+
+  // Once available, watermarks are authoritative for these two source types.
+  // Their row updated_at still changes on equal-content upserts; using it here
+  // would undo the trigger's no-op protection. Older schemas retain the former
+  // current-row behaviour and the private report flags the unavailable source.
+  for (const row of sources.publicChanges === undefined ? sources.sections : []) {
     const section = findSection(row.page, row.section);
     if (!section) continue;
     for (const route of routes) {
@@ -45,7 +57,7 @@ export function sitemapModificationDates(routes: readonly SitemapDatedRoute[], s
       if (section.appearsOn.includes(route.path) || wildcard) add(route.path, row.updated_at);
     }
   }
-  for (const row of sources.seo) add(row.path, row.updated_at);
+  for (const row of sources.publicChanges === undefined ? sources.seo : []) add(row.path, row.updated_at);
   const stored = Object.fromEntries(sources.settings
     .filter((row) => siteSettingKeys.includes(row.key as (typeof siteSettingKeys)[number]) && typeof row.value === "string")
     .map((row) => [row.key, row.value])) as Partial<SiteSettings>;

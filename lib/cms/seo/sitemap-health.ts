@@ -3,10 +3,10 @@ import { belongsInSitemap } from "@/lib/cms/seo/resolve";
 import type { SeoHealthIssue } from "@/lib/cms/seo/health";
 import type { SeoContent } from "@/lib/cms/types";
 
-export type SitemapUnavailableSource = "sections" | "seo" | "settings" | "media" | "collections" | "source-read";
+export type SitemapUnavailableSource = "sections" | "seo" | "settings" | "media" | "collections" | "public-changes" | "source-read";
 export type SitemapDateSnapshot = { sources: SitemapDateSources; unavailableSources: SitemapUnavailableSource[] };
 const sourceLabels: Record<SitemapUnavailableSource, string> = {
-  sections: "page-section dates", seo: "SEO-override dates", settings: "site-setting dates", media: "media-description dates", collections: "service/article collection dates", "source-read": "public modification-date sources",
+  sections: "page-section dates", seo: "SEO-override dates", settings: "site-setting dates", media: "media-description dates", collections: "service/article collection dates", "public-changes": "durable public section/SEO dates", "source-read": "public modification-date sources",
 };
 
 /** Private diagnostics only. Unknown dates remain omitted from the public sitemap. */
@@ -18,7 +18,7 @@ export function analyseSitemapDates(routes: readonly (SitemapDatedRoute & { labe
   }
   for (const route of routes) {
     if (belongsInSitemap(route.path, overrides[route.path] ?? null, siteUrl) && !dates.has(route.path)) {
-      issues.push({ path: route.path, label: route.label, code: "sitemap-date-unknown", severity: "info", message: "No valid modification date survives in this page's current public sources. Its sitemap entry correctly omits lastmod. A code-only edit, removed row or reset may require separate dated change evidence; the build time is not a substitute." });
+      issues.push({ path: route.path, label: route.label, code: "sitemap-date-unknown", severity: "info", message: "No valid modification date survives in this page's recorded public sources. Its sitemap entry correctly omits lastmod. Code-only edits and historical changes outside the durable section/SEO scope still need separate dated evidence; the build time is not a substitute." });
     }
   }
   return issues;
