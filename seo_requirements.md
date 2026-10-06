@@ -35,6 +35,23 @@ These were settled before this document was written. They are assumptions baked 
 | **Consultations**    | No TidyCal or other booking calendar. Consultation CTAs lead to the contact journey: form, phone, email, or WhatsApp.       | §6, §10 |
 | **Fees**             | No public fee figures and no fee-schedule admin. `/fees` explains how scope and fees are discussed privately.              | §8, §9, §12 |
 
+### Scope decisions (2026-10-06)
+
+Agreed with Luka on 2026-10-06, after the remaining checklist was reviewed
+against `prd.md` and the project execution plan. Each requirement below is
+either met by the existing design or deferred until a named trigger. None is
+open launch work. Reopen one only when its trigger happens.
+
+| Requirement | Decision | Why | Reopen when |
+| --- | --- | --- | --- |
+| **REQ-004** Editable URL slug | Met for editable content. Fixed pages stay code-defined. | Service and article slugs are validated, unique and editable, with automatic redirects and a confirmation naming both URLs (REQ-030). `prd.md` §13 lists slugs only for services and blog posts. `/about`, `/fees`, `/contact` and the other fixed pages are site structure, not content. A warning based on organic traffic needs Search Console data. | Search Console is connected, or a fixed page genuinely needs renaming |
+| **REQ-009** Metadata resolution order | Met by design | One resolver, `resolveMetadata` in `lib/cms/seo/resolve.ts`, serves every public route. Each entity's SEO panel edits the same path-keyed row as the SEO Metadata screen, so layers 3 and 4 are one store. A second per-entity store would give the same tag two sources of truth. | A page needs metadata independent of its URL |
+| **REQ-029** CMS-managed redirect table | Met by design | Redirects are stored in Supabase, managed in the admin, loop-checked and chain-flattened. Missing paths resolve through a cached server route (60-second ISR), so no request pays a database round trip and a new rule applies within 60 seconds. A lookup in `proxy.ts` on every request would slow every page for no visitor benefit. | A redirect must override a working page |
+| **REQ-032** Generated XML sitemap | Met. Further date provenance is not planned. | The sitemap is generated from the CMS, excludes private and unpublished content and refreshes on save. An entry without genuine change evidence omits `lastModified` rather than using build time. `lastmod` is optional in the sitemaps.org protocol, and Google uses it only when it is consistently accurate. | Search Console reports sitemap date problems |
+| **REQ-043** Location content type | Content deferred | The architecture, editor and quality gates exist, and zero location pages are published, as §7 requires. A real draft, preview and publish test needs an isolated backend and genuine local content from John. | John decides to publish location pages |
+| **REQ-049** Scheduled publishing | Deferred beyond articles | Articles schedule start and expiry in Europe/London time; expired articles return 404 and leave the sitemap. John publishes services and website content directly. Google treats a lasting 404 much like a 410. | John needs to schedule other content, or to retire many URLs at once |
+| **REQ-051** Role-based access | Consultant role deferred | Administrator and restricted SEO-editor roles exist and are enforced by RLS. This spec makes the broader content-and-SEO role conditional on a consultant being engaged, and none is. | An SEO consultant is engaged |
+
 ### Implementation and release status (updated 2026-10-06)
 
 The reviewed 2026-10-05 implementation is live on `johnviolaris.com`. All seven
@@ -299,6 +316,8 @@ The visible `<h1>` and the `<title>` serve different readers and must be indepen
 
 **Note.** The existing slugs (`/services/drink-driving`, `/services/totting-up`) are good. Resist deepening the hierarchy — `/services/drink-driving` beats `/motoring/offences/drink-driving` for both crawlers and humans.
 
+**Scope decision (2026-10-06): met for editable content.** Fixed pages stay code-defined; the traffic-aware warning waits for Search Console. See [Scope decisions](#scope-decisions-2026-10-06).
+
 ### REQ-005 — Canonical URL per route
 
 **P0**
@@ -386,6 +405,8 @@ With three layers able to set the same tag — the root layout, the route's `gen
 - An empty string in a CMS field is treated as "unset" and falls through; it never renders an empty tag.
 - Unit tests cover: all layers set; only root set; CMS set but blank; CMS row absent.
 - `metadataBase` remains set so all relative URLs resolve absolute.
+
+**Scope decision (2026-10-06): met by design.** Entity SEO panels and SEO Metadata edit the same path-keyed row, so layers 3 and 4 share one store. See [Scope decisions](#scope-decisions-2026-10-06).
 
 ---
 
@@ -742,6 +763,8 @@ John should be able to retire or rename a page without a developer.
 
 **Released status (2026-10-06): partial.** The table (migration `20260927215019`, applied to production 2026-10-03) stores redirects with a `permanent` boolean, `source_kind` and entity id, rejects loops and flattens chains. The admin UI manages manual and generated rules. A generic missing-path server route uses 60-second ISR; saves invalidate dependent aliases. Working routes cannot be overridden. Private notes are stored in a separate admin-only relation and saved atomically; the specified proxy-wide lookup remains absent. Host and lowercase redirects run in `proxy.ts` before session refresh; its matcher excludes Next assets and image files.
 
+**Scope decision (2026-10-06): met by design.** The cached missing-path route meets the no-round-trip and 60-second criteria; a per-request lookup in `proxy.ts` is not planned. See [Scope decisions](#scope-decisions-2026-10-06).
+
 ### REQ-030 — Slug changes auto-create redirects
 
 **P1**
@@ -806,6 +829,10 @@ private routes do not contribute. Collection withdrawals, settings/media
 deletions and code-only changes still lack complete provenance, so REQ-032
 remains partial. The migration and focused SQL tests are described in
 `docs/sitemap-date-evidence.md`.
+
+**Scope decision (2026-10-06): met.** Entries without genuine evidence keep
+omitting `lastModified`; further date provenance is not planned. See
+[Scope decisions](#scope-decisions-2026-10-06).
 
 ### REQ-033 — Sitemap index
 
@@ -881,6 +908,28 @@ Targets are measured on **mobile**, Lighthouse simulated 4G, mid-tier device.
 - The hero and testimonial marquee preserve their original transforms and timings using native browser animations. Review animation work pauses offscreen, on hover/focus and for reduced motion. Rerun mobile Lighthouse on the release preview before claiming the LCP target is met.
 - Fonts are preloaded. `next/font` already handles this for the three faces in `app/layout.tsx`.
 - Lighthouse mobile shows LCP under 2.5s on home, a service page, and an article.
+
+**Live measurement (2026-10-06).** Lighthouse 13.5 mobile ran against
+johnviolaris.com from a local machine, two runs per page. Home LCP was
+2.68–2.76s (performance 90–96), the drink-driving service 2.51–2.70s (93–97)
+and the drink-driving arrest article 2.06–2.20s (97–99). CLS was 0 throughout.
+The article meets this criterion; home and the service page do not.
+
+Lighthouse's simulated LCP here is roughly the time to download everything
+requested before the portrait paints. Request-blocking runs on the live home
+page attributed about 0.54s to the three preloaded `next/font` faces (about
+113 KB together). Blocking only the Playfair italic face gave 2.50s. Blocking
+all app-specific JavaScript saved about 0.06s. No safe font saving remains:
+
+- Narrower weight ranges do not shrink Google's variable font files.
+- Fixed-weight files would add bytes, because Playfair renders at 400, 400
+  italic, 500 and 700.
+- A subset to the site's characters saves only about 26 KB.
+
+Closing the gap therefore needs a design change to the fonts, not a code fix.
+`prd.md` §20's target of about 90+ is met on all three pages. Lighthouse CI
+runs on shared GitHub runners and has recorded lower values for the same code
+(home 77). Field LCP is unverified.
 
 ### REQ-039 — CLS under 0.1
 
@@ -979,6 +1028,10 @@ withdrawal. Rich context deliberately uses this small Markdown subset rather
 than arbitrary HTML, image embeds or a full document editor. Real saved-draft
 acceptance remains outstanding, so REQ-043 stays partial.
 
+**Scope decision (2026-10-06): content deferred** until John decides to publish
+location pages; the real draft test happens then, on an isolated backend. See
+[Scope decisions](#scope-decisions-2026-10-06).
+
 ### REQ-044 — URL structure decided up front
 
 **P3**
@@ -1057,6 +1110,8 @@ This section is about the operator experience: John making changes without calli
 - Content past `unpublishAt` returns 410 Gone (preferred over 404 — it tells Google the removal is intentional) and leaves the sitemap.
 - Scheduling is timezone-explicit: Europe/London, with BST handled correctly.
 
+**Scope decision (2026-10-06): deferred beyond articles.** Expired articles return 404 and leave the sitemap. See [Scope decisions](#scope-decisions-2026-10-06).
+
 ### REQ-050 — Version history and audit log
 
 **P2**
@@ -1079,6 +1134,8 @@ The foundation exists: `profiles.role` and `private.is_admin()`, with RLS polici
 - Roles are documented. If a third-party SEO consultant is engaged later, a role that can edit content and SEO fields but not manage users or delete content should exist.
 - RLS is enforced at the database level, not only in the UI. The current migration does this correctly — keep it that way when adding tables.
 - Destructive actions require explicit confirmation.
+
+**Scope decision (2026-10-06): consultant role deferred** until a consultant is engaged. See [Scope decisions](#scope-decisions-2026-10-06).
 
 ### REQ-052 — SEO health checks in the editor
 
