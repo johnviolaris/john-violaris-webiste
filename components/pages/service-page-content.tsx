@@ -332,10 +332,7 @@ export async function ServicePageContent({ service, detail, groups, descriptions
                   <br />
                   <em>a conversation.</em>
                 </h2>
-                <p>
-                  A free initial consultation. A chance to explain your
-                  situation and understand the next step.
-                </p>
+                <p>Free professional advice with no obligation.</p>
                 <Link href={config.bookingHref} className="action-button">
                   Discuss your case <Icon name="arrowRight" size={17} />
                 </Link>
