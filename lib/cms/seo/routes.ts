@@ -46,10 +46,10 @@ export type SeoRoute = {
  * What the pages say in search results.
  *
  * Written for the results page rather than borrowed from each page's heading.
- * A heading speaks to someone already reading ("Your situation. A considered
- * response."); a title speaks to someone choosing which result to open, so it
- * leads with the words they typed: solicitor, lawyer, the offence. Each fits
- * where the SEO editor starts warning — 60 characters with " | John
+ * A heading speaks to someone already reading ("Whatever the accusation I’ll
+ * find the solution."); a title speaks to someone choosing which result to
+ * open, so it leads with the words they typed: solicitor, lawyer, the offence.
+ * Each fits where the SEO editor starts warning — 60 characters with " | John
  * Violaris" added, 155 for the description — and says nothing the page itself
  * does not.
  */

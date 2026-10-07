@@ -709,10 +709,10 @@ export const pageIntroDefaults: Record<string, PageIntroContent> = {
   },
   services: {
     eyebrow: "Areas of practice",
-    title: "Your situation.",
-    emphasis: "A considered response.",
+    title: "Whatever the accusation",
+    emphasis: "I’ll find the solution.",
     description:
-      "Motoring offences, police interviews and criminal defence. Find the support that fits what you’re facing.",
+      "Whether you’re accused of a criminal or driving offence, let me help you achieve the best possible outcome.",
   },
   "police-station": {
     eyebrow: "Police station representation",
