@@ -33,7 +33,16 @@ export function FeesPreview({
               {content.linkLabel} <Icon name="arrowRight" size={17} />
             </Link>
           </div>
-          <QuestionsAccordion questions={content.questions} />
+          <div>
+            {/* A label rather than a heading: the questions are already
+                headings under the section's own. */}
+            {content.questionsTitle ? (
+              <p className="eyebrow questions-title">
+                <span className="small-rule" /> {content.questionsTitle}
+              </p>
+            ) : null}
+            <QuestionsAccordion questions={content.questions} />
+          </div>
         </div>
       </Container>
     </section>

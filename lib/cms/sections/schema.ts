@@ -1021,6 +1021,14 @@ export const pageGroups: PageGroup[] = [
             maxLength: 60,
           },
           {
+            key: "questionsTitle",
+            label: "Questions title",
+            kind: "text",
+            hint: "The small capitals above the questions, e.g. “FAQs”.",
+            seo: seoTips.eyebrow,
+            maxLength: 80,
+          },
+          {
             key: "questions",
             label: "Questions",
             kind: "items",

@@ -502,6 +502,8 @@ export type FeesPreviewContent = {
   headlineEmphasis: string;
   body: string[];
   linkLabel: string;
+  /** The small capitals above the questions; left empty, none is shown. */
+  questionsTitle: string;
   questions: Question[];
 };
 
@@ -514,26 +516,42 @@ export const feesPreviewDefaults: FeesPreviewContent = {
     "Whether you want to hold your hands up and plead guilt or to fight your case all the way, I will give you my honest opinion regardless of how much this impacts your legal fees.",
   ],
   linkLabel: "More about fees",
+  questionsTitle: "FAQs",
   questions: [
     {
-      question: "Will I deal directly with John?",
+      question: "Can I get legal aid for the police station?",
       answer:
-        "Yes. Personal representation is central to the practice. Your initial conversation is with John, and he will explain how he can help with your case.",
+        "Everyone who is interviewed under Caution (whether by the police or the local authority) for any offence is entitled to state funded legal representation. John would represent you through his sister firm Darryl Ingram Solicitors and you would not have to pay anything for this.",
     },
     {
-      question: "What should I have ready for the first conversation?",
+      question: "Can I get legal aid for Court?",
       answer:
-        "Any letters, notices or court papers you have received, along with the dates of any hearing or police interview. If you don’t have everything to hand, you can still get in touch.",
+        "If you are in receipt of benefits or earn under £1,500 per month and have been charged with an imprisonable offence (note most driving offences are excluded), you are likely to be eligible for legal aid at Court. John would refer you to his sister firm Darryl Ingram solicitors who would apply for legal aid on your behalf. Unfortunately, it may not be John who handles your case or represents you at Court.",
     },
     {
-      question: "Can John help outside London?",
+      question: "When will I have to pay my legal fees?",
       answer:
-        "John represents clients across England and Wales. Share the location of your case when you get in touch so he can discuss the arrangements with you.",
+        "If you instruct John privately, you can pay in full when you officially instruct him, or by instalments before each main stage of your proceedings.",
+    },
+    {
+      question: "Will I deal with John directly?",
+      answer:
+        "Yes, if you instruct John privately you will only deal with John. Personal representation is central to this practice and John will deal with your case from start to finish.",
+    },
+    {
+      question: "Can John help outside of South-East England?",
+      answer:
+        "John represents clients across England and Wales. Share the location of your case when you get in touch so he can discuss costs in relation to this.",
+    },
+    {
+      question: "What should I have ready when I first speak to John?",
+      answer:
+        "Any letters, notices or case papers that you are in possession of. The dates of any hearings or police interviews, paperwork detailing the alleged offence(s) and the contact details of the officer in charge would all be of use.",
     },
     {
       question: "What if my court hearing or interview is urgent?",
       answer:
-        "Make the date and urgency clear when contacting John. For an imminent hearing or interview, please call rather than waiting for an email response.",
+        "Make the date and urgency clear when contacting John. For an urgent hearing or interview, please call 07427260293 for a speedy response.",
     },
   ],
 };

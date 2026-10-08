@@ -1027,6 +1027,9 @@ body {
 .fees-note .display-heading {
   font-size: 39px;
 }
+.questions-title {
+  margin-bottom: 21px;
+}
 .fees-note > p:not(.eyebrow) {
   font-size: 13px;
   line-height: 1.9;
