@@ -511,7 +511,7 @@ export const feesPreviewDefaults: FeesPreviewContent = {
   headlineEmphasisLead: "with",
   headlineEmphasis: "honesty.",
   body: [
-    "Your first consultation is free. Before you instruct me, we’ll discuss the work involved and the fees, so you can make an informed decision.",
+    "Whether you want to hold your hands up and plead guilt or to fight your case all the way, I will give you my honest opinion regardless of how much this impacts your legal fees.",
   ],
   linkLabel: "More about fees",
   questions: [
