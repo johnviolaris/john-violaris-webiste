@@ -703,7 +703,7 @@ export const blogIntroDefaults: PageIntroContent = {
   title: "A little clarity.",
   emphasis: "Before we talk.",
   description:
-    "Plain-English explanations of motoring law from a practising solicitor with over 20 years of criminal defence experience.",
+    "Plain-English explanations of motoring offences and what to look out for if you find yourself on the wrong side of the law.",
 };
 
 /**
