@@ -29,9 +29,11 @@ export function FeesPreview({
               <em>{content.headlineEmphasis}</em>
             </h2>
             <Paragraphs values={content.body} />
-            <Link href="/fees" className="text-link">
-              {content.linkLabel} <Icon name="arrowRight" size={17} />
-            </Link>
+            {content.linkLabel ? (
+              <Link href="/fees" className="text-link">
+                {content.linkLabel} <Icon name="arrowRight" size={17} />
+              </Link>
+            ) : null}
           </div>
           <div>
             {/* A label rather than a heading: the questions are already

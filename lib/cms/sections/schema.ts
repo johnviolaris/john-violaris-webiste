@@ -1017,6 +1017,7 @@ export const pageGroups: PageGroup[] = [
             key: "linkLabel",
             label: "Link to fees",
             kind: "text",
+            hint: "Leave empty to hide the link.",
             seo: seoTips.linkText,
             maxLength: 60,
           },

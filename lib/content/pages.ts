@@ -501,6 +501,7 @@ export type FeesPreviewContent = {
   headlineEmphasisLead: string;
   headlineEmphasis: string;
   body: string[];
+  /** The link to /fees under the text; left empty, none is shown. */
   linkLabel: string;
   /** The small capitals above the questions; left empty, none is shown. */
   questionsTitle: string;
@@ -515,7 +516,7 @@ export const feesPreviewDefaults: FeesPreviewContent = {
   body: [
     "Whether you want to hold your hands up and plead guilt or to fight your case all the way, I will give you my honest opinion regardless of how much this impacts your legal fees.",
   ],
-  linkLabel: "More about fees",
+  linkLabel: "",
   questionsTitle: "FAQs",
   questions: [
     {
