@@ -5,7 +5,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { Logo } from "@/components/layout/logo";
-import { ServicesMenu } from "@/components/layout/services-menu";
+import {
+  MobileServicesMenu,
+  ServicesMenu,
+} from "@/components/layout/services-menu";
 import { useSiteConfig } from "@/components/layout/site-config-provider";
 import { mainNav, whatsappHref } from "@/lib/site-config";
 import { Icon } from "@/components/ui/icons";
@@ -192,6 +195,8 @@ export function SiteHeader() {
         </button>
         <nav aria-label="Mobile" className="px-5 py-4 sm:px-8">
           <ul className="divide-y divide-white/6">
+            {/* Keyed to the drawer so it opens collapsed every time. */}
+            <MobileServicesMenu key={openedOn ?? "closed"} />
             {mainNav.map((item) => (
               <li key={item.href}>
                 <Link

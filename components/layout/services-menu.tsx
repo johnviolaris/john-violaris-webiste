@@ -266,3 +266,92 @@ export function ServicesMenu() {
     </div>
   );
 }
+
+/**
+ * The same catalogue, folded into the top of the mobile drawer.
+ *
+ * Phones have no room for the "All services" button beside the logo, so it
+ * lives here instead. Collapsed by default so the main links stay in view.
+ * Renders a list item: it sits first in the drawer's link list.
+ */
+export function MobileServicesMenu() {
+  const { groups: serviceGroups } = useServiceCatalogue();
+  const pathname = usePathname();
+  const listId = useId();
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+        aria-controls={listId}
+        className={`flex w-full items-center justify-between py-3.5 text-left text-[15px] font-medium ${
+          expanded ? "text-gold-light" : "text-cream/80"
+        }`}
+      >
+        All services
+        {/* Plus that folds into a minus when open. */}
+        <span aria-hidden="true" className="relative block size-3.5 text-gold/60">
+          <span className="absolute top-1/2 left-0 block h-px w-full -translate-y-1/2 bg-current" />
+          <span
+            className={`absolute top-0 left-1/2 block h-full w-px -translate-x-1/2 bg-current transition-transform duration-300 ease-out ${
+              expanded ? "rotate-90" : "rotate-0"
+            }`}
+          />
+        </span>
+      </button>
+
+      <div
+        id={listId}
+        inert={!expanded}
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+          expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="grid gap-x-8 gap-y-6 pt-1 pb-5 sm:grid-cols-2">
+            {serviceGroups.map((group, groupIndex) => (
+              <div key={group.heading}>
+                <p
+                  id={`${listId}-group-${groupIndex}`}
+                  className="border-b border-gold/20 pb-2 text-[10px] font-bold tracking-[0.2em] text-gold uppercase"
+                >
+                  {group.heading}
+                </p>
+                <ul
+                  aria-labelledby={`${listId}-group-${groupIndex}`}
+                  className="mt-2"
+                >
+                  {group.services.map((service) => (
+                    <li key={service.href}>
+                      <Link
+                        href={service.href}
+                        aria-current={
+                          pathname === service.href ? "page" : undefined
+                        }
+                        className={`flex items-center gap-3 py-2.5 text-[14px] ${
+                          pathname === service.href
+                            ? "text-gold-light"
+                            : "text-cream/80"
+                        }`}
+                      >
+                        <Icon
+                          name={service.icon}
+                          size={16}
+                          className="shrink-0 text-gold/70"
+                        />
+                        {service.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </li>
+  );
+}
