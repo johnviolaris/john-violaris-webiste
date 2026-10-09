@@ -15,6 +15,8 @@ import { revalidateFor } from "@/lib/cms/revalidate";
 import {
   emptyServicePageValues,
   requiredToPublish,
+  requiredWithoutSections,
+  servicePageContentFrom,
   servicePageFields,
   servicePageItemFields,
   servicePageRules,
@@ -24,7 +26,6 @@ import {
 import type { SectionItem } from "@/lib/cms/sections/schema";
 import { readItems } from "@/lib/cms/sections/values";
 import type { ServiceContent, ServicePageContent } from "@/lib/cms/types";
-import type { PenaltyCard, TableRow } from "@/lib/content/service-detail";
 import { cmsWrite } from "@/lib/cms/write";
 import { createClient } from "@/utils/supabase/server";
 import { getPublicationSeoWarnings } from "@/lib/cms/seo/publication-check";
@@ -65,7 +66,11 @@ function missingToPublish(
   const faqs = validateFaqItems(content.faqItems);
   if (!faqs.ok) missing.faqItems = faqs.error;
 
-  for (const field of requiredToPublish) {
+  // A long-form page is laid out from its sections; one without them needs
+  // the shorter template's eyebrow, introduction and points instead.
+  const longForm = Boolean(content.sections?.length);
+
+  for (const field of longForm ? requiredToPublish : [...requiredToPublish, ...requiredWithoutSections]) {
     if (!content[field]) {
       missing[field] = `${servicePageRules[field].label} is needed before the page can be published.`;
     }
@@ -76,12 +81,17 @@ function missingToPublish(
       "A published page needs at least one at-a-glance card.";
   }
 
-  if (!content.defenceIssues?.length) {
+  if (!longForm && !content.defenceIssues?.length) {
     missing.defenceIssues =
-      "A published page needs at least one point in this list.";
+      "A published page needs at least one point in this list, or long-form sections.";
   }
 
   return Object.keys(missing).length > 0 ? missing : null;
+}
+
+/** A path on this site — `/services/speeding` — rather than another site or a script. */
+function isSitePath(href: string): boolean {
+  return /^\/(?!\/)[^\s]*$/.test(href);
 }
 
 export async function saveServicePage(
@@ -142,6 +152,14 @@ export async function saveServicePage(
     if (result.error) fieldErrors[key] = result.error;
   }
 
+  const offSite = items.relatedLinks.findIndex(
+    (link) => !isSitePath(String(link.href ?? "")),
+  );
+
+  if (offSite !== -1 && !fieldErrors.relatedLinks) {
+    fieldErrors.relatedLinks = `Link ${offSite + 1} needs an address on this site, starting with “/”, e.g. /services/speeding.`;
+  }
+
   if (!validation.ok || Object.keys(fieldErrors).length > 0) {
     return formError(submitted, fieldErrors);
   }
@@ -159,25 +177,10 @@ export async function saveServicePage(
   const faqs = readFaqItems(formData, existing?.content.faqItems);
   if (!faqs.ok) return formError(values, { faqItems: faqs.error });
 
-  const content: ServicePageContent = {
-    headline: values.headline,
-    emphasis: values.emphasis,
-    intro: values.intro,
-    penalties: items.penalties as PenaltyCard[],
-    issuesHeading: values.issuesHeading,
-    issuesIntro: values.issuesIntro,
-    defenceIssues: items.defenceIssues as ServicePageContent["defenceIssues"],
-    process: existing?.content.process ?? [],
-    ...(faqs.items.length ? { faqItems: faqs.items } : {}),
-    // Absent rather than empty, as the seeded pages have them: the page reads
-    // an absent table as "fall back" or "leave the section out".
-    ...(items.outcomes.length > 0
-      ? { outcomes: items.outcomes as TableRow[] }
-      : {}),
-    ...(items.ancillaryOrders.length > 0
-      ? { ancillaryOrders: items.ancillaryOrders as TableRow[] }
-      : {}),
-  };
+  const content = servicePageContentFrom(values, items, {
+    process: existing?.content.process,
+    faqItems: faqs.items,
+  });
 
   // A draft may be incomplete — that is what a draft is for. A published page
   // may not: it would render headings with nothing under them.

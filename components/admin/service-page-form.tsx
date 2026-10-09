@@ -25,6 +25,8 @@ import {
   initialServicePageFormState,
   outcomesField,
   penaltiesField,
+  relatedLinksField,
+  sectionsField,
   servicePageAsSection,
   servicePageItemFields,
   servicePageValuesFrom,
@@ -199,12 +201,110 @@ export function ServicePageForm({ service, page }: ServicePageFormProps) {
         <section className="space-y-4 rounded-xl border p-4 md:p-5">
           <div>
             <h2 className="font-display text-lg font-semibold">
+              The long-form page
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Everything below the at-a-glance cards: an opening statement, a
+              highlighted box, the sections, a quote and the related pages.
+              Once the page has at least one section, these replace “Clarity
+              first” and the tables further down, which are then not shown.
+            </p>
+          </div>
+
+          <FormattingGuide />
+
+          <Field
+            label="Opening statement"
+            labelFor={`${formId}-lead`}
+            hint="The statement beneath the cards, set large. Words between **double asterisks** are picked out in gold italics."
+            seo={seoTips.prose}
+            error={state.fieldErrors.lead}
+            errorId={errorId("lead")}
+          >
+            <Textarea rows={4} {...fieldProps("lead")} />
+          </Field>
+
+          <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
+            <Field
+              label="Highlighted box, title"
+              labelFor={`${formId}-alertTitle`}
+              hint="e.g. “Already have points?”. Leave both empty for no box."
+              error={state.fieldErrors.alertTitle}
+              errorId={errorId("alertTitle")}
+            >
+              <Input {...fieldProps("alertTitle")} />
+            </Field>
+
+            <Field
+              label="Highlighted box, text"
+              labelFor={`${formId}-alertBody`}
+              error={state.fieldErrors.alertBody}
+              errorId={errorId("alertBody")}
+            >
+              <Textarea rows={3} {...fieldProps("alertBody")} />
+            </Field>
+          </div>
+
+          {items(sectionsField)}
+
+          <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
+            <Field
+              label="Quote"
+              labelFor={`${formId}-quote`}
+              hint="Set as a pull quote after the last section. Quotation marks are added for you."
+              error={state.fieldErrors.quote}
+              errorId={errorId("quote")}
+            >
+              <Textarea rows={3} {...fieldProps("quote")} />
+            </Field>
+
+            <Field
+              label="Quote, attributed to"
+              labelFor={`${formId}-quoteCite`}
+              hint="e.g. “John Violaris”."
+              error={state.fieldErrors.quoteCite}
+              errorId={errorId("quoteCite")}
+            >
+              <Input {...fieldProps("quoteCite")} />
+            </Field>
+          </div>
+
+          {items(relatedLinksField)}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label="Closing banner, heading"
+              labelFor={`${formId}-ctaHeading`}
+              hint="The large line in the gold band at the foot of the page, e.g. “Charged with careless driving?”. Leave empty for the standard one."
+              error={state.fieldErrors.ctaHeading}
+              errorId={errorId("ctaHeading")}
+            >
+              <Input {...fieldProps("ctaHeading")} />
+            </Field>
+
+            <Field
+              label="Closing banner, emphasised part"
+              labelFor={`${formId}-ctaEmphasis`}
+              hint="Set in italic beneath it, e.g. “Call before you respond to anything.”"
+              error={state.fieldErrors.ctaEmphasis}
+              errorId={errorId("ctaEmphasis")}
+            >
+              <Input {...fieldProps("ctaEmphasis")} />
+            </Field>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        <section className="space-y-4 rounded-xl border p-4 md:p-5">
+          <div>
+            <h2 className="font-display text-lg font-semibold">
               Clarity first
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              The section after “The legal framework”. Its heading is the same
-              on every page; the eyebrow, introduction and points are this
-              page’s own.
+              The shorter template, for a page without long-form sections: the
+              section after “The legal framework”. Its heading is the same on
+              every page; the eyebrow, introduction and points are this page’s
+              own.
             </p>
           </div>
 
@@ -245,7 +345,8 @@ export function ServicePageForm({ service, page }: ServicePageFormProps) {
               Outcomes and orders
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Both tables are optional.
+              Both tables are optional, and like “Clarity first” they are only
+              shown on a page without long-form sections.
             </p>
           </div>
 
@@ -350,6 +451,52 @@ function SaveButton({ isNew }: { isNew: boolean }) {
     <Button type="submit" disabled={pending}>
       {pending ? "Saving…" : isNew ? "Create page" : "Save changes"}
     </Button>
+  );
+}
+
+/**
+ * The marks a section's text can use, beside the fields that use them.
+ *
+ * The full description, and the parser, are `lib/content/service-markup.ts`;
+ * this is the version an editor needs at hand.
+ */
+function FormattingGuide() {
+  const rows: [string, string][] = [
+    ["A blank line", "Starts a new paragraph."],
+    ["### Heading", "A sub-heading within the section."],
+    ["#### Title", "A smaller heading. Also the title of a card, a stage or a box."],
+    ["##### Label", "Small capitals, e.g. above a card’s title."],
+    ["###### Note", "Small print, e.g. the source under a table."],
+    ["- item", "A bulleted list, one item per line. Use 1. for a numbered list."],
+    ["| A | B |", "A table, one row per line. The first row is the header; a row of | --- | under it is optional."],
+    ["::: note", "Starts a gold box; a line with just ::: ends it. Use ::: warning for a red one."],
+    ["::: cards", "Cards side by side, ended by :::. Put a line of --- between one card and the next."],
+    ["::: steps", "Numbered stages, ended by :::. Put a line of --- between stages."],
+    ["**bold**  *italic*", "Within any line."],
+    ["[link text](/services/speeding)", "A link. Use an address on this site, or a full https:// address."],
+  ];
+
+  return (
+    <details className="rounded-lg border bg-muted/40 px-4 py-3 text-sm">
+      <summary className="cursor-pointer font-medium">
+        How to format the text of a section
+      </summary>
+      <p className="mt-2 text-muted-foreground">
+        Write as you would in a document. These marks, at the start of a line,
+        give the text its layout. After saving, “Preview saved service page”
+        below the form shows the page as visitors will see it.
+      </p>
+      <dl className="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-[minmax(0,14rem)_1fr]">
+        {rows.map(([mark, meaning]) => (
+          <div key={mark} className="contents">
+            <dt>
+              <code className="rounded bg-background px-1.5 py-0.5 text-xs">{mark}</code>
+            </dt>
+            <dd className="text-muted-foreground">{meaning}</dd>
+          </div>
+        ))}
+      </dl>
+    </details>
   );
 }
 

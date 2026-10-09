@@ -134,10 +134,44 @@ anything.
 ## Service Pages: the long page for each offence
 
 **Service Pages** holds the full page for each offence: the heading, the
-at-a-glance cards, the points you examine, the outcome tables and the questions.
-A page shows on the site only while both it and its service are published. A
-service without a published page still has a page, with general wording about
-how you can help.
+at-a-glance cards, the body of the page and the questions. A page shows on the
+site only while both it and its service are published. A service without a
+published page still has a page, with general wording about how you can help.
+
+Eleven pages are **long-form**: your own pages, with every section you wrote.
+Under **The long-form page** in the editor you will find:
+
+- the **Opening statement** beneath the cards,
+- an optional **Highlighted box**, such as "Already have points?",
+- the **Sections**, each an optional eyebrow, a heading and its text,
+- a **Quote** set after the last section,
+- the **Related pages** listed at the foot, and
+- the **Closing banner** heading for that page.
+
+The text of a section is written like a document, with a few marks at the start
+of a line for its layout. The editor lists them under **How to format the text
+of a section**:
+
+| Write                            | To get                                                     |
+| -------------------------------- | ---------------------------------------------------------- |
+| a blank line                     | a new paragraph                                            |
+| `### Heading`                    | a sub-heading                                              |
+| `#### Title`                     | a smaller heading, or the title of a card, stage or box    |
+| `##### Label`                    | small capitals, e.g. above a card's title                  |
+| `###### Note`                    | small print, e.g. the source under a table                 |
+| `- item`, `1. item`              | a bulleted or numbered list, one item per line             |
+| `\| A \| B \|`                   | a table, one row per line, the first row the header        |
+| `::: note` … `:::`               | a gold box (`::: warning` for a red one)                   |
+| `::: cards` … `:::`              | cards side by side, with a line of `---` between cards     |
+| `::: steps` … `:::`              | numbered stages, with a line of `---` between stages       |
+| `**bold**`, `*italic*`           | bold or italic words                                       |
+| `[link text](/services/speeding)`| a link                                                     |
+
+A page with sections shows them in place of the shorter template ("Clarity
+first", the points examined and the outcome tables), so those fields stay empty
+on a long-form page. Save, then use **Preview saved service page** to check the
+layout. Each save is kept under **Saved versions**, so an earlier version of a
+page can always be restored.
 
 ## Blog Posts: the Resources section
 

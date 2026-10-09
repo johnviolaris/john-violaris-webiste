@@ -434,20 +434,39 @@ same arrangement as `SiteConfigProvider`; the footer takes it as a prop.
   driving record. Renaming it in the CMS would change that, and the editor says
   so beside the field.
 
-**`/admin/service-pages`** is the long-form page for each service: the heading
-and standfirst, up to three at-a-glance cards, the points examined, and the
-optional outcomes and ancillary-orders tables. The repeating groups use the
-same `ItemsField` and `readItems` as Website Content. A page is addressed by
-its service, and the first save creates it.
+**`/admin/service-pages`** is the page for each service: the heading and
+standfirst, up to six at-a-glance cards, and then one of two bodies. A
+**long-form** page has sections — an optional eyebrow, a heading and text
+written in the markup `lib/content/service-markup.ts` parses (headings, lists,
+tables, boxes, cards and numbered stages) — plus an opening statement, a
+highlighted box, a quote, hand-picked related pages and its own closing-banner
+heading. A page without sections keeps the shorter template: the points
+examined and the optional outcomes and ancillary-orders tables. The repeating
+groups use the same `ItemsField` and `readItems` as Website Content. A page is
+addressed by its service, and the first save creates it.
 
 - A draft saves with only a heading. Publishing — from the editor or from the
-  list — needs the rest, so a half-written page cannot go live.
+  list — needs the rest, so a half-written page cannot go live. A long-form
+  page needs its sections in place of the eyebrow, introduction and points.
 - A published service with no published page still resolves, with the general
   copy it always had, rather than 404ing from a link the menu printed.
-- `process` is stored on every page but no page renders it, so it has no field;
-  the save carries it over. The copy every offence page shares — "Clarity
-  first", the checklist, the contact card — is template text, not editable
-  here.
+- `process` is stored on the shorter pages but no page renders it, so it has no
+  field; the save carries it over. The copy those pages share — "Clarity
+  first", the checklist — and the contact card on every page are template text,
+  not editable here.
+- The markup is parsed on the server; the page ships no script for it. Section
+  headings are `h2`, and the renderer numbers the headings inside them so the
+  outline never skips a level. Links in the markup are checked by the SEO
+  health report like any other content link.
+
+Eleven offence pages are long-form: John's own pages, from the standalone
+`jv-*.html` files his first demo pointed at and the demo's Drink Driving tab,
+one module each under `lib/content/service-pages/`. Only the demo's chrome and
+its fixed-fee boxes were left out, since no prices are published.
+`20261009140000_restore_full_offence_pages.sql` puts them in the database,
+guarded on the exact short versions the seed wrote, so a page edited in the
+CMS in the meantime is left alone. Apply it before the code deploys: the
+pages are static, and the build that follows renders them from the new rows.
 
 `20260923140000_sync_magistrates_court_page.sql` brought the Magistrates Court
 page in the database up to the site's wording before the switch. It had been

@@ -1,6 +1,6 @@
 /** Render actual article/service templates against fixture-only metadata; no database or HTTP calls. */
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { registerHooks } from "node:module";
 import { pathToFileURL } from "node:url";
@@ -39,7 +39,18 @@ const hooks = registerHooks({
 });
 
 try {
-  for (const [file, name, current] of [["lib/content/service-detail.ts", "serviceDetails", serviceDetails], ["lib/content/blog.ts", "articles", articles]]) {
+  // The long-form offence pages live one to a file and are imported by
+  // `service-detail.ts`; each is compared with its own committed copy, since
+  // the committed `service-detail.ts` would otherwise import today's files.
+  const pageFiles = readdirSync("lib/content/service-pages").filter((file) => file.endsWith(".ts"));
+  const pageModules = await Promise.all(pageFiles.map((file) => import(`../lib/content/service-pages/${file}`)));
+  const contentFiles = [
+    ["lib/content/service-detail.ts", "serviceDetails", serviceDetails],
+    ["lib/content/blog.ts", "articles", articles],
+    ...pageFiles.flatMap((file, index) =>
+      Object.entries(pageModules[index]).map(([name, current]) => [`lib/content/service-pages/${file}`, name, current])),
+  ];
+  for (const [file, name, current] of contentFiles) {
     const original = execFileSync("git", ["show", `HEAD:${file}`], { encoding: "utf8" });
     const source = ts.transpileModule(original, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
     const baseline = await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);

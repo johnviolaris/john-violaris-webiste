@@ -17,10 +17,20 @@ export function normaliseSeoText(value: string): string {
   return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("en-GB");
 }
 
-/** Finds content hrefs and explicit article-to-service relationships. */
+/** `[text](/path)` links written in page markup — see `lib/content/service-markup.ts`. */
+const markupLink = /\]\((\/(?!\/)[^\s)]*)\)/g;
+
+/** Finds content hrefs, links written in page markup, and explicit article-to-service relationships. */
 export function internalLinkPaths(content: unknown, siteUrl: string): string[] {
   const paths = new Set<string>();
   const visit = (value: unknown) => {
+    if (typeof value === "string") {
+      for (const [, target] of value.matchAll(markupLink)) {
+        const path = target.split(/[?#]/)[0].replace(/\/$/, "") || "/";
+        if (!/\.[a-z0-9]{2,5}$/i.test(path)) paths.add(path);
+      }
+      return;
+    }
     if (Array.isArray(value)) { value.forEach(visit); return; }
     if (typeof value !== "object" || value === null) return;
     for (const [key, child] of Object.entries(value)) {
