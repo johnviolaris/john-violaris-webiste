@@ -241,6 +241,8 @@
 }
 .service-long-copy {
   min-width: 0;
+  /* Cards size to the text column, which is narrowest beside the rail. */
+  container-type: inline-size;
 }
 @media (max-width: 1023px) {
   /* The text column needs the full width for its tables and cards. */
@@ -448,11 +450,25 @@
   display: grid;
   gap: 14px;
 }
-.sp-cards--2 {
+/*
+ * Columns follow the width of the text column, not the screen: beside the
+ * rail on a laptop it is narrower than on a tablet without it. Three abreast
+ * only where each card keeps a readable line; one at phone width.
+ */
+.sp-cards--2,
+.sp-cards--3 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.sp-cards--3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+@container (min-width: 720px) {
+  .sp-cards--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@container (max-width: 479px) {
+  .sp-cards--2,
+  .sp-cards--3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .sp-card {
   padding: 22px;
@@ -532,10 +548,6 @@
   .sp-section-heading {
     font-size: 26px;
   }
-  .sp-cards--2,
-  .sp-cards--3 {
-    grid-template-columns: minmax(0, 1fr);
-  }
   .sp-box,
   .sp-alert {
     padding: 18px;
@@ -546,10 +558,5 @@
   }
   .sp-quote p {
     font-size: 20px;
-  }
-}
-@media (min-width: 768px) and (max-width: 1023px) {
-  .sp-cards--3 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
