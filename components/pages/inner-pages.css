@@ -36,6 +36,33 @@
 .page-intro-action {
   margin-top: 32px;
 }
+/* A photograph beside the heading, in the space the text leaves on the right. */
+.page-intro-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(240px, 22vw, 290px);
+  gap: clamp(40px, 6vw, 96px);
+  align-items: start;
+}
+.page-intro-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  box-shadow: 0 30px 60px rgb(0 0 0 / 30%);
+}
+.page-intro-figure figcaption {
+  margin-top: 14px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgb(250 250 248 / 70%);
+}
+@media (max-width: 767px) {
+  .page-intro-split {
+    grid-template-columns: 1fr;
+  }
+  .page-intro-figure {
+    width: min(100%, 300px);
+  }
+}
 .information-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

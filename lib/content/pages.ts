@@ -211,6 +211,19 @@ export const whyInstructDefaults: WhyInstructContent = {
 // About
 // ---------------------------------------------------------------------------
 
+/**
+ * The photograph beside the About page's opening heading. Set here rather than
+ * in the CMS: the page opening is shared by seven pages and only this one has
+ * a picture.
+ */
+export const aboutIntroFigure = {
+  src: "/wills-memorial-building-university-of-bristol.webp",
+  width: 582,
+  height: 800,
+  alt: "The Gothic tower of the Wills Memorial Building at the University of Bristol",
+  caption: "Wills Memorial Building — University of Bristol — Law Department",
+};
+
 export type MeetJohnContent = {
   eyebrow: string;
   headline: string[];

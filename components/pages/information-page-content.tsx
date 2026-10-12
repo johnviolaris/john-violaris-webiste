@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { CtaBanner } from "@/components/layout/cta-banner";
 import { PageIntro } from "@/components/pages/page-intro";
 import "./information-pages.css";
@@ -29,6 +30,7 @@ import { structuredDataFor } from "@/lib/cms/seo/metadata";
 import { resolveFrom } from "@/lib/cms/sections/resolve";
 import {
   aboutBackgroundDefaults,
+  aboutIntroFigure,
   careerBandDefaults,
   contactDetailsDefaults,
   contactPrepareDefaults,
@@ -101,7 +103,25 @@ export function InformationPageContent({ page, groups, config, structured, previ
           breadcrumbNode(path, [{ name: intro.eyebrow, path }]),
         ])}
       />}
-      <PageIntro {...intro}>
+      <PageIntro
+        {...intro}
+        aside={
+          page === "about" ? (
+            <figure className="page-intro-figure">
+              <Image
+                src={aboutIntroFigure.src}
+                alt={aboutIntroFigure.alt}
+                width={aboutIntroFigure.width}
+                height={aboutIntroFigure.height}
+                loading="eager"
+                fetchPriority="high"
+                sizes="(max-width: 767px) min(100vw - 40px, 300px), 290px"
+              />
+              <figcaption>{aboutIntroFigure.caption}</figcaption>
+            </figure>
+          ) : undefined
+        }
+      >
         {page === "reviews" && (
           <a
             href={leaveReviewLink.href}
