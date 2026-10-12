@@ -39,9 +39,15 @@
 /* A photograph beside the heading, in the space the text leaves on the right. */
 .page-intro-split {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(240px, 22vw, 290px);
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: clamp(40px, 6vw, 96px);
   align-items: start;
+}
+.page-intro-figure-portrait {
+  width: clamp(240px, 22vw, 290px);
+}
+.page-intro-figure-landscape {
+  width: clamp(260px, 28vw, 380px);
 }
 .page-intro-figure img {
   display: block;
@@ -59,8 +65,11 @@
   .page-intro-split {
     grid-template-columns: 1fr;
   }
-  .page-intro-figure {
+  .page-intro-figure-portrait {
     width: min(100%, 300px);
+  }
+  .page-intro-figure-landscape {
+    width: min(100%, 420px);
   }
 }
 .information-grid {

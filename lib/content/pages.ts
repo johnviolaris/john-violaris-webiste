@@ -211,19 +211,6 @@ export const whyInstructDefaults: WhyInstructContent = {
 // About
 // ---------------------------------------------------------------------------
 
-/**
- * The photograph beside the About page's opening heading. Set here rather than
- * in the CMS: the page opening is shared by seven pages and only this one has
- * a picture.
- */
-export const aboutIntroFigure = {
-  src: "/wills-memorial-building-university-of-bristol.webp",
-  width: 582,
-  height: 800,
-  alt: "The Gothic tower of the Wills Memorial Building at the University of Bristol",
-  caption: "Wills Memorial Building — University of Bristol — Law Department",
-};
-
 export type MeetJohnContent = {
   eyebrow: string;
   headline: string[];
@@ -787,5 +774,36 @@ export const pageIntroDefaults: Record<string, PageIntroContent> = {
     emphasis: "And your rights.",
     description:
       "What happens to the details you send through this website: why they are used, who can see them, how long they are kept and what you can ask for.",
+  },
+};
+
+/** A photograph set beside a page's opening heading. */
+export type PageIntroFigure = {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+  caption: string;
+};
+
+/**
+ * The photographs beside the opening heading, for the pages that have one.
+ * Set here rather than in the CMS: the page opening is one section shared by
+ * seven pages, and most have no picture.
+ */
+export const pageIntroFigures: Record<string, PageIntroFigure> = {
+  about: {
+    src: "/wills-memorial-building-university-of-bristol.webp",
+    width: 582,
+    height: 800,
+    alt: "The Gothic tower of the Wills Memorial Building at the University of Bristol",
+    caption: "Wills Memorial Building — University of Bristol — Law Department",
+  },
+  services: {
+    src: "/scales-of-justice.webp",
+    width: 1200,
+    height: 800,
+    alt: "Brass scales of justice, evenly balanced, on a dark background",
+    caption: "Let me help you achieve justice.",
   },
 };
