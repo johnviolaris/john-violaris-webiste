@@ -107,6 +107,11 @@
 .article-hero-image img {
   object-fit: cover;
 }
+/* Beside the heading, the frame takes the figure's width and its shadow. */
+.page-intro-figure .article-hero-image {
+  margin-top: 0;
+  box-shadow: 0 30px 60px rgb(0 0 0 / 30%);
+}
 .article-layout {
   display: grid;
   grid-template-columns: 1.5fr 1fr;

@@ -45,6 +45,16 @@ export async function ArticlePageContent({ article, articles, services, config, 
   const faqSchema = faqPageNode({ path, items: faqs, sectionId: faqId });
   if (faqs.length) sections.push({ id: faqId, label: "Frequently asked questions" });
 
+  const heading = (
+    <>
+      <p className="eyebrow">
+        <span className="small-rule" /> {article.category}
+      </p>
+      <h1>{article.title}</h1>
+      <p className="article-standfirst">{article.standfirst}</p>
+    </>
+  );
+
   return (
     <>
       {structured && <JsonLd
@@ -81,28 +91,29 @@ export async function ArticlePageContent({ article, articles, services, config, 
           <Link href="/blog" className="breadcrumb">
             Home <span>/</span> {index}
           </Link>
-          <p className="eyebrow">
-            <span className="small-rule" /> {article.category}
-          </p>
-          <h1>{article.title}</h1>
-          <p className="article-standfirst">{article.standfirst}</p>
           {/* Only articles given an image in the CMS have one; the rest open
-              exactly as they did before. */}
-          {article.featuredImage && (
-            <figure>
-            <div className="article-hero-image">
-              <Image
-                src={article.featuredImage}
-                alt={article.featuredImageAlt ?? ""}
-                title={article.featuredImageTitle}
-                fill
-                sizes="(max-width: 860px) 100vw, 760px"
-                loading="eager"
-                fetchPriority="high"
-              />
+              exactly as they did before. The image sits beside the heading,
+              level with the eyebrow, as on the other pages. */}
+          {article.featuredImage ? (
+            <div className="page-intro-split">
+              <div>{heading}</div>
+              <figure className="page-intro-figure page-intro-figure-landscape">
+                <div className="article-hero-image">
+                  <Image
+                    src={article.featuredImage}
+                    alt={article.featuredImageAlt ?? ""}
+                    title={article.featuredImageTitle}
+                    fill
+                    sizes="(max-width: 767px) min(100vw - 40px, 420px), 380px"
+                    loading="eager"
+                    fetchPriority="high"
+                  />
+                </div>
+                {article.featuredImageCaption && <figcaption className="whitespace-pre-wrap"><ImageCaption caption={article.featuredImageCaption} format={article.featuredImageCaptionFormat} /></figcaption>}
+              </figure>
             </div>
-            {article.featuredImageCaption && <figcaption className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground"><ImageCaption caption={article.featuredImageCaption} format={article.featuredImageCaptionFormat} /></figcaption>}
-            </figure>
+          ) : (
+            heading
           )}
           {/*
             Who wrote it and how current it is (REQ-063): legal guidance is
