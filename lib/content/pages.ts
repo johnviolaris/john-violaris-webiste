@@ -783,27 +783,41 @@ export type PageIntroFigure = {
   width: number;
   height: number;
   alt: string;
-  caption: string;
+  /** Printed beneath the photograph. Optional. */
+  caption?: string;
 };
 
 /**
- * The photographs beside the opening heading, for the pages that have one.
- * Set here rather than in the CMS: the page opening is one section shared by
- * seven pages, and most have no picture.
+ * The photographs beside the opening heading, keyed by path, for the pages
+ * that have one — information pages and service pages alike. Set here rather
+ * than in the CMS: the page opening is shared by many pages, and most have no
+ * picture.
  */
 export const pageIntroFigures: Record<string, PageIntroFigure> = {
-  about: {
+  "/about": {
     src: "/wills-memorial-building-university-of-bristol.webp",
     width: 582,
     height: 800,
     alt: "The Gothic tower of the Wills Memorial Building at the University of Bristol",
     caption: "Wills Memorial Building — University of Bristol — Law Department",
   },
-  services: {
+  "/services": {
     src: "/scales-of-justice.webp",
     width: 1200,
     height: 800,
     alt: "Brass scales of justice, evenly balanced, on a dark background",
     caption: "Let me help you achieve justice.",
+  },
+  "/police-station": {
+    src: "/police-station-at-night.webp",
+    width: 1200,
+    height: 800,
+    alt: "A London police station entrance at dusk, with a blue police lamp and a Metropolitan Police sign on the wall",
+  },
+  "/services/magistrates-court": {
+    src: "/magistrates-courtroom.webp",
+    width: 1200,
+    height: 800,
+    alt: "An empty courtroom with three chairs on the magistrates’ bench beneath the royal coat of arms",
   },
 };

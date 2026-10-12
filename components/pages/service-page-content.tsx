@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/ui/json-ld";
 import { FaqBlock } from "@/components/ui/faq-block";
 import { InlineMarkup, ServiceMarkup } from "@/components/pages/service-markup";
 import { faqSectionId, resolveFaqItems } from "@/lib/cms/faq";
+import { pageIntroFigures } from "@/lib/content/pages";
 import { CtaBanner } from "@/components/layout/cta-banner";
 import {
   breadcrumbNode,
@@ -218,6 +219,7 @@ export async function ServicePageContent({ service, detail, groups, descriptions
         title={detail?.headline ?? service.name.replace(" · ", " / ")}
         emphasis={detail?.emphasis ?? "Let’s understand your options."}
         description={intro}
+        figure={pageIntroFigures[path]}
       />
       {detail && (
         <section className="penalty-strip" aria-labelledby="at-a-glance">

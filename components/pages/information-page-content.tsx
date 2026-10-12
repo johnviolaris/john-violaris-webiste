@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { CtaBanner } from "@/components/layout/cta-banner";
 import { PageIntro } from "@/components/pages/page-intro";
 import "./information-pages.css";
@@ -66,9 +65,6 @@ export function InformationPageContent({ page, groups, config, structured, previ
   const shared = resolveFrom(groups.shared);
 
   const intro = own("intro", pageIntroDefaults[page]);
-  // A wide photograph takes a wider column beside the heading than a tall one.
-  const figure = pageIntroFigures[page];
-  const landscape = figure ? figure.width > figure.height : false;
 
   // Null until a usable number is configured; the row is omitted rather than
   // linking the visitor back to the page they are already reading.
@@ -106,27 +102,7 @@ export function InformationPageContent({ page, groups, config, structured, previ
           breadcrumbNode(path, [{ name: intro.eyebrow, path }]),
         ])}
       />}
-      <PageIntro
-        {...intro}
-        aside={
-          figure ? (
-            <figure className={`page-intro-figure page-intro-figure-${landscape ? "landscape" : "portrait"}`}>
-              <Image
-                src={figure.src}
-                alt={figure.alt}
-                width={figure.width}
-                height={figure.height}
-                loading="eager"
-                fetchPriority="high"
-                sizes={landscape
-                  ? "(max-width: 767px) min(100vw - 40px, 420px), 380px"
-                  : "(max-width: 767px) min(100vw - 40px, 300px), 290px"}
-              />
-              <figcaption>{figure.caption}</figcaption>
-            </figure>
-          ) : undefined
-        }
-      >
+      <PageIntro {...intro} figure={pageIntroFigures[path]}>
         {page === "reviews" && (
           <a
             href={leaveReviewLink.href}
