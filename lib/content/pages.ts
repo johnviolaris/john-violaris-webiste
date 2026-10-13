@@ -759,7 +759,7 @@ export const pageIntroDefaults: Record<string, PageIntroContent> = {
     title: "Tell me what’s happened.",
     emphasis: "We’ll start there.",
     description:
-      "A free initial conversation, directly with John. Share your situation, your concerns and any important dates.",
+      "Our initial consultation is free, so you have nothing to lose by booking a call with me.",
   },
   cookies: {
     eyebrow: "Cookie policy",
