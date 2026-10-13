@@ -262,7 +262,7 @@ export function InformationPageContent({ page, groups, config, structured, previ
                     ))}
                   </ul>
                   <Paragraphs values={prepare.listNote} />
-                  <a href={config.mailtoHref} className="action-button">
+                  <a href="#enquiry-form" className="action-button">
                     {prepare.ctaLabel} <Icon name="arrowRight" size={17} />
                   </a>
                   <div className="contact-urgent" id="urgent">
