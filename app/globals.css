@@ -1391,15 +1391,22 @@ body {
 .footer-grid {
   display: grid;
   /* The services column is wider: it carries the catalogue in two tracks. */
-  grid-template-columns: 1.2fr 1.9fr 1fr 1.2fr;
+  grid-template-columns: 1.2fr 1fr 2fr;
   gap: 45px;
 }
+/* Filled down the first track, then the second, on rows the two tracks share,
+   so their entries line up side by side. The row count is set inline. */
 .footer-services ul {
-  columns: 2;
-  column-gap: 22px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(var(--footer-rows), auto);
+  grid-auto-flow: column;
+  gap: 11px 22px;
 }
-.footer-services li {
-  break-inside: avoid;
+/* The row gap spaces these, so the first entry starts level with the
+   Information column rather than a margin's depth below it. */
+.footer-grid .footer-services li {
+  margin-top: 0;
 }
 .footer-identity > p {
   margin: 25px 0 16px;
@@ -1422,23 +1429,6 @@ body {
 }
 .footer-grid a:hover {
   color: var(--color-gold);
-}
-.footer-contact > p:not(.eyebrow) {
-  font-size: 12px;
-  line-height: 1.9;
-  margin-bottom: 23px;
-}
-.footer-contact > a {
-  display: block;
-  font-size: 11px;
-  margin-top: 14px;
-  overflow-wrap: anywhere;
-}
-.footer-contact > a:first-of-type {
-  color: var(--color-gold);
-}
-.footer-contact > a > span {
-  margin-left: 8px;
 }
 .footer-bottom {
   display: flex;
@@ -1471,6 +1461,9 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 40px;
   }
+  .footer-services {
+    grid-column: 1/-1;
+  }
 }
 @media (max-width: 639px) {
   .editorial-footer {
@@ -1479,13 +1472,8 @@ body {
   .footer-grid {
     gap: 30px 23px;
   }
-  .footer-identity,.footer-services {
+  .footer-identity {
     grid-column: 1/-1;
-  }
-  .footer-contact {
-    grid-column: 1/-1;
-    border-top: 1px solid #ffffff20;
-    padding-top: 20px;
   }
   .footer-bottom {
     flex-wrap: wrap;
@@ -1717,36 +1705,6 @@ body {
   .editorial-footer {
     padding-bottom: 85px;
   }
-}
-
-/* Practical contact detail in the footer — label above value, hairline ruled. */
-.footer-facts {
-  margin-top: 26px;
-  border-top: 1px solid #ffffff20;
-}
-.footer-facts > div {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 9px 0;
-  border-bottom: 1px solid #ffffff10;
-}
-.footer-facts dt {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-  color: var(--color-gold);
-  flex-shrink: 0;
-}
-.footer-facts dd {
-  font-size: 11px;
-  text-align: right;
-  overflow-wrap: anywhere;
-}
-.footer-facts dd a:hover {
-  color: var(--color-gold);
 }
 
 /* Plain-language note that making contact is not yet instructing John. */

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { IntentLink as Link } from "@/components/ui/intent-link";
 import { CookieSettingsButton } from "@/components/layout/analytics";
 import { Container } from "@/components/ui/container";
@@ -37,7 +38,19 @@ export function SiteFooter({
               aria-label={`Footer ${column.heading}`}
             >
               <p className="eyebrow">{column.heading}</p>
-              <ul>
+              {/*
+                The wide column fills down its first track before the second,
+                on a shared row grid so both tracks start on the same line.
+              */}
+              <ul
+                style={
+                  column.wide
+                    ? ({
+                        "--footer-rows": Math.ceil(column.links.length / 2),
+                      } as CSSProperties)
+                    : undefined
+                }
+              >
                 {column.links.map((link) => (
                   <li key={link.href}>
                     <Link href={link.href}>{link.label}</Link>
@@ -46,47 +59,6 @@ export function SiteFooter({
               </ul>
             </nav>
           ))}
-          <div className="footer-contact">
-            <p className="eyebrow">Your next step</p>
-            <p>
-              A conversation with John.
-              <br />
-              Free, confidential and without obligation.
-            </p>
-            <Link href={config.bookingHref}>
-              Arrange a consultation <span>↗</span>
-            </Link>
-
-            {/*
-              The practical detail the reference firms all publish — how to
-              reach someone, how quickly they answer, where they work. Only
-              confirmed routes appear.
-            */}
-            <dl className="footer-facts">
-              <div>
-                <dt>Email</dt>
-                <dd>
-                  <a href={config.mailtoHref}>{config.email}</a>
-                </dd>
-              </div>
-              {config.phoneE164 ? (
-                <div>
-                  <dt>Telephone</dt>
-                  <dd>
-                    <a href={config.telHref}>{config.phoneDisplay}</a>
-                  </dd>
-                </div>
-              ) : null}
-              <div>
-                <dt>Response</dt>
-                <dd>{config.responseTime}</dd>
-              </div>
-              <div>
-                <dt>Coverage</dt>
-                <dd>{config.jurisdiction}</dd>
-              </div>
-            </dl>
-          </div>
         </div>
         <div className="footer-bottom">
           <p>

@@ -286,14 +286,6 @@ export function footerNav(services: Service[]): {
 }[] {
   return [
     {
-      heading: "Services",
-      wide: true,
-      links: [
-        ...services.filter((service) => service.href === allCrimeHref),
-        ...services.filter((service) => service.href !== allCrimeHref),
-      ].map((service) => ({ label: service.name, href: service.href })),
-    },
-    {
       heading: "Information",
       links: [
         { label: "About John", href: "/about" },
@@ -302,6 +294,14 @@ export function footerNav(services: Service[]): {
         { label: "Resources", href: "/blog" },
         { label: "Contact", href: "/contact" },
       ],
+    },
+    {
+      heading: "Services",
+      wide: true,
+      links: [
+        ...services.filter((service) => service.href === allCrimeHref),
+        ...services.filter((service) => service.href !== allCrimeHref),
+      ].map((service) => ({ label: service.name, href: service.href })),
     },
   ];
 }
