@@ -42,24 +42,26 @@ export const emptyEnquiryValues: EnquiryValues = {
 /**
  * Offered in the "Type of matter" select. Mirrors the service catalogue but
  * stays a plain list — a visitor picking a category is not choosing a service
- * page, and "Other / not sure" has to remain a valid answer.
+ * page, and "Other / Unsure" has to remain a valid answer. General Crime
+ * leads, Other / Unsure closes, and the rest run alphabetically between them.
  */
 export const matterTypes = [
+  "General Crime",
+  "Careless driving",
+  "Dangerous driving",
   "Drink driving",
+  "Driving without insurance",
   "Drug driving",
-  "Totting up / 12+ points",
   "Exceptional hardship",
+  "Failing to stop or report",
+  "Mobile phone whilst driving",
+  "Police station — another offence",
+  "Police station — motoring",
+  "Section 172 / driver details",
   "Special reasons",
   "Speeding",
-  "Dangerous driving",
-  "Careless driving",
-  "Mobile phone whilst driving",
-  "Driving without insurance",
-  "Failing to stop or report",
-  "Section 172 / driver details",
-  "Police station — motoring",
-  "Police station — another offence",
-  "Other / not sure",
+  "Totting up / 12+ points",
+  "Other / Unsure",
 ] as const;
 
 export const enquiryStatuses = ["new", "read", "replied", "archived"] as const;
@@ -204,7 +206,7 @@ export function validateEnquiry(input: EnquiryValues): EnquiryValidationResult {
   }
 
   if (!values.matterType) {
-    fieldErrors.matterType = "Choose the type of matter, or 'Other / not sure'.";
+    fieldErrors.matterType = "Choose the type of matter, or 'Other / Unsure'.";
   } else if (!(matterTypes as readonly string[]).includes(values.matterType)) {
     fieldErrors.matterType = "Choose one of the listed options.";
   }
