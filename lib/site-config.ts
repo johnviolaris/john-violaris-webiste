@@ -152,8 +152,8 @@ export type SiteConfig = SiteSettings &
      */
     whatsappDigits: string | null;
     /**
-     * Where every "book a consultation" button goes: the contact section, which
-     * offers email, telephone and WhatsApp. There is no booking calendar.
+     * Where every "book a consultation" button goes: the enquiry form at the
+     * top of the contact page. There is no booking calendar.
      */
     bookingHref: string;
   };
@@ -205,7 +205,7 @@ export function resolveSiteConfig(
     whatsappDigits: values.whatsappNumber
       ? normaliseWhatsappNumber(values.whatsappNumber)
       : null,
-    bookingHref: "/contact#consultation",
+    bookingHref: "/contact#enquiry-form",
   };
 }
 

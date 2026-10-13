@@ -383,7 +383,7 @@ The split inside that file is the thing to understand:
   because a row that looks authoritative and is ignored is worse than no row.
 
 `resolveSiteConfig` lays stored values over the defaults and derives `telHref`,
-`mailtoHref`, `bookingHref` (the internal name for `/contact#consultation`, not
+`mailtoHref`, `bookingHref` (the internal name for `/contact#enquiry-form`, not
 an external booking service) and the normalised WhatsApp digits. Only non-empty
 values override: clearing a field in the admin deletes its row, which is what
 makes "leave it blank to fall back" true rather than a figure of speech.
