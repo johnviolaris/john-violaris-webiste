@@ -121,10 +121,9 @@ export function ContactEnquiryForm({ readOnly = false }: { readOnly?: boolean } 
               <em>your case.</em>
             </h2>
             <p className="enquiry-intro">
-              Send John the outline of your situation and he will come back to
-              you personally. If your hearing is tomorrow or your police
-              interview is today, please call instead — that reaches him faster
-              than any form.
+              If your hearing or police interview is imminent, call or WhatsApp
+              message John directly using the number below. For all other
+              matters, please complete the form or send an email.
             </p>
             <div className="enquiry-direct">
               <a href={config.telHref}>
