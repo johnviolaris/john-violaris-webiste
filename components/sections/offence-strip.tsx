@@ -11,7 +11,9 @@ import { offenceStripDefaults } from "@/lib/content/pages";
  * full catalogue lives in the header's services menu.
  *
  * Which charges appear is the "Show in the rail" box on each service in the
- * CMS, and they run in catalogue order.
+ * CMS, and they run in catalogue order with the motoring groups first: the
+ * rail is the motoring practice, so Representation leading the menu does not
+ * put the police station at the front of it.
  */
 export function OffenceStrip({
   content = offenceStripDefaults,
@@ -19,7 +21,10 @@ export function OffenceStrip({
   content?: { eyebrow: string };
 }) {
   const { groups } = useServiceCatalogue();
-  const featured = groups
+  const featured = [
+    ...groups.filter((group) => group.motoring),
+    ...groups.filter((group) => !group.motoring),
+  ]
     .flatMap((group) => group.services)
     .filter((service) => service.featured);
 

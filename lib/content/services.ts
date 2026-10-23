@@ -41,6 +41,36 @@ export const representationGroup = "Representation";
 
 export const serviceGroups: ServiceGroup[] = [
   {
+    heading: representationGroup,
+    motoring: false,
+    services: [
+      {
+        // Deliberately not `featured`: the rail beneath the hero is the
+        // motoring practice, and the general crime work sits behind it
+        // rather than alongside it. The slug stays `criminal-defence`:
+        // it is the page's canonical URL and renaming the card is not a
+        // reason to break a link that is already out there.
+        name: "All Crime",
+        href: "/services/criminal-defence",
+        statute: "Every allegation, not just motoring",
+        icon: "alert",
+      },
+      {
+        name: "Police Station",
+        href: "/police-station",
+        statute: "Free under legal aid in most cases",
+        icon: "shield",
+        featured: true,
+      },
+      {
+        name: "Magistrates Court",
+        href: "/services/magistrates-court",
+        statute: "Where most cases are heard",
+        icon: "scales",
+      },
+    ],
+  },
+  {
     heading: "Drugs & Alcohol",
     motoring: true,
     services: [
@@ -50,6 +80,12 @@ export const serviceGroups: ServiceGroup[] = [
         statute: "s.5 RTA 1988",
         icon: "glass",
         featured: true,
+      },
+      {
+        name: "Drunk in Charge",
+        href: "/services/drunk-in-charge",
+        statute: "s.5(1)(b) RTA 1988",
+        icon: "glass",
       },
       {
         name: "Drug Driving",
@@ -64,12 +100,6 @@ export const serviceGroups: ServiceGroup[] = [
         href: "/services/failing-to-provide",
         statute: "s.7 RTA 1988",
         icon: "vial",
-      },
-      {
-        name: "Drunk in Charge",
-        href: "/services/drunk-in-charge",
-        statute: "s.5(1)(b) RTA 1988",
-        icon: "glass",
       },
     ],
   },
@@ -157,42 +187,6 @@ export const serviceGroups: ServiceGroup[] = [
         href: "/services/driver-details",
         statute: "s.172 RTA 1988",
         icon: "mail",
-      },
-    ],
-  },
-  {
-    heading: representationGroup,
-    motoring: false,
-    services: [
-      {
-        name: "Police Station",
-        href: "/police-station",
-        statute: "Free under legal aid in most cases",
-        icon: "shield",
-        featured: true,
-      },
-      {
-        name: "Magistrates Court",
-        href: "/services/magistrates-court",
-        statute: "Where most cases are heard",
-        icon: "scales",
-      },
-      {
-        // Deliberately not `featured`: the rail beneath the hero is the
-        // motoring practice, and the general crime work sits behind it
-        // rather than alongside it. The slug stays `criminal-defence`:
-        // it is the page's canonical URL and renaming the card is not a
-        // reason to break a link that is already out there.
-        name: "All Crime",
-        href: "/services/criminal-defence",
-        statute: "Every allegation, not just motoring",
-        icon: "alert",
-      },
-      {
-        name: "Non-Motoring Crime",
-        href: "/services/all-crime",
-        statute: "Legal aid and private instruction",
-        icon: "document",
       },
     ],
   },

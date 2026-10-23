@@ -65,8 +65,4 @@ export const serviceDescriptions: Record<string, { intro: string }> = {
     intro:
       "There is no crime that I haven’t dealt with before. Find out how I can help with all criminal allegations being made against you.",
   },
-  "/services/all-crime": {
-    intro:
-      "Charged with something other than a motoring offence? Find out where legal aid applies and when instructing privately is worth it.",
-  },
 };

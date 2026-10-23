@@ -53,16 +53,8 @@ export async function ServicePageContent({ service, detail, groups, descriptions
   const group = groups.find((candidate) =>
     candidate.services.some((item) => item.href === service.href),
   );
-  /*
-   * `Non-Motoring Crime` is kept out of the related list: it covers the same
-   * ground as `All Crime` above it, so offering both reads as a duplicate.
-   * The service itself still has its page and its place in the nav.
-   */
   const related =
-    group?.services.filter(
-      (item) =>
-        item.href !== service.href && item.href !== "/services/all-crime",
-    ) ?? [];
+    group?.services.filter((item) => item.href !== service.href) ?? [];
   /*
    * A long-form page names its own related pages. A link to an offence page
    * that is not published would be a dead end, so those are dropped here as
