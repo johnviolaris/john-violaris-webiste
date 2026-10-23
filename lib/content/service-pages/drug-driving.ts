@@ -82,7 +82,7 @@ A section 5A charge requires proof of a specified drug above a set limit. An unf
     {
       eyebrow: "The Process",
       heading: "How a Drug Driving Case Progresses",
-      body: `Uncertainty is often what clients find hardest. My aim is to make each stage predictable — so you know what is coming, and what each decision means for the one that follows.
+      body: `Uncertainty is often what clients find hardest. My aim is to make each stage predictable — so you know what is coming.
 
 ::: steps
 
