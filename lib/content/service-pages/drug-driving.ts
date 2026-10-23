@@ -143,7 +143,7 @@ Where conviction is the likely outcome, I ensure the court has the fullest pictu
     },
     {
       eyebrow: "My Service",
-      heading: "How I Help — From Arrest to Outcome",
+      heading: "I Can Help — Whatever Stage You're At",
       body: `My approach is calm, prepared and direct. At every stage I aim to give you a clear picture of where you stand and what your options are — without unnecessary complexity, and without drama.
 
 ::: steps
