@@ -12,7 +12,7 @@ export const drugDriving: ServiceDetail = {
   intro:
     "Drug driving cases are often more technical than they first appear. Whether you face a section 5A charge, a driving whilst unfit allegation, or an in-charge case, the right outcome depends on early, expert advice from a solicitor who knows where these cases turn.",
   penalties: [
-    { kicker: "Mandatory on conviction", label: "12-month minimum ban", note: "Plus unlimited fine, community order or up to 6 months' custody", tone: "risk" },
+    { kicker: "Mandatory on conviction", label: "12-month minimum ban", note: "Plus unlimited fine, community order or up to 6 months' custody", tone: "note" },
   ],
   lead:
     "The answer to a drug driving case usually depends on four things: **the reading, the drug involved, the police procedure, and whether the charge is right.** A case can turn on sampling, timing, the custody record — or whether a medical defence applies. I review all of it.",
