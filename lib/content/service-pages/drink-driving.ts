@@ -85,7 +85,7 @@ You do not need to feel drunk to be over the limit. Factors including your build
     },
     {
       heading: "Where Will the Case Be Heard?",
-      body: `All drink driving cases are heard in the Magistrates' Court, unless you appeal. Appeals against conviction or sentence are heard in the Crown Court. I represent clients at both.`,
+      body: `All drink driving cases are heard in the Magistrates' Court, unless you appeal. Appeals against conviction or sentence are heard in the Crown Court.`,
     },
   ],
   relatedLinks: [
