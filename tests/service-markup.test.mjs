@@ -9,6 +9,7 @@ import {
   parseServiceMarkup,
 } from "../lib/content/service-markup.ts";
 import { serviceDetails } from "../lib/content/service-detail.ts";
+import { reservedIds, sectionAnchors } from "../lib/content/section-anchors.ts";
 import { serviceGroups } from "../lib/content/services.ts";
 import { internalLinkPaths } from "../lib/cms/seo/health.ts";
 
@@ -205,15 +206,18 @@ test("every long-form section parses into content, and every card and stage has 
   }
 });
 
-test("long-form links point at pages the site has, or at a full web address", () => {
+test("long-form links point at pages the site has, a section of the same page, or a full web address", () => {
   for (const [path, detail] of longForm) {
     for (const link of detail.relatedLinks ?? []) {
       assert.ok(sitePaths.has(link.href), `${path}: related link to unknown ${link.href}`);
     }
+    // The page skips sections with neither heading nor body before it numbers the anchors.
+    const rendered = detail.sections.filter((section) => section.heading?.trim() || section.body?.trim());
+    const anchors = new Set(sectionAnchors(rendered, reservedIds).filter(Boolean).map((id) => `#${id}`));
     for (const section of detail.sections) {
       for (const href of markupLinks(parseServiceMarkup(section.body))) {
         assert.ok(
-          href.startsWith("https://") || sitePaths.has(href),
+          href.startsWith("https://") || sitePaths.has(href) || anchors.has(href),
           `${path}: link to ${href}`,
         );
       }

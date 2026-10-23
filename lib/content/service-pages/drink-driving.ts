@@ -16,9 +16,9 @@ export const drinkDriving: ServiceDetail = {
   ],
   sections: [
     {
-      body: `If your breath reading is above **35µg/100ml** (or blood above **80mg/100ml**, or urine above **108mg/100ml**), you will face a prosecution and an appearance before the Magistrates' Court. I act for motorists across England and Wales facing drink driving allegations — from first-time offenders to professionals worried about their career and licence.
+      body: `If your breath reading is above [**35µg/100ml**](#sentencing-guidelines) (or blood above [**80mg/100ml**](#sentencing-guidelines), or urine above [**108mg/100ml**](#sentencing-guidelines)), you will face a prosecution and an appearance before the Magistrates' Court. I act for motorists across England and Wales facing drink driving allegations — from first-time offenders to professionals worried about their career and licence.
 
-Whether you want to **challenge the case**, or whether you are planning to plead guilty and need expert mitigation for your upcoming court appearance, I can help at every stage.`,
+Whether you want to challenge the case, or whether you are planning to plead guilty and need expert mitigation for your upcoming court appearance, I can help at every stage.`,
     },
     {
       heading: "How I Defend Driving With Excess Alcohol Allegations",
