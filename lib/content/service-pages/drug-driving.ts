@@ -148,15 +148,6 @@ Where conviction is the likely outcome, I ensure the court has the fullest pictu
 
 If you have a drug driving case and want to understand your options properly — before you make any decisions — call me for a free initial consultation.`,
     },
-    {
-      eyebrow: "Why Instruct Me",
-      heading: "What Makes This Practice Different",
-      body: `Clients instruct me because they want clear, personal advice from one solicitor who stays involved from first contact to final outcome. Drug driving cases reward technical knowledge — but technical knowledge is only useful if it is communicated clearly and acted on strategically.
-
-I have been practising criminal defence since 2005, with a background that spans police station representation, youth court work, and the full range of driving offences at magistrates' court level. I qualified at the University of Bristol and have represented thousands of clients across England and Wales.
-
-I do not operate a volume practice. I take on work I can handle personally, to the standard I would want for myself. If you have a drug driving case and want to understand your options properly — before you make any decisions — call me for a free initial consultation.`,
-    },
   ],
   quote:
     "Early advice is often the difference between a controlled response and avoidable damage to your position.",
