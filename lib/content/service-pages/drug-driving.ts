@@ -20,11 +20,11 @@ export const drugDriving: ServiceDetail = {
     {
       eyebrow: "The Offence",
       heading: "What Does Drug Driving Actually Mean?",
-      body: `The primary offence under **section 5A of the Road Traffic Act 1988** is driving, attempting to drive, or being in charge of a motor vehicle with a specified controlled drug above the prescribed limit in blood or urine. It is a **strict liability offence** — the prosecution does not need to prove impairment, only that the limit was exceeded.
+      body: `The primary offence under section 5A of the Road Traffic Act 1988 is driving, attempting to drive, or being in charge of a motor vehicle with a specified controlled drug above the prescribed limit in blood or urine. It is a strict liability offence — the prosecution does not need to prove impairment, only that the limit was exceeded.
 
 That distinction matters enormously. It means someone can be entirely unaffected by a substance — perhaps through prescribed medication, residual trace levels, or individual metabolism — and still face prosecution. It also means the technical detail of the case carries real weight.
 
-There is also a separate offence of **driving whilst unfit through drugs**, which does require evidence of impairment. Whether the police and prosecution have charged the right offence is itself a question I examine closely in every case.
+There is also a separate offence of driving whilst unfit through drugs, which does require evidence of impairment. Whether the police and prosecution have charged the right offence is itself a question I examine closely in every case.
 
 ::: cards
 
