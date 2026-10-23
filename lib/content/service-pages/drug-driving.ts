@@ -144,33 +144,9 @@ Where conviction is the likely outcome, I ensure the court has the fullest pictu
     {
       eyebrow: "My Service",
       heading: "I Can Help — Whatever Stage You're At",
-      body: `My approach is calm, prepared and direct. At every stage I aim to give you a clear picture of where you stand and what your options are — without unnecessary complexity, and without drama.
+      body: `My approach is calm, assured and direct. Whether you're at the start of an investigation or about to be sentenced, I can help you by providing you with clarity and a much better understanding of your case. We can then work towards achieving your ideal outcome. Where an acquittal or discontinuance isn't possible, I will help you make the best out of a bad situation.
 
-::: steps
-
-#### Police Station Advice
-
-I can advise you before interview, at the police station, or as soon as you are contacted by police. Early advice is often the difference between a controlled response and avoidable damage to your position. I have attended police station interviews over 10,000 times since 2003.
-
----
-
-#### Full Evidence Review
-
-I examine the full evidential picture: the stop, the roadside test, the sample process, the custody record, the laboratory analysis, any prescription or medical history, and whether the prosecution has charged the correct offence. Technical detail is where drug driving cases are genuinely won or lost.
-
----
-
-#### Court Representation
-
-I represent you at the first hearing and at trial where needed. You deal directly with me at every stage — there are no hand-offs to junior colleagues or case handlers. The solicitor you speak to in consultation is the one who stands up in court.
-
----
-
-#### Special Reasons & Mitigation
-
-Where a special reasons argument is available, I prepare and present it with the care it requires. Where the focus is on mitigation, I take time to understand your individual circumstances and communicate them to the court in the most effective way possible.
-
-:::`,
+If you have a drug driving case and want to understand your options properly — before you make any decisions — call me for a free initial consultation.`,
     },
     {
       eyebrow: "Why Instruct Me",
