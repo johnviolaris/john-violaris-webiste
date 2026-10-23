@@ -12,8 +12,8 @@ export const failingToProvide: ServiceDetail = {
   intro:
     "Failing to provide a specimen is treated by the courts almost as seriously as drink driving itself. A mandatory 12-month ban follows conviction in most cases — and the technical issues that determine guilt or innocence are often missed without specialist advice.",
   penalties: [
-    { label: "12-month minimum ban", note: "Driving / attempting to drive", tone: "risk" },
-    { label: "Up to 6 months' custody", note: "Most serious cases", tone: "risk" },
+    { label: "12-month minimum ban", note: "Driving / attempting to drive", tone: "note" },
+    { label: "Up to 6 months' custody", note: "Most serious cases", tone: "note" },
     { label: "3 years minimum", note: "Previous conviction within 10 years", tone: "note" },
     { label: "DR31 endorsement", note: "Remains on licence 11 years", tone: "note" },
   ],

@@ -8,7 +8,7 @@ import type { ServiceDetail } from "@/lib/content/service-detail";
  */
 export const drinkDriving: ServiceDetail = {
   headline: "Driving with Excess Alcohol —",
-  emphasis: "Specialist Defence",
+  emphasis: "Carries a Mandatory Ban",
   intro:
     "Being accused of driving with excess alcohol is stressful, intimidating, and potentially life-changing. A minimum 12-month disqualification can affect your career, your family, and your independence. Before you enter a plea, speak to me.",
   penalties: [
