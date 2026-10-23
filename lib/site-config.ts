@@ -257,6 +257,7 @@ export type NavLink = {
 export const mainNav: NavLink[] = [
   { label: "About", href: "/about" },
   { label: "Services", href: "/services" },
+  { label: "All Crime", href: "/services/criminal-defence" },
   { label: "Police Station", href: "/police-station" },
   { label: "Magistrates Court", href: "/services/magistrates-court" },
   { label: "Fees", href: "/fees" },

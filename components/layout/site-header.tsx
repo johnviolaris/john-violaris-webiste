@@ -77,9 +77,9 @@ export function SiteHeader() {
   }, [open]);
 
   /**
-   * Only the most specific matching link is marked current. "Magistrates
-   * Court" sits under /services, so a prefix match alone would light both it
-   * and "Services" at once.
+   * Only the most specific matching link is marked current. "All Crime" and
+   * "Magistrates Court" sit under /services, so a prefix match alone would
+   * light both one of them and "Services" at once.
    */
   const current = mainNav.reduce<string | null>((best, item) => {
     const matches =
@@ -115,7 +115,7 @@ export function SiteHeader() {
               key={item.href}
               href={item.href}
               aria-current={isActive(item.href) ? "page" : undefined}
-              className={`rounded-sharp px-2.5 py-2 text-[12.5px] font-medium whitespace-nowrap transition-colors 2xl:px-3 ${
+              className={`rounded-sharp px-2 py-2 text-[12.5px] font-medium whitespace-nowrap transition-colors ${
                 isActive(item.href)
                   ? "text-gold-light"
                   : "text-cream/65 hover:text-cream"
