@@ -88,7 +88,7 @@ A section 5A charge requires proof of a specified drug above a set limit. An unf
 
 #### Police Stop & Arrest
 
-You may be stopped following a positive roadside drug swipe test, observations about your driving, a collision, or an allegation by another person. The police may take a blood or urine sample and record observations about your condition. **Legal advice at the police station can be decisive** — particularly where prescribed medication or a medical condition is relevant.
+You may be stopped following a positive roadside drug swipe test, observations about your driving, a collision, or an allegation by another person. The police will request a blood or urine sample and record observations about your condition. You should always accept a sample of what they take from you. The procedure cannot be delayed for you to speak to a solicitor, but **legal advice at the police station can be decisive** — particularly where prescribed medication or a medical condition is relevant.
 
 ---
 
