@@ -12,7 +12,7 @@ export const drinkDriving: ServiceDetail = {
   intro:
     "Being accused of driving with excess alcohol is stressful, intimidating, and potentially life-changing. A minimum 12-month disqualification can affect your career, your family, and your independence. Before you enter a plea, speak to me.",
   penalties: [
-    { kicker: "Mandatory on conviction", label: "12-month minimum ban", note: "Plus possible fine, community order or custody & criminal record", tone: "risk" },
+    { kicker: "Mandatory on conviction", label: "12-month minimum ban", note: "Plus possible fine, community order or custody & criminal record", tone: "note" },
   ],
   sections: [
     {
