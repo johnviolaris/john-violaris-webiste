@@ -42,7 +42,7 @@ The stop, the field impairment test, the request for a sample, and how you were 
 
 #### Does a medical defence apply?
 
-For certain drugs, a statutory medical defence is available where the drug was taken as prescribed and there was no reason to expect impairment. This requires careful preparation.
+For certain drugs, a statutory medical defence is available where the drug was taken as prescribed, where driving guidelines were followed and where there was no impairment. This defence requires careful preparation by an experienced solicitor.
 
 ---
 
