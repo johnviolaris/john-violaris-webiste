@@ -96,46 +96,6 @@ Where you are alleged to have been **in charge** of a vehicle rather than drivin
 The statutory defence available in 'in-charge' cases — that there was no likelihood you would have driven while over the limit — applies equally here. Where this can be argued, you can avoid a disqualification entirely.`,
     },
     {
-      heading: "The Wider Consequences",
-      body: `::: cards
-
-#### Employment
-
-Driving jobs, shift work, site access, and roles requiring reliability or security clearance are all at risk. A conviction and ban can take immediate effect on your ability to earn.
-
----
-
-#### Professional Registration
-
-Doctors, nurses, pilots, solicitors, and other regulated professionals may have reporting obligations to their employer or regulator. Timing and disclosure must be handled carefully.
-
----
-
-#### International Travel
-
-A criminal conviction can create visa complications for travel to the US, Canada, Australia, and other countries. The conviction remains on your criminal record.
-
----
-
-#### Insurance
-
-Premiums typically rise sharply and some insurers may decline cover altogether. The DR31 endorsement remains visible on your DVLA record for 11 years.
-
----
-
-#### Criminal Record
-
-This is a criminal conviction — it appears on standard and enhanced DBS checks and may require disclosure in job applications, licensing applications, and visa forms.
-
----
-
-#### Future Offences
-
-A conviction for FTP counts as a relevant prior for 10 years. Any further drink, drug, or FTP offence within that period triggers a 3-year minimum ban as a starting point.
-
-:::`,
-    },
-    {
       eyebrow: "Lines of Defence",
       heading: "Where These Cases Can Be Won",
       body: `The prosecution must prove two things: that you failed to provide the specimen, and that you did so **without reasonable excuse**. If either element is not proved to the criminal standard, you are entitled to be acquitted. There are also procedural routes that can undermine the prosecution case entirely.
