@@ -8,9 +8,9 @@ import type { ServiceDetail } from "@/lib/content/service-detail";
  */
 export const failingToProvide: ServiceDetail = {
   headline: "Failing to Provide a Specimen —",
-  emphasis: "Specialist Defence",
+  emphasis: "Even if you weren't driving",
   intro:
-    "Failing to provide a specimen is treated by the courts almost as seriously as drink driving itself. A mandatory 12-month ban follows conviction in most cases — and the technical issues that determine guilt or innocence are often missed without specialist advice.",
+    "Failing to provide a specimen is treated by the courts almost as seriously as drink driving itself. A mandatory 12-month ban follows conviction in most cases — and the technical issues that determine the outcome are often missed without specialist advice.",
   penalties: [
     { label: "12-month minimum ban", note: "Driving / attempting to drive", tone: "note" },
     { label: "Up to 6 months' custody", note: "Most serious cases", tone: "note" },
