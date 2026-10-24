@@ -93,7 +93,7 @@ This is one of the first things I check when taking instructions, because it fun
 
 Where you are alleged to have been **in charge** of a vehicle rather than driving it, the sentencing range is different: a minimum of 10 penalty points (rather than a ban), a maximum fine of £2,500, up to 3 months' custody, and a **discretionary** disqualification. A 3-year minimum does not apply even with a relevant prior conviction.
 
-The statutory defence available in drink-in-charge cases — that there was no likelihood you would have driven while over the limit — applies equally here. Where this can be argued, it can avoid any disqualification entirely.`,
+The statutory defence available in 'in-charge' cases — that there was no likelihood you would have driven while over the limit — applies equally here. Where this can be argued, you can avoid a disqualification entirely.`,
     },
     {
       heading: "The Wider Consequences",
