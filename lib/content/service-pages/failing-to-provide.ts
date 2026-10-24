@@ -160,9 +160,11 @@ Importantly, **it is not enough simply to raise a medical issue and then refuse 
 
 That said, when a medical reason is raised at the time, the officer is not entitled to simply dismiss it. Where an officer failed to take a raised medical concern seriously, that itself may support the defence.
 
+### Relevant Medical Conditions
+
 ::: cards
 
-#### Breath — may be accepted
+#### Breath
 
 - Asthma (diagnosed, evidenced)
 - Respiratory infection or illness
@@ -172,7 +174,7 @@ That said, when a medical reason is raised at the time, the officer is not entit
 
 ---
 
-#### Blood — may be accepted
+#### Blood
 
 - Needle phobia (clinical diagnosis)
 - Blood clotting disorder
@@ -182,7 +184,7 @@ That said, when a medical reason is raised at the time, the officer is not entit
 
 ---
 
-#### Urine — may be accepted
+#### Urine
 
 - Urinary tract infection
 - Prostate conditions
