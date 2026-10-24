@@ -17,7 +17,7 @@ export const failingToProvide: ServiceDetail = {
     { label: "3 years minimum", note: "Previous conviction within 10 years", tone: "note" },
   ],
   lead:
-    "These cases turn on the **warning given, the exact request made, your medical position, and the procedure the police followed.** A case that looks straightforward at first sight can have real defences — and a case that looks hopeless may have options. The only way to know is to examine the evidence properly.",
+    "These cases turn on the **warning given, the exact request made, your medical position, and the procedure the police followed.** A case that looks straightforward at first sight can have real deficiencies — and a case that looks hopeless may have options. The only way to know is by instructing your solicitor to examine the evidence properly.",
   sections: [
     {
       eyebrow: "The Offence",
