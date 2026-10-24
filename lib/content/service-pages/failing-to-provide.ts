@@ -15,7 +15,6 @@ export const failingToProvide: ServiceDetail = {
     { label: "12-month minimum ban", note: "Driving / attempting to drive", tone: "note" },
     { label: "Up to 6 months' custody", note: "Most serious cases", tone: "note" },
     { label: "3 years minimum", note: "Previous conviction within 10 years", tone: "note" },
-    { label: "DR31 endorsement", note: "Remains on licence 11 years", tone: "note" },
   ],
   lead:
     "These cases turn on the **warning given, the exact request made, your medical position, and the procedure the police followed.** A case that looks straightforward at first sight can have real defences — and a case that looks hopeless may have options. The only way to know is to examine the evidence properly.",
