@@ -97,10 +97,10 @@ The statutory defence available in 'in-charge' cases — that there was no likel
     },
     {
       eyebrow: "Lines of Defence",
-      heading: "Where These Cases Can Be Won",
-      body: `The prosecution must prove two things: that you failed to provide the specimen, and that you did so **without reasonable excuse**. If either element is not proved to the criminal standard, you are entitled to be acquitted. There are also procedural routes that can undermine the prosecution case entirely.
+      heading: "Where these cases can be won",
+      body: `The prosecution must prove two things: that you failed to provide the specimen and that you did so **without a reasonable excuse**. If either element isn't proven to the criminal standard, you should be found not guilty. There are also procedural routes that can undermine the prosecution case entirely.
 
-I do not raise arguments that have no merit. But I look carefully at every case before advising on a plea — because the defences available here are genuinely misunderstood, and clients are sometimes advised to plead guilty when they have a real argument.
+I look carefully at every case before advising client's on their plea. I do not raise arguments that have no merit, but the defences available here are genuinely misunderstood and frequently overlooked.
 
 ::: cards
 
