@@ -205,9 +205,7 @@ That said, when a medical reason is raised at the time, the officer is not entit
       heading: "Personal Advice. Technical Depth. Plain English.",
       body: `Failing to provide cases look deceptively simple — the prosecution says you refused, you either did or you didn't. The reality is more complex. The warning, the request, the device, the procedure, the medical position, the charge itself — each one is a potential point of challenge. I look at all of them.
 
-I qualified as a solicitor in 2005 and have worked in criminal defence ever since. I have represented thousands of clients across England and Wales at the police station and in the magistrates' court, across the full range of driving offences. I keep my fees fixed and transparent so you know what you are committing to before you instruct me.
-
-If you have been charged with failing to provide a specimen — or if you are still at the police station stage and have not yet been charged — call me. The earlier I am involved, the more options are likely to be available.`,
+If you have a failing to provide case and want to understand your options properly — before you make any decisions — call me for a free initial consultation.`,
     },
   ],
   alertTitle: "Still at the Police Station?",
