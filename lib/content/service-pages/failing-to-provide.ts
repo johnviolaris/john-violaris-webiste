@@ -196,43 +196,6 @@ That said, when a medical reason is raised at the time, the officer is not entit
 ###### Every case is different. The above are examples only. Whether a particular condition amounts to a reasonable excuse depends on the specific facts, the supporting evidence, and how the defence is presented. A medical report from an appropriate specialist is almost always required.`,
     },
     {
-      eyebrow: "My Service",
-      heading: "How I Help — From Arrest to Outcome",
-      body: `Every FTP case I take on is handled personally by me. There is no paralegal, no case handler, no one else. You have one solicitor, and that solicitor knows your case from the first conversation.
-
-::: steps
-
-#### Police Station Representation
-
-I can advise you before interview, at the police station, or at any point after arrest. Early advice is often decisive in these cases — particularly where a medical condition is relevant, where the procedure was irregular, or where there is genuine doubt about whether you were driving. I have been attending police station interviews since 2003, over 10,000 times.
-
----
-
-#### Full Evidence Review
-
-I examine the custody record, the wording of the requirement and the warning, body-worn footage, the intoximeter printout or laboratory paperwork, any medical records raised at the time, and the charging document. I look for procedural errors, evidential weaknesses, and the grounds for any reasonable excuse defence — before advising on plea.
-
----
-
-#### Expert Evidence Coordination
-
-Where a medical defence is arguable, expert evidence is usually required. I have working relationships with medical practitioners who can provide the precise, causally-linked opinions the court requires. A report that simply confirms a diagnosis is rarely enough — it needs to address the specific circumstances of the failure directly.
-
----
-
-#### Court Representation
-
-I represent you at the first hearing and at trial. I present the legal and factual arguments clearly and directly — without jargon — so the court understands the real position quickly. I attend every hearing personally. You deal with me throughout.
-
----
-
-#### Special Reasons and Mitigation
-
-Where the circumstances support a special reasons application — for example, where you were not aware of the significance of what was being asked, or where there was a genuine emergency — I prepare and present the argument with the care it requires. Where the focus is on sentencing, I ensure the court has the fullest picture of your personal circumstances and the impact of a ban on your life and those around you.
-
-:::`,
-    },
-    {
       eyebrow: "Why Instruct Me",
       heading: "Personal Advice. Technical Depth. Plain English.",
       body: `Failing to provide cases look deceptively simple — the prosecution says you refused, you either did or you didn't. The reality is more complex. The warning, the request, the device, the procedure, the medical position, the charge itself — each one is a potential point of challenge. I look at all of them.
