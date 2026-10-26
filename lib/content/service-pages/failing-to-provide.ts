@@ -212,7 +212,7 @@ If you have a failing to provide case and want to understand your options proper
   alertBody:
     "If you are being held and required to provide a specimen, call me immediately. Advice at this stage can determine what happens at every stage that follows.",
   quote:
-    "The warning given, the wording of the request, and the procedure followed — these are the details that determine whether a charge can be defended. I examine all of them before advising on anything.",
+    "Allow me to help you get your head around your case without making it explode.",
   quoteCite: "John Violaris",
   relatedLinks: [
     { label: "Drink Driving", href: "/services/drink-driving" },
