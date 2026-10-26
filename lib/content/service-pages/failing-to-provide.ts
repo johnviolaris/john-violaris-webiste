@@ -196,6 +196,11 @@ That said, when a medical reason is raised at the time, the officer is not entit
 ###### Every case is different. The above are examples only. Whether a particular condition amounts to a reasonable excuse depends on the specific facts, the supporting evidence, and how the defence is presented. A medical report from an appropriate specialist is almost always required.`,
     },
     {
+      eyebrow: "My Service",
+      heading: "How I Help — From Arrest to Outcome",
+      body: `My approach is calm, assured and direct. Whether you're at the start of an investigation or about to be sentenced, I can help you by providing you with clarity and a much better understanding of your case. We can then work towards achieving your ideal outcome. Where an acquittal or discontinuance isn't possible, I will help you make the best out of a bad situation.`,
+    },
+    {
       eyebrow: "Why Instruct Me",
       heading: "Personal Advice. Technical Depth. Plain English.",
       body: `Failing to provide cases look deceptively simple — the prosecution says you refused, you either did or you didn't. The reality is more complex. The warning, the request, the device, the procedure, the medical position, the charge itself — each one is a potential point of challenge. I look at all of them.
