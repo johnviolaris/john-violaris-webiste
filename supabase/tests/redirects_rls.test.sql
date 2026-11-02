@@ -276,8 +276,10 @@ select is(
 );
 
 set local role anon;
+-- Only this test's rows: migrations add real redirects too, such as
+-- /services/all-crime, and those must not change the count.
 select is(
-  (select count(*)::bigint from public.redirects where active),
+  (select count(*)::bigint from public.redirects where active and source_path like '%pgtap%'),
   6::bigint,
   'anonymous visitors can see active redirect rows'
 );
