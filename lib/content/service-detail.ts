@@ -16,12 +16,12 @@
  * which the site has its own versions of, and the fixed-fee boxes, because no
  * prices are published.
  *
- * Drunk in charge and totting up joined them later, from the pages John sent
- * as `drunk-in-charge.html` and `totting-up.html`, with their editor's notes
- * left out.
+ * Drunk in charge, totting up and exceptional hardship joined them later,
+ * from the pages John sent as `drunk-in-charge.html`, `totting-up.html` and
+ * `exceptional-hardship.html`, with their editor's notes left out.
  *
- * The other four (exceptional hardship, the magistrates' court and the two
- * crime pages) keep the shorter template: the demo had no page for them.
+ * The other three (the magistrates' court and the two crime pages) keep the
+ * shorter template: the demo had no page for them.
  */
 
 import type { FaqItem } from "@/lib/cms/faq";
@@ -30,6 +30,7 @@ import { dangerousDriving } from "@/lib/content/service-pages/dangerous-driving"
 import { drinkDriving } from "@/lib/content/service-pages/drink-driving";
 import { driverDetails } from "@/lib/content/service-pages/driver-details";
 import { drunkInCharge } from "@/lib/content/service-pages/drunk-in-charge";
+import { exceptionalHardship } from "@/lib/content/service-pages/exceptional-hardship";
 import { drugDriving } from "@/lib/content/service-pages/drug-driving";
 import { failingToProvide } from "@/lib/content/service-pages/failing-to-provide";
 import { failingToStop } from "@/lib/content/service-pages/failing-to-stop";
@@ -145,72 +146,7 @@ export const serviceDetails: Record<string, ServiceDetail> = {
 
   "/services/totting-up": tottingUp,
 
-  "/services/exceptional-hardship": {
-    headline: "Exceptional hardship.",
-    emphasis: "What the court is really looking for.",
-    intro:
-      "Most exceptional hardship arguments fail, and they fail for the same reason: they describe inconvenience rather than hardship, and they are not supported by evidence. Prepared properly, the argument is a strong one.",
-    penalties: [
-      {
-        label: "Avoids the ban if accepted",
-        note: "Points remain on the licence",
-        tone: "note",
-      },
-      {
-        label: "6-month ban if refused",
-        note: "Imposed the same day",
-        tone: "risk",
-      },
-      {
-        label: "Usually once in 3 years",
-        note: "The same grounds cannot be repeated",
-        tone: "note",
-      },
-    ],
-    issuesHeading: "What makes an argument succeed",
-    issuesIntro:
-      "The test is not whether a ban would be difficult. It is whether the consequences go beyond what any driver would suffer.",
-    defenceIssues: [
-      {
-        title: "Hardship to other people",
-        body: "The most persuasive arguments show real consequences for employees, family members, patients or clients who depend on you.",
-      },
-      {
-        title: "Loss of employment",
-        body: "Losing a job is not automatically exceptional. The argument is about what follows from it, and for whom.",
-      },
-      {
-        title: "Documented evidence",
-        body: "Employment contracts, accounts, care arrangements and medical letters carry weight where assertions do not.",
-      },
-      {
-        title: "Witnesses who attend",
-        body: "An employer or dependant who comes to court and answers questions is worth a great deal more than a letter.",
-      },
-      {
-        title: "Alternatives considered",
-        body: "The court will ask whether public transport, taxis or another driver could meet the need. Have the answer ready.",
-      },
-    ],
-    process: [
-      {
-        title: "An honest assessment",
-        body: "I will tell you at the outset whether your circumstances are likely to meet the threshold. That is more useful than optimism.",
-      },
-      {
-        title: "Building the case",
-        body: "We identify who is affected and gather the documents and statements that demonstrate it.",
-      },
-      {
-        title: "Preparing for questions",
-        body: "You and any witnesses will be asked to justify the position. Preparation makes the difference on the day.",
-      },
-      {
-        title: "At court",
-        body: "The argument is presented in full, with the evidence to support it.",
-      },
-    ],
-  },
+  "/services/exceptional-hardship": exceptionalHardship,
 
   "/services/special-reasons": specialReasons,
 

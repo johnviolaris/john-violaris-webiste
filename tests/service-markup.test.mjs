@@ -170,7 +170,7 @@ const sitePaths = new Set([
   "/police-station",
 ]);
 
-test("John's thirteen long-form pages are present", () => {
+test("John's fourteen long-form pages are present", () => {
   assert.deepEqual(longForm.map(([path]) => path).sort(), [
     "/services/careless-driving",
     "/services/dangerous-driving",
@@ -178,6 +178,7 @@ test("John's thirteen long-form pages are present", () => {
     "/services/driver-details",
     "/services/drug-driving",
     "/services/drunk-in-charge",
+    "/services/exceptional-hardship",
     "/services/failing-to-provide",
     "/services/failing-to-stop",
     "/services/mobile-phone",
