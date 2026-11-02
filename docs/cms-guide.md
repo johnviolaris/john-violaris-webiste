@@ -138,7 +138,7 @@ at-a-glance cards, the body of the page and the questions. A page shows on the
 site only while both it and its service are published. A service without a
 published page still has a page, with general wording about how you can help.
 
-Fourteen pages are **long-form**: your own pages, with every section you wrote.
+Fifteen pages are **long-form**: your own pages, with every section you wrote.
 Under **The long-form page** in the editor you will find:
 
 - the **Opening statement** beneath the cards,

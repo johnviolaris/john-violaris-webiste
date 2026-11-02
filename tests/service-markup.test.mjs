@@ -166,13 +166,15 @@ const longForm = Object.entries(serviceDetails).filter(([, detail]) => detail.se
 const sitePaths = new Set([
   ...serviceGroups.flatMap((group) => group.services.map((service) => service.href)),
   "/services",
+  "/about",
   "/fees",
   "/police-station",
 ]);
 
-test("John's fourteen long-form pages are present", () => {
+test("John's fifteen long-form pages are present", () => {
   assert.deepEqual(longForm.map(([path]) => path).sort(), [
     "/services/careless-driving",
+    "/services/criminal-defence",
     "/services/dangerous-driving",
     "/services/drink-driving",
     "/services/driver-details",

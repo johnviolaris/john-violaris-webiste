@@ -16,16 +16,18 @@
  * which the site has its own versions of, and the fixed-fee boxes, because no
  * prices are published.
  *
- * Drunk in charge, totting up and exceptional hardship joined them later,
- * from the pages John sent as `drunk-in-charge.html`, `totting-up.html` and
- * `exceptional-hardship.html`, with their editor's notes left out.
+ * Drunk in charge, totting up, exceptional hardship and all crime
+ * (`/services/criminal-defence`) joined them later, from the pages John sent
+ * as `drunk-in-charge.html`, `totting-up.html`, `exceptional-hardship.html` and
+ * `all-crime.html`, with their editor's notes left out.
  *
- * The other three (the magistrates' court and the two crime pages) keep the
- * shorter template: the demo had no page for them.
+ * The magistrates' court page keeps the shorter template: the demo had no
+ * page for it.
  */
 
 import type { FaqItem } from "@/lib/cms/faq";
 import { carelessDriving } from "@/lib/content/service-pages/careless-driving";
+import { criminalDefence } from "@/lib/content/service-pages/criminal-defence";
 import { dangerousDriving } from "@/lib/content/service-pages/dangerous-driving";
 import { drinkDriving } from "@/lib/content/service-pages/drink-driving";
 import { driverDetails } from "@/lib/content/service-pages/driver-details";
@@ -327,70 +329,5 @@ export const serviceDetails: Record<string, ServiceDetail> = {
     ],
   },
 
-  "/services/criminal-defence": {
-    headline: "All crime.",
-    emphasis: "Twenty years of it.",
-    intro:
-      "There is no crime John has not dealt with before. Alongside the motoring work, he represents people facing criminal allegations of every kind — from first arrest through to trial. The approach does not change: understand the case fully, explain it plainly, and prepare properly.",
-    penalties: [
-      {
-        label: "Free at the police station",
-        note: "Legal aid in most cases",
-        tone: "note",
-      },
-      {
-        label: "Advice before interview",
-        note: "The stage that shapes everything after",
-        tone: "note",
-      },
-      {
-        label: "Representation at court",
-        note: "First hearing through to trial",
-        tone: "note",
-      },
-    ],
-    issuesHeading: "How John can assist",
-    issuesIntro:
-      "Most people meet the criminal process once. Knowing what happens next removes a great deal of the fear attached to it.",
-    defenceIssues: [
-      {
-        title: "At the police station",
-        body: "Advice before and during interview, including whether to answer questions, give a statement or remain silent.",
-      },
-      {
-        title: "Reviewing the evidence",
-        body: "The prosecution case is obtained and examined properly before any decision on plea is taken.",
-      },
-      {
-        title: "Advising on plea",
-        body: "A frank assessment of the strength of the case and of the credit available for an early plea.",
-      },
-      {
-        title: "Preparing for trial",
-        body: "Witnesses, disclosure and any expert evidence are dealt with in good time rather than at the door of the court.",
-      },
-      {
-        title: "Sentence",
-        body: "Where conviction follows, mitigation is prepared with the supporting material that gives it weight.",
-      },
-    ],
-    process: [
-      {
-        title: "The first conversation",
-        body: "Tell me what has happened and what stage things have reached. There is no charge for that conversation.",
-      },
-      {
-        title: "Understanding the case",
-        body: "I obtain the evidence and go through it with you, in plain terms, before anything is decided.",
-      },
-      {
-        title: "The decision on plea",
-        body: "The choice is yours. My job is to make sure it is an informed one.",
-      },
-      {
-        title: "At court",
-        body: "Personal representation at every hearing, by the solicitor you have been speaking to throughout.",
-      },
-    ],
-  },
+  "/services/criminal-defence": criminalDefence,
 };

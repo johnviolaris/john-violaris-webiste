@@ -459,15 +459,14 @@ addressed by its service, and the first save creates it.
   outline never skips a level. Links in the markup are checked by the SEO
   health report like any other content link.
 
-Fourteen offence pages are long-form: John's own pages, from the standalone
+Fifteen service pages are long-form: John's own pages, from the standalone
 `jv-*.html` files his first demo pointed at, the demo's Drink Driving tab and,
-for drunk in charge, totting up and exceptional hardship, the pages he sent
-later, one module each under `lib/content/service-pages/`. Only the demo's
-chrome and its fixed-fee boxes were left out, since no prices are published.
-`20261009140000_restore_full_offence_pages.sql`,
-`20261102120000_restore_full_drunk_in_charge_page.sql`,
-`20261102140000_restore_full_totting_up_page.sql` and
-`20261102160000_restore_full_exceptional_hardship_page.sql` put them in the database,
+for drunk in charge, totting up, exceptional hardship and all crime
+(`/services/criminal-defence`), the pages he sent later, one module each under
+`lib/content/service-pages/`. Only the demo's chrome and its fixed-fee boxes
+were left out, since no prices are published.
+`20261009140000_restore_full_offence_pages.sql` and the
+`20261102*_restore_full_*_page.sql` migrations put them in the database,
 guarded on the exact short versions the seed wrote, so a page edited in the
 CMS in the meantime is left alone. Apply them before the code deploys: the
 pages are static, and the build that follows renders them from the new rows.
