@@ -396,6 +396,10 @@
   border-collapse: collapse;
   text-align: left;
 }
+/* Two columns fit any screen; only wider tables need to scroll. */
+.sp-table--narrow {
+  min-width: 0;
+}
 .sp-table th,
 .sp-table td {
   padding: 13px 16px;

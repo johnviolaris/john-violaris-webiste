@@ -178,3 +178,8 @@ test("units in a table heading keep their case, so µg is not capitalised into M
   assert.match(html, /<th scope="col">Breath \(<span class="sp-unit">µg\/100ml<\/span>\)<\/th>/);
   assert.match(html, /<th scope="col">Blood \(<span class="sp-unit">mg\/100ml<\/span>\)<\/th>/);
 });
+
+test("a two-column table fits the screen; wider tables keep their minimum width", () => {
+  assert.match(render("| A | B |\n| --- | --- |\n| 1 | 2 |"), /<table class="sp-table sp-table--narrow">/);
+  assert.match(render("| A | B | C |\n| --- | --- | --- |\n| 1 | 2 | 3 |"), /<table class="sp-table">/);
+});

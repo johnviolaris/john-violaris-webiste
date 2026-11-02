@@ -16,12 +16,12 @@
  * which the site has its own versions of, and the fixed-fee boxes, because no
  * prices are published.
  *
- * Drunk in charge joined them later, from the page John sent as
- * `drunk-in-charge.html`, with its editor's notes left out.
+ * Drunk in charge and totting up joined them later, from the pages John sent
+ * as `drunk-in-charge.html` and `totting-up.html`, with their editor's notes
+ * left out.
  *
- * The other five (totting up, exceptional hardship, the magistrates' court and
- * the two crime pages) keep the shorter template: the demo had no page for
- * them.
+ * The other four (exceptional hardship, the magistrates' court and the two
+ * crime pages) keep the shorter template: the demo had no page for them.
  */
 
 import type { FaqItem } from "@/lib/cms/faq";
@@ -37,6 +37,7 @@ import { mobilePhone } from "@/lib/content/service-pages/mobile-phone";
 import { noInsurance } from "@/lib/content/service-pages/no-insurance";
 import { specialReasons } from "@/lib/content/service-pages/special-reasons";
 import { speeding } from "@/lib/content/service-pages/speeding";
+import { tottingUp } from "@/lib/content/service-pages/totting-up";
 
 export type PenaltyCard = {
   /** Optional small capitals above the headline, e.g. "Mandatory on conviction". */
@@ -142,72 +143,7 @@ export const serviceDetails: Record<string, ServiceDetail> = {
 
   "/services/drunk-in-charge": drunkInCharge,
 
-  "/services/totting-up": {
-    headline: "Twelve points.",
-    emphasis: "A ban is not automatic.",
-    intro:
-      "When a driver accumulates 12 or more penalty points within three years, a mandatory six-month disqualification follows unless exceptional hardship is established. That is a high threshold — but it is a real one, and it is met with evidence.",
-    penalties: [
-      {
-        label: "6-month minimum ban",
-        note: "At 12 points within 3 years",
-        tone: "risk",
-      },
-      {
-        label: "Longer for repeat bans",
-        note: "12 or 24 months if previously disqualified",
-        tone: "risk",
-      },
-      {
-        label: "Exceptional hardship",
-        note: "Can avoid the ban entirely",
-        tone: "note",
-      },
-    ],
-    issuesHeading: "How the ban is avoided",
-    issuesIntro:
-      "The court must impose the ban unless it is persuaded otherwise. Persuading it is a matter of preparation.",
-    defenceIssues: [
-      {
-        title: "Checking the points are correct",
-        body: "Points wrongly recorded, or outside the three-year window, should not count. The starting position is worth verifying.",
-      },
-      {
-        title: "Exceptional hardship",
-        body: "Hardship to you alone is rarely enough. Hardship to employees, dependants and others who rely on you is where these arguments succeed.",
-      },
-      {
-        title: "Evidence, not assertion",
-        body: "The court expects documents and witnesses — employment records, accounts, medical evidence and statements from those affected.",
-      },
-      {
-        title: "Arguments already used",
-        body: "The same circumstances cannot generally be relied on twice within three years. What was said before matters.",
-      },
-      {
-        title: "A shorter ban",
-        body: "Where the ban cannot be avoided, there is scope to argue for the minimum period rather than more.",
-      },
-    ],
-    process: [
-      {
-        title: "The first conversation",
-        body: "I will look at your licence, the points on it and the dates, and tell you honestly whether an argument is available.",
-      },
-      {
-        title: "Preparing the evidence",
-        body: "This is the part that decides the case. Statements, financial material and supporting documents are prepared in good time.",
-      },
-      {
-        title: "Preparing you",
-        body: "You will usually give evidence yourself. We will go through what you will be asked before the day.",
-      },
-      {
-        title: "At court",
-        body: "I present the argument and examine the witnesses, with the aim of keeping you on the road.",
-      },
-    ],
-  },
+  "/services/totting-up": tottingUp,
 
   "/services/exceptional-hardship": {
     headline: "Exceptional hardship.",

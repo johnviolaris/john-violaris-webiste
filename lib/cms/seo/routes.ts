@@ -169,7 +169,7 @@ const offenceDefaults: Record<string, RouteDefaults> = {
       "Drunk in charge is a different offence from drink driving, with no mandatory ban and a statutory defence. Speak directly to John. Free consultation.",
   },
   "/services/totting-up": {
-    title: "Totting Up Solicitor — 12 Points",
+    title: "Totting Up & 12 Points Solicitor",
     description:
       "12 points in three years? A six-month ban follows unless exceptional hardship is proved with evidence. Speak to John first. Free initial consultation.",
   },

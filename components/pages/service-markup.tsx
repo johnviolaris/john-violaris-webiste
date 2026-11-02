@@ -111,7 +111,7 @@ function renderBlock(block: MarkupBlock, context: RenderContext, key: number): R
           aria-label={`${context.label} — table`}
           tabIndex={0}
         >
-          <table className="sp-table">
+          <table className={`sp-table${block.head.length <= 2 ? " sp-table--narrow" : ""}`}>
             <thead>
               <tr>
                 {block.head.map((cell, index) => (
