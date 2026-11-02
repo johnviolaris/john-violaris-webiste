@@ -116,7 +116,7 @@ function renderBlock(block: MarkupBlock, context: RenderContext, key: number): R
               <tr>
                 {block.head.map((cell, index) => (
                   <th key={index} scope="col">
-                    {renderInline(parseInline(cell))}
+                    {keepUnitCase(renderInline(parseInline(cell)))}
                   </th>
                 ))}
               </tr>
@@ -189,6 +189,30 @@ function cardColumns(items: MarkupBlock[][]): 1 | 2 | 3 {
   if (items.length % 3 === 0 && longest <= 55) return 3;
 
   return 2;
+}
+
+/** A reading's unit, e.g. "µg/100ml" or "mg/100ml". */
+const unitPattern = /([µμm]g\/\d+ ?ml)/;
+
+/**
+ * Table headings are set in capitals, which would turn "µg/100ml" into
+ * "MG/100ML": micrograms read as milligrams. Units keep the case they were
+ * typed in.
+ */
+function keepUnitCase(nodes: ReactNode[]): ReactNode[] {
+  return nodes.flatMap((node, index): ReactNode[] =>
+    typeof node === "string"
+      ? node.split(unitPattern).map((part, partIndex) =>
+          partIndex % 2 === 1 ? (
+            <span key={`${index}-${partIndex}`} className="sp-unit">
+              {part}
+            </span>
+          ) : (
+            part
+          ),
+        )
+      : [node],
+  );
 }
 
 function renderInline(nodes: InlineNode[]): ReactNode[] {

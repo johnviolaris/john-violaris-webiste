@@ -9,7 +9,7 @@ import {
   parseServiceMarkup,
 } from "../lib/content/service-markup.ts";
 import { serviceDetails } from "../lib/content/service-detail.ts";
-import { reservedIds, sectionAnchors } from "../lib/content/section-anchors.ts";
+import { pageIds, sectionAnchors } from "../lib/content/section-anchors.ts";
 import { serviceGroups } from "../lib/content/services.ts";
 import { internalLinkPaths } from "../lib/cms/seo/health.ts";
 
@@ -170,13 +170,14 @@ const sitePaths = new Set([
   "/police-station",
 ]);
 
-test("John's eleven long-form pages are present", () => {
+test("John's twelve long-form pages are present", () => {
   assert.deepEqual(longForm.map(([path]) => path).sort(), [
     "/services/careless-driving",
     "/services/dangerous-driving",
     "/services/drink-driving",
     "/services/driver-details",
     "/services/drug-driving",
+    "/services/drunk-in-charge",
     "/services/failing-to-provide",
     "/services/failing-to-stop",
     "/services/mobile-phone",
@@ -213,7 +214,7 @@ test("long-form links point at pages the site has, a section of the same page, o
     }
     // The page skips sections with neither heading nor body before it numbers the anchors.
     const rendered = detail.sections.filter((section) => section.heading?.trim() || section.body?.trim());
-    const anchors = new Set(sectionAnchors(rendered, reservedIds).filter(Boolean).map((id) => `#${id}`));
+    const anchors = new Set(sectionAnchors(rendered, pageIds).filter(Boolean).map((id) => `#${id}`));
     for (const section of detail.sections) {
       for (const href of markupLinks(parseServiceMarkup(section.body))) {
         assert.ok(

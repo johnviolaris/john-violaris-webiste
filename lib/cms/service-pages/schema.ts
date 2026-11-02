@@ -129,7 +129,8 @@ export const penaltiesField: SectionField = {
         label: "Note",
         kind: "text",
         required: true,
-        maxLength: 160,
+        // Drunk in charge's cards carry a sentence or two each.
+        maxLength: 400,
         hint: "e.g. “Mandatory on conviction”.",
       },
       {

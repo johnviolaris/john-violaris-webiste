@@ -16,9 +16,12 @@
  * which the site has its own versions of, and the fixed-fee boxes, because no
  * prices are published.
  *
- * The other six (drunk in charge, totting up, exceptional hardship, the
- * magistrates' court and the two crime pages) keep the shorter template:
- * the demo had no page for them.
+ * Drunk in charge joined them later, from the page John sent as
+ * `drunk-in-charge.html`, with its editor's notes left out.
+ *
+ * The other five (totting up, exceptional hardship, the magistrates' court and
+ * the two crime pages) keep the shorter template: the demo had no page for
+ * them.
  */
 
 import type { FaqItem } from "@/lib/cms/faq";
@@ -26,6 +29,7 @@ import { carelessDriving } from "@/lib/content/service-pages/careless-driving";
 import { dangerousDriving } from "@/lib/content/service-pages/dangerous-driving";
 import { drinkDriving } from "@/lib/content/service-pages/drink-driving";
 import { driverDetails } from "@/lib/content/service-pages/driver-details";
+import { drunkInCharge } from "@/lib/content/service-pages/drunk-in-charge";
 import { drugDriving } from "@/lib/content/service-pages/drug-driving";
 import { failingToProvide } from "@/lib/content/service-pages/failing-to-provide";
 import { failingToStop } from "@/lib/content/service-pages/failing-to-stop";
@@ -136,68 +140,7 @@ export const serviceDetails: Record<string, ServiceDetail> = {
 
   "/services/failing-to-provide": failingToProvide,
 
-  "/services/drunk-in-charge": {
-    headline: "Drunk in charge.",
-    emphasis: "A different offence, and a different answer.",
-    intro:
-      "Being in charge of a vehicle while over the limit is not the same offence as driving, and it does not carry the same mandatory ban. The statutory defence of no likelihood of driving is often the heart of the case.",
-    penalties: [
-      {
-        label: "10 penalty points",
-        note: "Or discretionary disqualification",
-        tone: "risk",
-      },
-      {
-        label: "Up to 3 months’ custody",
-        note: "Most serious cases",
-        tone: "risk",
-      },
-      {
-        label: "Statutory defence available",
-        note: "No likelihood of driving",
-        tone: "note",
-      },
-    ],
-    issuesHeading: "The issues I examine",
-    issuesIntro:
-      "Whether you were in charge at all, and whether you were going to drive, are both open to argument.",
-    defenceIssues: [
-      {
-        title: "No likelihood of driving",
-        body: "If you can show there was no likelihood of your driving while over the limit, a statutory defence is available. Expert evidence is often needed.",
-      },
-      {
-        title: "Whether you were in charge",
-        body: "Proximity to the vehicle, possession of the keys and your intentions are all relevant. Being near a car is not, by itself, being in charge.",
-      },
-      {
-        title: "The reading and the procedure",
-        body: "The same evidential and procedural points that arise in a driving case arise here.",
-      },
-      {
-        title: "Avoiding disqualification",
-        body: "Disqualification is discretionary rather than mandatory, so there is real scope to argue for points instead of a ban.",
-      },
-    ],
-    process: [
-      {
-        title: "The first conversation",
-        body: "Where you were, where the vehicle was and what you intended to do all matter. I will take a careful account.",
-      },
-      {
-        title: "Building the defence",
-        body: "Where the statutory defence is advanced, expert evidence on when you would have fallen below the limit is often central.",
-      },
-      {
-        title: "Advising on plea",
-        body: "A clear view of whether the defence is realistic, and what the sentence is likely to be if it is not.",
-      },
-      {
-        title: "At court",
-        body: "Representation at trial or in mitigation, with the focus on keeping your licence.",
-      },
-    ],
-  },
+  "/services/drunk-in-charge": drunkInCharge,
 
   "/services/totting-up": {
     headline: "Twelve points.",

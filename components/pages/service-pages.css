@@ -412,6 +412,10 @@
   text-transform: uppercase;
   color: var(--color-gold-ink);
 }
+.sp-table thead .sp-unit {
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
 .sp-table tbody tr:last-child td {
   border-bottom: 0;
 }

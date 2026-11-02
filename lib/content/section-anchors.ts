@@ -1,20 +1,22 @@
 import type { ServiceSection } from "@/lib/content/service-detail";
 
 /**
- * Ids the page already uses, which a long-form section's anchor must not take.
+ * Ids every service page uses, which a long-form section's anchor must not take.
+ */
+export const pageIds = ["main", "at-a-glance", "page-alert", "toc-heading", "cta-heading"];
+
+/**
+ * Ids only the shorter template uses as well. A long-form page is free to take
+ * them, so its "Legal framework" section can be `#legal-framework`.
  */
 export const reservedIds = [
-  "main",
-  "at-a-glance",
+  ...pageIds,
   "legal-framework",
   "your-options",
   "sentencing-and-outcomes",
   "ancillary-orders",
   "what-to-share",
   "personal-representation",
-  "page-alert",
-  "toc-heading",
-  "cta-heading",
 ];
 
 /**

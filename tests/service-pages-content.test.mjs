@@ -171,3 +171,10 @@ test("tables, boxes, cards and steps render as accessible structures", () => {
   assert.match(html, /<ol class="sp-steps" role="list">/);
   assert.equal((html.match(/class="sp-step"/g) ?? []).length, 2);
 });
+
+test("units in a table heading keep their case, so µg is not capitalised into MG", () => {
+  const html = render("| Breath (µg/100ml) | Blood (mg/100ml) |\n| --- | --- |\n| 36–59 | 81–137 |");
+
+  assert.match(html, /<th scope="col">Breath \(<span class="sp-unit">µg\/100ml<\/span>\)<\/th>/);
+  assert.match(html, /<th scope="col">Blood \(<span class="sp-unit">mg\/100ml<\/span>\)<\/th>/);
+});

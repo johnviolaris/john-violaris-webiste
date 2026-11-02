@@ -9,7 +9,7 @@ import { FaqBlock } from "@/components/ui/faq-block";
 import { InlineMarkup, ServiceMarkup } from "@/components/pages/service-markup";
 import { faqSectionId, resolveFaqItems } from "@/lib/cms/faq";
 import { pageIntroFigures } from "@/lib/content/pages";
-import { reservedIds, sectionAnchors } from "@/lib/content/section-anchors";
+import { pageIds, reservedIds, sectionAnchors } from "@/lib/content/section-anchors";
 import { CtaBanner } from "@/components/layout/cta-banner";
 import {
   breadcrumbNode,
@@ -79,7 +79,7 @@ export async function ServicePageContent({ service, detail, groups, descriptions
   const longForm = (detail?.sections ?? []).filter(
     (section) => section.heading?.trim() || section.body?.trim(),
   );
-  const anchors = sectionAnchors(longForm, reservedIds);
+  const anchors = sectionAnchors(longForm, pageIds);
   const faqs = resolveFaqItems(detail?.faqItems);
   const faqId = faqSectionId([...reservedIds, ...anchors.filter((id): id is string => id !== null)]);
   const faqSchema = faqPageNode({ path, items: faqs, sectionId: faqId });
@@ -515,6 +515,12 @@ function LongFormSection({
 }) {
   const eyebrow = section.eyebrow?.trim();
   const heading = section.heading?.trim();
+  /*
+   * An eyebrow that only repeats the heading still names the section in the
+   * contents list and opens it with a rule, but is not printed above it.
+   */
+  const printedEyebrow =
+    eyebrow && eyebrow.toLowerCase() !== heading?.toLowerCase() ? eyebrow : undefined;
   const className = [
     "sp-section",
     eyebrow ? "" : "sp-section--continues",
@@ -525,9 +531,9 @@ function LongFormSection({
 
   return (
     <section className={className} aria-labelledby={anchor ?? undefined}>
-      {eyebrow ? (
+      {printedEyebrow ? (
         <p className="eyebrow sp-eyebrow">
-          <span className="small-rule" /> {eyebrow}
+          <span className="small-rule" /> {printedEyebrow}
         </p>
       ) : null}
       {heading && anchor ? (
