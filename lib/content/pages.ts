@@ -821,6 +821,12 @@ export const pageIntroFigures: Record<string, PageIntroFigure> = {
     height: 800,
     alt: "Brass scales of justice, evenly balanced, on a dark background",
   },
+  "/services/totting-up": {
+    src: "/letter-from-the-police.webp",
+    width: 1200,
+    height: 800,
+    alt: "Hands drawing a letter with a blue-and-white chequered police band out of a brown envelope",
+  },
   "/services/exceptional-hardship": {
     src: "/exceptional-hardship-scales.webp",
     width: 1200,
