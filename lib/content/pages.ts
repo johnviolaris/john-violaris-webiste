@@ -821,6 +821,12 @@ export const pageIntroFigures: Record<string, PageIntroFigure> = {
     height: 800,
     alt: "Brass scales of justice, evenly balanced, on a dark background",
   },
+  "/services/exceptional-hardship": {
+    src: "/exceptional-hardship-scales.webp",
+    width: 1200,
+    height: 800,
+    alt: "Brass scales in a courtroom, a driving licence and car key on one pan, outweighed by a briefcase, a child’s shoe, a model house and medication on the other",
+  },
   "/services/magistrates-court": {
     src: "/magistrates-courtroom.webp",
     width: 1200,
