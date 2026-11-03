@@ -814,6 +814,13 @@ export const pageIntroFigures: Record<string, PageIntroFigure> = {
     height: 800,
     alt: "A London police station entrance at dusk, with a blue police lamp and a Metropolitan Police sign on the wall",
   },
+  // All Crime. The same photograph as the Services page.
+  "/services/criminal-defence": {
+    src: "/scales-of-justice.webp",
+    width: 1200,
+    height: 800,
+    alt: "Brass scales of justice, evenly balanced, on a dark background",
+  },
   "/services/magistrates-court": {
     src: "/magistrates-courtroom.webp",
     width: 1200,

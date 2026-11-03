@@ -34,6 +34,14 @@ const hooks = registerHooks({
       }
     ` };
     if (url.startsWith(rootUrl) && url.endsWith(".tsx")) return { format: "module", shortCircuit: true, source: ts.transpileModule(readFileSync(new URL(url), "utf8"), { compilerOptions: { module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 } }).outputText };
+    // `next/image` is CommonJS with its component on `.default`; imported as-is,
+    // a page opening with a photograph would render an object, not the image.
+    // Its own entry only re-exports `dist/shared/lib/image-external`.
+    if (url.endsWith("/node_modules/next/image.js")) return { format: "module", shortCircuit: true, source: `
+      import { createRequire } from "node:module";
+      const image = createRequire(${JSON.stringify(url)})("./dist/shared/lib/image-external");
+      export default image.default;
+    ` };
     return nextLoad(url, context);
   },
 });
