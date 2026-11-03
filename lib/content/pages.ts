@@ -821,6 +821,12 @@ export const pageIntroFigures: Record<string, PageIntroFigure> = {
     height: 800,
     alt: "Brass scales of justice, evenly balanced, on a dark background",
   },
+  "/services/drunk-in-charge": {
+    src: "/sleeping-driver-roadside-check.webp",
+    width: 1200,
+    height: 800,
+    alt: "A police officer shines a torch into a frost-covered car at night, where a man is asleep in the driver’s seat with the headlights on",
+  },
   "/services/totting-up": {
     src: "/letter-from-the-police.webp",
     width: 1200,
